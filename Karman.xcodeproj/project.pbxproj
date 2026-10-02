@@ -1,0 +1,1043 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03C3CBEDF6D9A1328CE39DB3 /* earth_lights.jpg in Resources */ = {isa = PBXBuildFile; fileRef = B2523F799F11C706FBFEBFC7 /* earth_lights.jpg */; };
+		05E2401CB9F57E8D9729CECA /* stars.bin in Resources */ = {isa = PBXBuildFile; fileRef = 34DC9B586E7A631FD358E629 /* stars.bin */; };
+		069BE632C35C62C82B6B401C /* AstroMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */; };
+		12A3ADAFD336E674B48D9D28 /* Soundscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED461DF20500BA434F58C99 /* Soundscape.swift */; };
+		1B01F1815E2A9B181B58C63C /* Globe.metal in Sources */ = {isa = PBXBuildFile; fileRef = D10B8D4B18C3158B2D2F7E34 /* Globe.metal */; };
+		2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */; };
+		30216CB9A7A778136D6861D2 /* moon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FF6B47423238D4C7B83FF18F /* moon.jpg */; };
+		33ABD3864694C4BEC72380A5 /* PulseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C592EB75A6989A6F51D48F /* PulseView.swift */; };
+		3C27110AFC7D7C46A94DA08C /* LayersPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 930565FA9CE4CDA1CFB50A62 /* LayersPanel.swift */; };
+		3C29A2277725146A1A65E33C /* GlobeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A7E2D1C92CEB2C054BA55C /* GlobeView.swift */; };
+		3FBC096248B61A6B17C81D77 /* widget_lights.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A7BDB84E2E5A919FC223104B /* widget_lights.jpg */; };
+		415515C85ABD1B4C2136D4B0 /* earth_mask_small.png in Resources */ = {isa = PBXBuildFile; fileRef = A0D0F1C9D90908EDA5544933 /* earth_mask_small.png */; };
+		41A3CCAF19F3C46459F8B4EE /* BriefingPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57B6EA883B3764F245490E0 /* BriefingPlayerView.swift */; };
+		41D4239760862F77E32D7449 /* WidgetState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5F1AEAA24556517F686E1C /* WidgetState.swift */; };
+		4691C93212485ADCEF5C1448 /* KarmanWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A81A753BF768849E62F73F /* KarmanWidgetsBundle.swift */; };
+		4D0011511A4172D16EBFC155 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A09FE9EF57DEDB31320F999 /* Assets.xcassets */; };
+		54D49FF1F70E665B55967A64 /* SkyTonightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4DBEE47944CF3B8CA9305A0 /* SkyTonightView.swift */; };
+		5BCBAE225B332FF87A9E74EB /* GlobeCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B151DE37B477BF8BD07F35 /* GlobeCamera.swift */; };
+		5C045FC7B2FADE8BE723C00D /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70ED95826842647A5B8C6E /* Log.swift */; };
+		5C70EEDCA4DC917577144BA6 /* AuroraPolarMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0580720767CA68600CBFCD95 /* AuroraPolarMap.swift */; };
+		5FC029F010077DDED077CBF8 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B465E6D786F725A9EA2E0A57 /* Localizable.strings */; };
+		6068018BE6CA50F3139A256D /* PlanetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */; };
+		6074900B5058D05811269D1F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8908C6555008B50D5852F4 /* NotificationService.swift */; };
+		637B7CD628AD1356F5058347 /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892092C3A695F815B3B94900 /* AskView.swift */; };
+		661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */; };
+		6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F669B24228503A0F50BEFB5C /* BriefingDirector.swift */; };
+		6A74DF09EAC19CB089BBFE90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B37297F3AA3EFD93526695C /* Assets.xcassets */; };
+		6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 15550FFB007FB9B1657980D0 /* earth_clouds.jpg */; };
+		6ECAAD250AD053865048E2BC /* DirectFeeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC97298659782BDDF939295 /* DirectFeeds.swift */; };
+		6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */; };
+		75CB82BD4A34133582DC642F /* KarmanWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 392BAC5508D9E973DEDD843F /* KarmanWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		795FD8C70BB522B77370A980 /* PlanetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */; };
+		7BA5A76AC82652ACED38DAEF /* HomeHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7D5E495D4825DD6E2546F3 /* HomeHUD.swift */; };
+		8397501463C833508102CA32 /* SelectionCallout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E32F2E7F416E9FA5E301F2 /* SelectionCallout.swift */; };
+		83F956BC30C9EF1CB785E1DE /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F15479F1AFC96D1700780E2E /* AppModel.swift */; };
+		849A8089ECFE15456142B2BC /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D65CB3D9051C229459CBADB /* Formatters.swift */; };
+		874C9FBAA9279098BD0EDE34 /* earth_water.png in Resources */ = {isa = PBXBuildFile; fileRef = 2659D154FEE07FBFBB433FE0 /* earth_water.png */; };
+		8A5BB4F1924D69AED6DAB90B /* Geo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C142BA54B76F0976B55D22 /* Geo.swift */; };
+		8D865D8DF61E1BDCBDCD6CDC /* SatelliteEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA91F414B16F11189BD99DB /* SatelliteEngine.swift */; };
+		8DD2F916D634CF733EBA841A /* AstroMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */; };
+		984EDFCEF579BF3D022F2814 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475F9268862AEDC750CAB3E /* SettingsView.swift */; };
+		9907F01ABC07CD613F07101F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121CD7BAC7A23FEF05A275E4 /* RootView.swift */; };
+		9CC7D8410DCFF4576A166FF8 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0AF33512858A71F827DDF3A /* APIClient.swift */; };
+		9DDBDCAA78A5C1D8276A9D2F /* MetalResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11FA09369C56B38581F18B4 /* MetalResources.swift */; };
+		A2C5457E804FBF76A3D788E1 /* IntroTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294386B0031D6BB43B318966 /* IntroTitleView.swift */; };
+		A875274C65746AF99D1810D0 /* GlobeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8667E02105767D47B4BFA /* GlobeRenderer.swift */; };
+		B45263F82831020B9FCC64A4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F16DC2464B7939E03DF205CB /* InfoPlist.strings */; };
+		B61E88254EAD55BB15666DFC /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0AF33512858A71F827DDF3A /* APIClient.swift */; };
+		B8EE88E27F0C88BFA41D6D3C /* WidgetState.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5F1AEAA24556517F686E1C /* WidgetState.swift */; };
+		BD15AA17003751C3505F08B5 /* GlobeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CD099608C17D25644118ED /* GlobeController.swift */; };
+		BF8798FC382D2B589496FE4C /* earth_day.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 87E7D0170506DF75EEE13B0B /* earth_day.jpg */; };
+		C01E01792D1959FEEF33EEC5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB66E612BD5347E84CCE808 /* AppDelegate.swift */; };
+		C2181D441672E5E4AD9B3D2F /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D98059E112454A80B106DE2 /* WidgetBridge.swift */; };
+		C8A81F92C26C3C2738D2C157 /* AskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE3EF8E55A96991EEA1DF41 /* AskService.swift */; };
+		CBEDD847F8968EDFD7882378 /* AstroTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B23DB921A2ECB8E0C625DA /* AstroTests.swift */; };
+		CC896871AA8CCCE56E9E32B9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 51E28943A3EA83BBFF414328 /* InfoPlist.strings */; };
+		CDA4BCDB9834BD8737B530F6 /* SGP4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */; };
+		CF8D271B562ACE479EF0010B /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACD28256510603D348A3843 /* AppSettings.swift */; };
+		CFABBD2E421ABCE2D485E917 /* widget_day.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DAE0BF88D4021D901D7A2EB3 /* widget_day.jpg */; };
+		D50C0756BB820FCC69A5E4BC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7449C1D28C0E6A4635316A7F /* SwiftUI.framework */; };
+		DB06F41C400E2B649650DFB9 /* SGP4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */; };
+		DE9AC39E5D64853C73C192DE /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DB19C35AB87CE4CB3031E60 /* LocationService.swift */; };
+		DF8A548952F047DFF0B59D10 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52705857D57A19F1BCA53B63 /* Theme.swift */; };
+		E13533BCF9C81AFFF23CB8CE /* DetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D359214F18B022C04C45349 /* DetailSheet.swift */; };
+		E4CB9E267E7FA4EDE6181D95 /* PassPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9E665D1D497F49983BA306 /* PassPredictor.swift */; };
+		EA9936C3D52EB716A42E82C9 /* Geo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C142BA54B76F0976B55D22 /* Geo.swift */; };
+		EB75D107B73537FCD672533C /* LiveImagery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */; };
+		EC61731ED718C8B4DEC1D36C /* OrthoSphere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */; };
+		F1E1A942AB8335FA8ED48256 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8CA31FFD96A184F2D16DCF5 /* Haptics.swift */; };
+		F48A71AE7751F26849FC2216 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3CFCBD38C659A2E352D0420 /* WidgetKit.framework */; };
+		F4EF7C4B006D3EF2224BCC98 /* PlanetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49271D45CEFE574D1125B3 /* PlanetProvider.swift */; };
+		F774DD51E6BE1ADC40BF9541 /* SpaceWeatherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCB9F6D96404AAD71977A33 /* SpaceWeatherView.swift */; };
+		FD2D1B95F4D4A9A3F73F6DEF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5742061F06457B2C4762AD75 /* Localizable.strings */; };
+		FEF3D39A44448B68C8DAF00F /* earth_normal.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 6D73214AB73ED56539866317 /* earth_normal.jpg */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1E2954E6A8106A635AA62E8B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 093DCD6B111D02473BB9BCF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5379B6553DF86786C9F3C970;
+			remoteInfo = KarmanWidgets;
+		};
+		9F004443EA019F3062940DDC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 093DCD6B111D02473BB9BCF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 486D484F2FD7ABB6C6E92190;
+			remoteInfo = Karman;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7B76F9485C4372A3CCA6E9D3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				75CB82BD4A34133582DC642F /* KarmanWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		000A705C233870534EC24A4C /* Karman.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Karman.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0580720767CA68600CBFCD95 /* AuroraPolarMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraPolarMap.swift; sourceTree = "<group>"; };
+		0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetModels.swift; sourceTree = "<group>"; };
+		0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroMath.swift; sourceTree = "<group>"; };
+		121CD7BAC7A23FEF05A275E4 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		15550FFB007FB9B1657980D0 /* earth_clouds.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_clouds.jpg; sourceTree = "<group>"; };
+		16E32F2E7F416E9FA5E301F2 /* SelectionCallout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCallout.swift; sourceTree = "<group>"; };
+		1B37297F3AA3EFD93526695C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1FB66E612BD5347E84CCE808 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		2659D154FEE07FBFBB433FE0 /* earth_water.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = earth_water.png; sourceTree = "<group>"; };
+		294386B0031D6BB43B318966 /* IntroTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroTitleView.swift; sourceTree = "<group>"; };
+		2AA91F414B16F11189BD99DB /* SatelliteEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SatelliteEngine.swift; sourceTree = "<group>"; };
+		31B151DE37B477BF8BD07F35 /* GlobeCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeCamera.swift; sourceTree = "<group>"; };
+		34DC9B586E7A631FD358E629 /* stars.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = stars.bin; sourceTree = "<group>"; };
+		392BAC5508D9E973DEDD843F /* KarmanWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KarmanWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		39A7E2D1C92CEB2C054BA55C /* GlobeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeView.swift; sourceTree = "<group>"; };
+		39EA18C9B53CA40896B8D89C /* KarmanTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KarmanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DB19C35AB87CE4CB3031E60 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		4A6C4C87DCF578A65A1C4AA3 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		4B70ED95826842647A5B8C6E /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		51C142BA54B76F0976B55D22 /* Geo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geo.swift; sourceTree = "<group>"; };
+		51E28943A3EA83BBFF414328 /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		51F098165AA40C4F1A5F90BA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		52705857D57A19F1BCA53B63 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		5742061F06457B2C4762AD75 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SGP4.swift; sourceTree = "<group>"; };
+		63C592EB75A6989A6F51D48F /* PulseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseView.swift; sourceTree = "<group>"; };
+		6AC97298659782BDDF939295 /* DirectFeeds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectFeeds.swift; sourceTree = "<group>"; };
+		6D73214AB73ED56539866317 /* earth_normal.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_normal.jpg; sourceTree = "<group>"; };
+		7449C1D28C0E6A4635316A7F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		7D359214F18B022C04C45349 /* DetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailSheet.swift; sourceTree = "<group>"; };
+		80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveImagery.swift; sourceTree = "<group>"; };
+		8475F9268862AEDC750CAB3E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		87E7D0170506DF75EEE13B0B /* earth_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_day.jpg; sourceTree = "<group>"; };
+		892092C3A695F815B3B94900 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
+		8A09FE9EF57DEDB31320F999 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8C4144BE5828A19FC1DCF8BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D65CB3D9051C229459CBADB /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		92A81A753BF768849E62F73F /* KarmanWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KarmanWidgetsBundle.swift; sourceTree = "<group>"; };
+		930565FA9CE4CDA1CFB50A62 /* LayersPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayersPanel.swift; sourceTree = "<group>"; };
+		96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrthoSphere.swift; sourceTree = "<group>"; };
+		9D98059E112454A80B106DE2 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
+		A0D0F1C9D90908EDA5544933 /* earth_mask_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = earth_mask_small.png; sourceTree = "<group>"; };
+		A11FA09369C56B38581F18B4 /* MetalResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalResources.swift; sourceTree = "<group>"; };
+		A7BDB84E2E5A919FC223104B /* widget_lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = widget_lights.jpg; sourceTree = "<group>"; };
+		ACCB9F6D96404AAD71977A33 /* SpaceWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceWeatherView.swift; sourceTree = "<group>"; };
+		B2523F799F11C706FBFEBFC7 /* earth_lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_lights.jpg; sourceTree = "<group>"; };
+		B465E6D786F725A9EA2E0A57 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetStore.swift; sourceTree = "<group>"; };
+		C4B23DB921A2ECB8E0C625DA /* AstroTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTests.swift; sourceTree = "<group>"; };
+		C5E768E64CEC7155559D68CD /* Karman.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Karman.entitlements; sourceTree = "<group>"; };
+		CA49271D45CEFE574D1125B3 /* PlanetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetProvider.swift; sourceTree = "<group>"; };
+		CACD28256510603D348A3843 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		CB5F1AEAA24556517F686E1C /* WidgetState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetState.swift; sourceTree = "<group>"; };
+		CB9E665D1D497F49983BA306 /* PassPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassPredictor.swift; sourceTree = "<group>"; };
+		CED461DF20500BA434F58C99 /* Soundscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Soundscape.swift; sourceTree = "<group>"; };
+		D10B8D4B18C3158B2D2F7E34 /* Globe.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Globe.metal; sourceTree = "<group>"; };
+		DAE0BF88D4021D901D7A2EB3 /* widget_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = widget_day.jpg; sourceTree = "<group>"; };
+		DD8908C6555008B50D5852F4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		E0AF33512858A71F827DDF3A /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		E4DBEE47944CF3B8CA9305A0 /* SkyTonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyTonightView.swift; sourceTree = "<group>"; };
+		EA7D5E495D4825DD6E2546F3 /* HomeHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHUD.swift; sourceTree = "<group>"; };
+		EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KarmanApp.swift; sourceTree = "<group>"; };
+		EBE3EF8E55A96991EEA1DF41 /* AskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskService.swift; sourceTree = "<group>"; };
+		F15479F1AFC96D1700780E2E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F16DC2464B7939E03DF205CB /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F1CD099608C17D25644118ED /* GlobeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeController.swift; sourceTree = "<group>"; };
+		F3CFCBD38C659A2E352D0420 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		F57B6EA883B3764F245490E0 /* BriefingPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingPlayerView.swift; sourceTree = "<group>"; };
+		F669B24228503A0F50BEFB5C /* BriefingDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingDirector.swift; sourceTree = "<group>"; };
+		F8CA31FFD96A184F2D16DCF5 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		FDD8667E02105767D47B4BFA /* GlobeRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeRenderer.swift; sourceTree = "<group>"; };
+		FE838C667256F1C0E4C71DD4 /* KarmanWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KarmanWidgets.entitlements; sourceTree = "<group>"; };
+		FF6B47423238D4C7B83FF18F /* moon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = moon.jpg; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7EB4843730C1653E84F57843 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F48A71AE7751F26849FC2216 /* WidgetKit.framework in Frameworks */,
+				D50C0756BB820FCC69A5E4BC /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		001C72C6D8BE6E10CAF2ED47 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				4B70ED95826842647A5B8C6E /* Log.swift */,
+				9D98059E112454A80B106DE2 /* WidgetBridge.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		19B7A37DDD0F6F321F019D15 /* KarmanTests */ = {
+			isa = PBXGroup;
+			children = (
+				C4B23DB921A2ECB8E0C625DA /* AstroTests.swift */,
+			);
+			path = KarmanTests;
+			sourceTree = "<group>";
+		};
+		1B54578FA45863705DCA43A9 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				6AC97298659782BDDF939295 /* DirectFeeds.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		2B78784756F2267CD3D12BFE /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1FB66E612BD5347E84CCE808 /* AppDelegate.swift */,
+				F15479F1AFC96D1700780E2E /* AppModel.swift */,
+				EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		43B4B7D9BEDDE5A9790AE952 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				518F49B96793BE4BBAB8C6C9 /* Ask */,
+				CE87C9ADD41336B6739A4705 /* Briefing */,
+				5B58E8F6A13A79A2CB1E8ECC /* Events */,
+				8C2D05172361B73461F172E0 /* Globe */,
+				D8C35B23C4146EB891C37031 /* Intro */,
+				B761AFC80324BDF862820FF0 /* Settings */,
+				87B6A7EEEBFBE6368FA12C37 /* Sky */,
+				9098FF413F6BE223A22334FF /* SpaceWeather */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		4B6B335C8665706EA4CD8963 /* Astro */ = {
+			isa = PBXGroup;
+			children = (
+				CB9E665D1D497F49983BA306 /* PassPredictor.swift */,
+			);
+			path = Astro;
+			sourceTree = "<group>";
+		};
+		4CD0486DE0D93C366CEE81E3 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				E0AF33512858A71F827DDF3A /* APIClient.swift */,
+				0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */,
+				51C142BA54B76F0976B55D22 /* Geo.swift */,
+				96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */,
+				0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */,
+				5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */,
+				CB5F1AEAA24556517F686E1C /* WidgetState.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		518F49B96793BE4BBAB8C6C9 /* Ask */ = {
+			isa = PBXGroup;
+			children = (
+				892092C3A695F815B3B94900 /* AskView.swift */,
+			);
+			path = Ask;
+			sourceTree = "<group>";
+		};
+		53596802922751C5D6BBAE39 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4B6B335C8665706EA4CD8963 /* Astro */,
+				1B54578FA45863705DCA43A9 /* Networking */,
+				B03C5F41FC344A880966AB05 /* Services */,
+				001C72C6D8BE6E10CAF2ED47 /* Support */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		576A377D488AA5F9EB032EBD /* KarmanWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				AFBF0DC83A826FA3DA771D61 /* Resources */,
+				8A09FE9EF57DEDB31320F999 /* Assets.xcassets */,
+				8C4144BE5828A19FC1DCF8BE /* Info.plist */,
+				FE838C667256F1C0E4C71DD4 /* KarmanWidgets.entitlements */,
+				92A81A753BF768849E62F73F /* KarmanWidgetsBundle.swift */,
+				CA49271D45CEFE574D1125B3 /* PlanetProvider.swift */,
+			);
+			path = KarmanWidgets;
+			sourceTree = "<group>";
+		};
+		5ADD8907A57C34FE2373D0DB /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				7A0BD323CD371F65918F2748 /* Shaders */,
+				31B151DE37B477BF8BD07F35 /* GlobeCamera.swift */,
+				F1CD099608C17D25644118ED /* GlobeController.swift */,
+				FDD8667E02105767D47B4BFA /* GlobeRenderer.swift */,
+				39A7E2D1C92CEB2C054BA55C /* GlobeView.swift */,
+				A11FA09369C56B38581F18B4 /* MetalResources.swift */,
+			);
+			path = Render;
+			sourceTree = "<group>";
+		};
+		5B58E8F6A13A79A2CB1E8ECC /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				7D359214F18B022C04C45349 /* DetailSheet.swift */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
+		60301E0EE9AAF49F485A25D4 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				8D65CB3D9051C229459CBADB /* Formatters.swift */,
+				52705857D57A19F1BCA53B63 /* Theme.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		7A0BD323CD371F65918F2748 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				D10B8D4B18C3158B2D2F7E34 /* Globe.metal */,
+				4A6C4C87DCF578A65A1C4AA3 /* ShaderTypes.h */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		8266315CF4CA11135EB01FC1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A8C7CB33F9B3F3E86B90FD68 /* Textures */,
+				1B37297F3AA3EFD93526695C /* Assets.xcassets */,
+				51E28943A3EA83BBFF414328 /* InfoPlist.strings */,
+				5742061F06457B2C4762AD75 /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		87B6A7EEEBFBE6368FA12C37 /* Sky */ = {
+			isa = PBXGroup;
+			children = (
+				E4DBEE47944CF3B8CA9305A0 /* SkyTonightView.swift */,
+			);
+			path = Sky;
+			sourceTree = "<group>";
+		};
+		8C2D05172361B73461F172E0 /* Globe */ = {
+			isa = PBXGroup;
+			children = (
+				EA7D5E495D4825DD6E2546F3 /* HomeHUD.swift */,
+				930565FA9CE4CDA1CFB50A62 /* LayersPanel.swift */,
+				63C592EB75A6989A6F51D48F /* PulseView.swift */,
+				121CD7BAC7A23FEF05A275E4 /* RootView.swift */,
+				16E32F2E7F416E9FA5E301F2 /* SelectionCallout.swift */,
+			);
+			path = Globe;
+			sourceTree = "<group>";
+		};
+		9098FF413F6BE223A22334FF /* SpaceWeather */ = {
+			isa = PBXGroup;
+			children = (
+				0580720767CA68600CBFCD95 /* AuroraPolarMap.swift */,
+				ACCB9F6D96404AAD71977A33 /* SpaceWeatherView.swift */,
+			);
+			path = SpaceWeather;
+			sourceTree = "<group>";
+		};
+		A8C7CB33F9B3F3E86B90FD68 /* Textures */ = {
+			isa = PBXGroup;
+			children = (
+				15550FFB007FB9B1657980D0 /* earth_clouds.jpg */,
+				87E7D0170506DF75EEE13B0B /* earth_day.jpg */,
+				B2523F799F11C706FBFEBFC7 /* earth_lights.jpg */,
+				A0D0F1C9D90908EDA5544933 /* earth_mask_small.png */,
+				6D73214AB73ED56539866317 /* earth_normal.jpg */,
+				2659D154FEE07FBFBB433FE0 /* earth_water.png */,
+				FF6B47423238D4C7B83FF18F /* moon.jpg */,
+				34DC9B586E7A631FD358E629 /* stars.bin */,
+			);
+			path = Textures;
+			sourceTree = "<group>";
+		};
+		AFBF0DC83A826FA3DA771D61 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F16DC2464B7939E03DF205CB /* InfoPlist.strings */,
+				B465E6D786F725A9EA2E0A57 /* Localizable.strings */,
+				DAE0BF88D4021D901D7A2EB3 /* widget_day.jpg */,
+				A7BDB84E2E5A919FC223104B /* widget_lights.jpg */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B03C5F41FC344A880966AB05 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				CACD28256510603D348A3843 /* AppSettings.swift */,
+				EBE3EF8E55A96991EEA1DF41 /* AskService.swift */,
+				F8CA31FFD96A184F2D16DCF5 /* Haptics.swift */,
+				80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */,
+				3DB19C35AB87CE4CB3031E60 /* LocationService.swift */,
+				DD8908C6555008B50D5852F4 /* NotificationService.swift */,
+				C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */,
+				2AA91F414B16F11189BD99DB /* SatelliteEngine.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		B4EFF04718288E091CDDF65E /* Karman */ = {
+			isa = PBXGroup;
+			children = (
+				2B78784756F2267CD3D12BFE /* App */,
+				53596802922751C5D6BBAE39 /* Core */,
+				60301E0EE9AAF49F485A25D4 /* DesignSystem */,
+				43B4B7D9BEDDE5A9790AE952 /* Features */,
+				5ADD8907A57C34FE2373D0DB /* Render */,
+				8266315CF4CA11135EB01FC1 /* Resources */,
+				51F098165AA40C4F1A5F90BA /* Info.plist */,
+				C5E768E64CEC7155559D68CD /* Karman.entitlements */,
+			);
+			path = Karman;
+			sourceTree = "<group>";
+		};
+		B53A7A8EE452AC90AF152702 = {
+			isa = PBXGroup;
+			children = (
+				B4EFF04718288E091CDDF65E /* Karman */,
+				19B7A37DDD0F6F321F019D15 /* KarmanTests */,
+				576A377D488AA5F9EB032EBD /* KarmanWidgets */,
+				4CD0486DE0D93C366CEE81E3 /* Shared */,
+				DF137E28CCDD2F6637369C8D /* Frameworks */,
+				EE6826054175C314EDE29F2D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B761AFC80324BDF862820FF0 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				8475F9268862AEDC750CAB3E /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		CE87C9ADD41336B6739A4705 /* Briefing */ = {
+			isa = PBXGroup;
+			children = (
+				F669B24228503A0F50BEFB5C /* BriefingDirector.swift */,
+				F57B6EA883B3764F245490E0 /* BriefingPlayerView.swift */,
+				CED461DF20500BA434F58C99 /* Soundscape.swift */,
+			);
+			path = Briefing;
+			sourceTree = "<group>";
+		};
+		D8C35B23C4146EB891C37031 /* Intro */ = {
+			isa = PBXGroup;
+			children = (
+				294386B0031D6BB43B318966 /* IntroTitleView.swift */,
+			);
+			path = Intro;
+			sourceTree = "<group>";
+		};
+		DF137E28CCDD2F6637369C8D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7449C1D28C0E6A4635316A7F /* SwiftUI.framework */,
+				F3CFCBD38C659A2E352D0420 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EE6826054175C314EDE29F2D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				000A705C233870534EC24A4C /* Karman.app */,
+				39EA18C9B53CA40896B8D89C /* KarmanTests.xctest */,
+				392BAC5508D9E973DEDD843F /* KarmanWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		486D484F2FD7ABB6C6E92190 /* Karman */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 81428A7D241ACD5E417B08D3 /* Build configuration list for PBXNativeTarget "Karman" */;
+			buildPhases = (
+				94C8195DD06B395DF4A6E9FA /* Sources */,
+				21768714D63BE6DD61F3FA7B /* Resources */,
+				7B76F9485C4372A3CCA6E9D3 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				15B670BEABF327AAD62EF21B /* PBXTargetDependency */,
+			);
+			name = Karman;
+			packageProductDependencies = (
+			);
+			productName = Karman;
+			productReference = 000A705C233870534EC24A4C /* Karman.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5379B6553DF86786C9F3C970 /* KarmanWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C34A9459289D7CCFD53262F /* Build configuration list for PBXNativeTarget "KarmanWidgets" */;
+			buildPhases = (
+				9F00E847F9B1C0925EB9A2F6 /* Sources */,
+				D50AD23A6FB318EC31E0BAE9 /* Resources */,
+				7EB4843730C1653E84F57843 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KarmanWidgets;
+			packageProductDependencies = (
+			);
+			productName = KarmanWidgets;
+			productReference = 392BAC5508D9E973DEDD843F /* KarmanWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		C4EBEC16074557EA92DA5506 /* KarmanTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 23DCF538EE2E61B67E303762 /* Build configuration list for PBXNativeTarget "KarmanTests" */;
+			buildPhases = (
+				74A48DB487E38CC08EF31B7D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				07C7841BCCB717607FECC3E9 /* PBXTargetDependency */,
+			);
+			name = KarmanTests;
+			packageProductDependencies = (
+			);
+			productName = KarmanTests;
+			productReference = 39EA18C9B53CA40896B8D89C /* KarmanTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		093DCD6B111D02473BB9BCF2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					486D484F2FD7ABB6C6E92190 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					5379B6553DF86786C9F3C970 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					C4EBEC16074557EA92DA5506 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 91BC3B3F61168F4C0DD0A087 /* Build configuration list for PBXProject "Karman" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				tr,
+			);
+			mainGroup = B53A7A8EE452AC90AF152702;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				486D484F2FD7ABB6C6E92190 /* Karman */,
+				C4EBEC16074557EA92DA5506 /* KarmanTests */,
+				5379B6553DF86786C9F3C970 /* KarmanWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		21768714D63BE6DD61F3FA7B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A74DF09EAC19CB089BBFE90 /* Assets.xcassets in Resources */,
+				CC896871AA8CCCE56E9E32B9 /* InfoPlist.strings in Resources */,
+				FD2D1B95F4D4A9A3F73F6DEF /* Localizable.strings in Resources */,
+				6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */,
+				BF8798FC382D2B589496FE4C /* earth_day.jpg in Resources */,
+				03C3CBEDF6D9A1328CE39DB3 /* earth_lights.jpg in Resources */,
+				415515C85ABD1B4C2136D4B0 /* earth_mask_small.png in Resources */,
+				FEF3D39A44448B68C8DAF00F /* earth_normal.jpg in Resources */,
+				874C9FBAA9279098BD0EDE34 /* earth_water.png in Resources */,
+				30216CB9A7A778136D6861D2 /* moon.jpg in Resources */,
+				05E2401CB9F57E8D9729CECA /* stars.bin in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D50AD23A6FB318EC31E0BAE9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D0011511A4172D16EBFC155 /* Assets.xcassets in Resources */,
+				B45263F82831020B9FCC64A4 /* InfoPlist.strings in Resources */,
+				5FC029F010077DDED077CBF8 /* Localizable.strings in Resources */,
+				CFABBD2E421ABCE2D485E917 /* widget_day.jpg in Resources */,
+				3FBC096248B61A6B17C81D77 /* widget_lights.jpg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		74A48DB487E38CC08EF31B7D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CBEDD847F8968EDFD7882378 /* AstroTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94C8195DD06B395DF4A6E9FA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9CC7D8410DCFF4576A166FF8 /* APIClient.swift in Sources */,
+				C01E01792D1959FEEF33EEC5 /* AppDelegate.swift in Sources */,
+				83F956BC30C9EF1CB785E1DE /* AppModel.swift in Sources */,
+				CF8D271B562ACE479EF0010B /* AppSettings.swift in Sources */,
+				C8A81F92C26C3C2738D2C157 /* AskService.swift in Sources */,
+				637B7CD628AD1356F5058347 /* AskView.swift in Sources */,
+				069BE632C35C62C82B6B401C /* AstroMath.swift in Sources */,
+				5C70EEDCA4DC917577144BA6 /* AuroraPolarMap.swift in Sources */,
+				6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */,
+				41A3CCAF19F3C46459F8B4EE /* BriefingPlayerView.swift in Sources */,
+				E13533BCF9C81AFFF23CB8CE /* DetailSheet.swift in Sources */,
+				6ECAAD250AD053865048E2BC /* DirectFeeds.swift in Sources */,
+				849A8089ECFE15456142B2BC /* Formatters.swift in Sources */,
+				EA9936C3D52EB716A42E82C9 /* Geo.swift in Sources */,
+				1B01F1815E2A9B181B58C63C /* Globe.metal in Sources */,
+				5BCBAE225B332FF87A9E74EB /* GlobeCamera.swift in Sources */,
+				BD15AA17003751C3505F08B5 /* GlobeController.swift in Sources */,
+				A875274C65746AF99D1810D0 /* GlobeRenderer.swift in Sources */,
+				3C29A2277725146A1A65E33C /* GlobeView.swift in Sources */,
+				F1E1A942AB8335FA8ED48256 /* Haptics.swift in Sources */,
+				7BA5A76AC82652ACED38DAEF /* HomeHUD.swift in Sources */,
+				A2C5457E804FBF76A3D788E1 /* IntroTitleView.swift in Sources */,
+				2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */,
+				3C27110AFC7D7C46A94DA08C /* LayersPanel.swift in Sources */,
+				EB75D107B73537FCD672533C /* LiveImagery.swift in Sources */,
+				DE9AC39E5D64853C73C192DE /* LocationService.swift in Sources */,
+				5C045FC7B2FADE8BE723C00D /* Log.swift in Sources */,
+				9DDBDCAA78A5C1D8276A9D2F /* MetalResources.swift in Sources */,
+				6074900B5058D05811269D1F /* NotificationService.swift in Sources */,
+				661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */,
+				E4CB9E267E7FA4EDE6181D95 /* PassPredictor.swift in Sources */,
+				6068018BE6CA50F3139A256D /* PlanetModels.swift in Sources */,
+				6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */,
+				33ABD3864694C4BEC72380A5 /* PulseView.swift in Sources */,
+				9907F01ABC07CD613F07101F /* RootView.swift in Sources */,
+				CDA4BCDB9834BD8737B530F6 /* SGP4.swift in Sources */,
+				8D865D8DF61E1BDCBDCD6CDC /* SatelliteEngine.swift in Sources */,
+				8397501463C833508102CA32 /* SelectionCallout.swift in Sources */,
+				984EDFCEF579BF3D022F2814 /* SettingsView.swift in Sources */,
+				54D49FF1F70E665B55967A64 /* SkyTonightView.swift in Sources */,
+				12A3ADAFD336E674B48D9D28 /* Soundscape.swift in Sources */,
+				F774DD51E6BE1ADC40BF9541 /* SpaceWeatherView.swift in Sources */,
+				DF8A548952F047DFF0B59D10 /* Theme.swift in Sources */,
+				C2181D441672E5E4AD9B3D2F /* WidgetBridge.swift in Sources */,
+				41D4239760862F77E32D7449 /* WidgetState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9F00E847F9B1C0925EB9A2F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B61E88254EAD55BB15666DFC /* APIClient.swift in Sources */,
+				8DD2F916D634CF733EBA841A /* AstroMath.swift in Sources */,
+				8A5BB4F1924D69AED6DAB90B /* Geo.swift in Sources */,
+				4691C93212485ADCEF5C1448 /* KarmanWidgetsBundle.swift in Sources */,
+				EC61731ED718C8B4DEC1D36C /* OrthoSphere.swift in Sources */,
+				795FD8C70BB522B77370A980 /* PlanetModels.swift in Sources */,
+				F4EF7C4B006D3EF2224BCC98 /* PlanetProvider.swift in Sources */,
+				DB06F41C400E2B649650DFB9 /* SGP4.swift in Sources */,
+				B8EE88E27F0C88BFA41D6D3C /* WidgetState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		07C7841BCCB717607FECC3E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 486D484F2FD7ABB6C6E92190 /* Karman */;
+			targetProxy = 9F004443EA019F3062940DDC /* PBXContainerItemProxy */;
+		};
+		15B670BEABF327AAD62EF21B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5379B6553DF86786C9F3C970 /* KarmanWidgets */;
+			targetProxy = 1E2954E6A8106A635AA62E8B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		19BBC4E36A688CEDAB1A8668 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Karman.app/Karman";
+			};
+			name = Release;
+		};
+		2C56E19ECADD68A8ED27B711 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Karman.app/Karman";
+			};
+			name = Debug;
+		};
+		64CD01DBCEC968A9A14B22B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Karman/Karman.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Karman/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				MTL_LANGUAGE_REVISION = Metal32;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman;
+				PRODUCT_NAME = Karman;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = Karman/Render/Shaders/ShaderTypes.h;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8422E7C50AE1DB99D8FF3196 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				KARMAN_API_BASE_URL = "https://92.5.38.182:8443";
+				KARMAN_API_PIN = "";
+				KARMAN_DEV_TOKEN = "";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		8B772E6FA8E5DEE8024FB9FC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KarmanWidgets/KarmanWidgets.entitlements;
+				INFOPLIST_FILE = KarmanWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman.widgets;
+				PRODUCT_NAME = KarmanWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C16AD023F71B418BE73E6ADC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Karman/Karman.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Karman/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				MTL_LANGUAGE_REVISION = Metal32;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman;
+				PRODUCT_NAME = Karman;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = Karman/Render/Shaders/ShaderTypes.h;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C52CD317467736A7D93B46CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = KarmanWidgets/KarmanWidgets.entitlements;
+				INFOPLIST_FILE = KarmanWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.adilemre.karman.widgets;
+				PRODUCT_NAME = KarmanWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CFB36E963351E55DBCC5D08E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				KARMAN_API_BASE_URL = "https://92.5.38.182:8443";
+				KARMAN_API_PIN = "";
+				KARMAN_DEV_TOKEN = "";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		23DCF538EE2E61B67E303762 /* Build configuration list for PBXNativeTarget "KarmanTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2C56E19ECADD68A8ED27B711 /* Debug */,
+				19BBC4E36A688CEDAB1A8668 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3C34A9459289D7CCFD53262F /* Build configuration list for PBXNativeTarget "KarmanWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C52CD317467736A7D93B46CD /* Debug */,
+				8B772E6FA8E5DEE8024FB9FC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		81428A7D241ACD5E417B08D3 /* Build configuration list for PBXNativeTarget "Karman" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C16AD023F71B418BE73E6ADC /* Debug */,
+				64CD01DBCEC968A9A14B22B8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		91BC3B3F61168F4C0DD0A087 /* Build configuration list for PBXProject "Karman" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CFB36E963351E55DBCC5D08E /* Debug */,
+				8422E7C50AE1DB99D8FF3196 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 093DCD6B111D02473BB9BCF2 /* Project object */;
+}

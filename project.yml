@@ -1,0 +1,98 @@
+name: Karman
+options:
+  bundleIdPrefix: com.adilemre
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+  groupSortPosition: top
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_STRICT_CONCURRENCY: complete
+    LOCALIZATION_PREFERS_STRING_CATALOGS: NO
+    SWIFT_EMIT_LOC_STRINGS: YES
+    # Kármán API (self-hosted). The pin is the base64 SHA-256 of the server's SubjectPublicKeyInfo.
+    KARMAN_API_BASE_URL: "https://92.5.38.182:8443"
+    KARMAN_API_PIN: ""
+  configs:
+    Debug:
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      KARMAN_DEV_TOKEN: ""
+    Release:
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+      KARMAN_DEV_TOKEN: ""
+
+targets:
+  Karman:
+    type: application
+    platform: iOS
+    sources:
+      - path: Karman
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.adilemre.karman
+        PRODUCT_NAME: Karman
+        INFOPLIST_FILE: Karman/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Karman/Karman.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_OBJC_BRIDGING_HEADER: Karman/Render/Shaders/ShaderTypes.h
+        MTL_FAST_MATH: YES
+        MTL_LANGUAGE_REVISION: Metal32
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      - target: KarmanWidgets
+        embed: true
+        codeSign: true
+    scheme:
+      testTargets:
+        - KarmanTests
+      gatherCoverageData: false
+
+  KarmanWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: KarmanWidgets
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.adilemre.karman.widgets
+        PRODUCT_NAME: KarmanWidgets
+        INFOPLIST_FILE: KarmanWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: KarmanWidgets/KarmanWidgets.entitlements
+        SKIP_INSTALL: YES
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+
+  KarmanTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: KarmanTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.adilemre.karman.tests
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Karman.app/Karman"
+    dependencies:
+      - target: Karman
