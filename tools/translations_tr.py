@@ -306,6 +306,7 @@ APP = {
         "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.",
     "…": "…",
     "MAKE IT YOURS": "SANA ÖZEL YAP",
+    "Done": "Bitti",
     "Live globe": "Canlı küre",
     "%lld earthquakes in the last 24 hours, %lld storms, Kp %@": "Son 24 saatte %1$lld deprem, %2$lld fırtına, Kp %3$@",
     "Drag to rotate, pinch to zoom, tap a marker for details.": "Döndürmek için sürükle, yakınlaştırmak için iki parmakla sıkıştır, ayrıntılar için bir işarete dokun.",

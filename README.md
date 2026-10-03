@@ -99,6 +99,8 @@ Simülatörde yerel backend ile test (yalnızca DEBUG):
 ```bash
 SIMCTL_CHILD_KARMAN_API_BASE_URL=http://127.0.0.1:8787 SIMCTL_CHILD_KARMAN_FAKE_LOCATION="41.01,28.98,Istanbul" xcrun simctl launch booted com.adilemre.karman
 ```
+Kendi cihazında DEBUG derlemesiyle yapay zekâ özelliklerini denemek için (Xcode'dan çalıştırılan uygulamaların App Store satın alma kanıtı olmaz): sunucuda `KARMAN_DEV_TOKEN=<gizli-bir-değer>` ayarla ve aynı değeri `project.yml` → `configs.Debug.KARMAN_DEV_TOKEN` alanına yaz. Release derlemeleri bu anahtarı asla içermez.
+
 `KARMAN_SCREEN=hero|briefing|quake|storm|space|sky|ask|realearth|starlink|pulse|preview` ile uygulama ekran görüntüsü sahnelerine otomatik gider (`tools/compose_screenshots.py` bu çekimlerden App Store görsellerini üretir).
 
 ## Sunucu (backend) kurulumu
@@ -155,6 +157,7 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Gizlilik politikası URL'si: `/privacy` sayfasını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages).
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
 - [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:8443/healthz` → `"ai": true, "push": true`.
+- [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`).
 - [ ] Xcode → Product → Archive → Distribute (App Store Connect).
 
 ## Testler

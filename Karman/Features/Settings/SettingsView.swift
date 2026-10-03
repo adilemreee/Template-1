@@ -4,6 +4,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.requestReview) private var requestReview
     @State private var showCities = false
     @State private var notificationsAuthorized = NotificationService.shared.authorized
@@ -98,6 +99,11 @@ struct SettingsView: View {
             .background(PanelBackground())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
             .sheet(isPresented: $showCities) { CityPicker() }
             .task { await NotificationService.shared.refreshStatus(); notificationsAuthorized = NotificationService.shared.authorized }
         }
@@ -131,10 +137,23 @@ private struct CityPicker: View {
             .task(id: query) {
                 guard query.count >= 2 else { results = []; return }
                 try? await Task.sleep(for: .milliseconds(250))
+                // Geocode the place name worldwide first, then add points of interest.
+                var found: [MKMapItem] = []
+                if let geo = MKGeocodingRequest(addressString: query) {
+                    geo.region = MKCoordinateRegion(.world)
+                    found += (try? await geo.mapItems) ?? []
+                }
                 let req = MKLocalSearch.Request()
                 req.naturalLanguageQuery = query
+                req.region = MKCoordinateRegion(.world)
                 req.resultTypes = [.address, .pointOfInterest]
-                results = (try? await MKLocalSearch(request: req).start().mapItems) ?? []
+                found += (try? await MKLocalSearch(request: req).start().mapItems) ?? []
+                guard !Task.isCancelled else { return }
+                var seen = Set<String>()
+                results = found.filter { item in
+                    let key = "\(Int(item.location.coordinate.latitude * 10)),\(Int(item.location.coordinate.longitude * 10))"
+                    return seen.insert(key).inserted
+                }
             }
             .navigationTitle("Choose a place")
             .navigationBarTitleDisplayMode(.inline)
