@@ -143,5 +143,6 @@ AI data sharing (Guideline 5.1.2(i)): before the first question, Ask Kármán sh
 > • The globe, Pulse, Space Weather and Tonight's Sky use public scientific data (USGS, NOAA, NASA, CelesTrak, The Space Devs) via our server.
 > • Planet Briefing and Ask Kármán use Anthropic's Claude on our server. Access is authorised with StoreKit's signed AppTransaction (sandbox purchases are accepted), so they work in TestFlight and review builds.
 > • Ask Kármán asks for explicit permission before the first question is shared with Anthropic (one-time screen; can be withdrawn in Settings → Ask Kármán). Briefings contain no personal data.
+> • App Transport Security: a single exception (NSExceptionAllowsInsecureHTTPLoads) is scoped to our own API domain, karman.adilemree.xyz. The API uses a self-signed certificate that the app verifies by public-key pinning in code, which is stricter than CA validation. All other connections use default ATS.
 > • Location is optional (Settings → Location → Choose a place). It is only used for "near you" features and alerts.
 > • "Feel it" on an earthquake plays a haptic pattern; it requires a device with haptics.

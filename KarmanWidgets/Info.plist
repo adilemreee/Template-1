@@ -24,6 +24,20 @@
 	<string>$(KARMAN_API_BASE_URL)</string>
 	<key>KarmanAPIPin</key>
 	<string>$(KARMAN_API_PIN)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>karman.adilemree.xyz</key>
+			<dict>
+				<!-- Self-signed certificate, verified in code by public-key pinning (APIClient). -->
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>

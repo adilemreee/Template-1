@@ -52,6 +52,17 @@
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>karman.adilemree.xyz</key>
+			<dict>
+				<!-- Self-signed certificate, verified in code by public-key pinning (APIClient). -->
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<false/>
+			</dict>
+		</dict>
 	</dict>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save your Kármán postcards of the planet to your photo library.</string>

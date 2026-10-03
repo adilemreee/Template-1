@@ -28,7 +28,7 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
 
     override init() {
         let info = Bundle.main.infoDictionary ?? [:]
-        let base = (info["KarmanAPIBaseURL"] as? String).flatMap { $0.isEmpty || $0.contains("$(") ? nil : $0 } ?? "https://92.5.38.182:9443"
+        let base = (info["KarmanAPIBaseURL"] as? String).flatMap { $0.isEmpty || $0.contains("$(") ? nil : $0 } ?? "https://karman.adilemree.xyz:9443"
         #if targetEnvironment(simulator)
         let override = ProcessInfo.processInfo.environment["KARMAN_API_BASE_URL"]
         baseURL = URL(string: override ?? base)!
@@ -65,10 +65,13 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
               let key = SecCertificateCopyKey(leaf), let spkiHash = Self.spkiSHA256(key) else {
             return (.cancelAuthenticationChallenge, nil)
         }
-        if spkiHash == pin {
-            return (.useCredential, URLCredential(trust: trust))
-        }
-        return (.cancelAuthenticationChallenge, nil)
+        guard spkiHash == pin else { return (.cancelAuthenticationChallenge, nil) }
+        // Make the pinned certificate the only anchor, so the system evaluation that App
+        // Transport Security repeats on top of ours trusts exactly this server and nothing else.
+        SecTrustSetAnchorCertificates(trust, [leaf] as CFArray)
+        SecTrustSetAnchorCertificatesOnly(trust, true)
+        guard SecTrustEvaluateWithError(trust, nil) else { return (.cancelAuthenticationChallenge, nil) }
+        return (.useCredential, URLCredential(trust: trust))
     }
 
     static func spkiSHA256(_ key: SecKey) -> String? {

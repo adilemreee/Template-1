@@ -141,11 +141,31 @@ func genCert(args []string) {
 	host := fs.String("host", "127.0.0.1", "comma-separated IPs or DNS names")
 	out := fs.String("out", ".", "output directory")
 	days := fs.Int("days", 820, "validity in days (Apple caps TLS server certs at 825)")
+	keyPath := fs.String("key", "", "reuse this PEM private key so the app's pin stays valid")
 	_ = fs.Parse(args)
 
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		panic(err)
+	}
+	if *keyPath != "" {
+		pemBytes, err := os.ReadFile(*keyPath)
+		if err != nil {
+			panic(err)
+		}
+		block, _ := pem.Decode(pemBytes)
+		if block == nil {
+			panic("no PEM block in " + *keyPath)
+		}
+		parsed, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			panic(err)
+		}
+		ec, ok := parsed.(*ecdsa.PrivateKey)
+		if !ok {
+			panic("only ECDSA keys are supported")
+		}
+		key = ec
 	}
 	serial, _ := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 120))
 	tmpl := &x509.Certificate{
