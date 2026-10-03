@@ -42,12 +42,15 @@
 "AURORAL OVAL · LIVE" = "AURORA OVALİ · CANLI";
 "About" = "Hakkında";
 "Above you" = "Tepende";
+"Agree and continue" = "Kabul et ve devam et";
 "Alerts" = "Uyarılar";
 "Alerts use your location rounded to about 50 km. Space Station reminders are computed on this device." = "Uyarılar konumunu yaklaşık 50 km hassasiyetle kullanır. Uzay İstasyonu hatırlatmaları bu cihazda hesaplanır.";
 "All" = "Tümü";
 "Allow location to see your odds." = "Şansını görmek için konuma izin ver.";
 "Ambient soundscape" = "Ambiyans müziği";
 "Ask" = "Sor";
+"Ask Kármán" = "Kármán'a Sor";
+"Ask Kármán is powered by Claude, an AI model made by Anthropic. To answer, your question and your approximate location, rounded to about 50 km, are sent to Kármán's server and to Anthropic." = "Kármán'a Sor, Anthropic'in geliştirdiği yapay zekâ modeli Claude ile çalışır. Yanıt verebilmek için sorun ve yaklaşık 50 km'ye yuvarlanmış konumun Kármán'ın sunucusuna ve Anthropic'e gönderilir.";
 "Ask Kármán is resting right now. Please try again later." = "Kármán'a Sor şu an dinleniyor. Lütfen daha sonra tekrar dene.";
 "Ask about the planet…" = "Gezegen hakkında sor…";
 "Ask anything about what's happening on Earth and above it. Answers use live data from USGS, NOAA and NASA." = "Dünya'da ve üzerinde olan her şeyi sor. Yanıtlar USGS, NOAA ve NASA'nın canlı verilerini kullanır.";
@@ -55,6 +58,7 @@
 "Aurora" = "Aurora";
 "Aurora chance tonight %lld%%" = "Bu gece aurora ihtimali %%%lld";
 "Aurora visible from here" = "Buradan görülebilen aurora";
+"Before your first question" = "İlk sorundan önce";
 "Blue hour" = "Mavi saat";
 "Bz" = "Bz";
 "CONTEXT" = "BAĞLAM";
@@ -162,10 +166,12 @@
 "Narrated briefings" = "Seslendirmeli brifingler";
 "Narrated tour of what is happening right now" = "Şu an olanların seslendirmeli turu";
 "Never miss the sky" = "Gökyüzünü kaçırma";
+"Never used for advertising or profiling, and Anthropic does not train on it" = "Reklam ya da profil çıkarmak için asla kullanılmaz; Anthropic de modellerini bununla eğitmez";
 "New Moon" = "Yeni Ay";
 "Next visible ISS pass %@" = "Sıradaki görünür ISS geçişi %@";
 "No visible passes in the next few days. The station is only visible when it's lit by the Sun while your sky is dark." = "Önümüzdeki birkaç gün görünür geçiş yok. İstasyon yalnızca senin gökyüzün karanlıkken Güneş tarafından aydınlatıldığında görülebilir.";
 "North" = "Kuzey";
+"Not linked to your identity" = "Kimliğinle ilişkilendirilmez";
 "Not now" = "Şimdi değil";
 "Not set" = "Ayarlanmadı";
 "Nothing here right now" = "Şu an burada bir şey yok";
@@ -184,6 +190,7 @@
 "Play Planet Briefing" = "Gezegen Brifingini Oynat";
 "Possible from dark skies." = "Karanlık gökyüzünden mümkün.";
 "Privacy" = "Gizlilik";
+"Privacy Policy" = "Gizlilik Politikası";
 "Pulse" = "Nabız";
 "QUIET" = "SAKİN";
 "Quakes" = "Depremler";
@@ -207,6 +214,7 @@
 "Settings" = "Ayarlar";
 "Share" = "Paylaş";
 "Share Kármán" = "Kármán'ı paylaş";
+"Share questions with Claude" = "Soruları Claude ile paylaş";
 "Share this moment" = "Bu anı paylaş";
 "Show Space Weather" = "Uzay Havasını Göster";
 "Show Tonight's Sky" = "Bu Gece Gökyüzünü Göster";
@@ -286,10 +294,12 @@
 "Wildfires are tracked by satellites that detect their heat and smoke. Hot, dry and windy conditions let them spread quickly; from orbit their smoke can stretch for hundreds of kilometres." = "Orman yangınları, ısılarını ve dumanlarını algılayan uydularla izlenir. Sıcak, kuru ve rüzgârlı koşullar hızla yayılmalarına yol açar; yörüngeden bakıldığında dumanları yüzlerce kilometre uzanabilir.";
 "Within %@" = "%@ içinde";
 "YOU ARE HERE" = "BURADASIN";
+"You can stop sharing any time in Settings" = "Paylaşımı istediğin zaman Ayarlar'dan durdurabilirsin";
 "You've reached today's question limit. It resets at midnight UTC." = "Bugünkü soru hakkını doldurdun. UTC gece yarısı sıfırlanır.";
 "Your chance of seeing the aurora tonight is about %lld percent." = "Bu gece aurorayı görme şansın yaklaşık yüzde %lld.";
 "Your location" = "Konumun";
 "Your planetary scientist" = "Senin gezegen bilimcin";
+"Your questions and a location rounded to about 50 km are sent to Kármán's server and to Anthropic to generate answers. Turn this off to stop sharing; Ask Kármán will ask again before your next question." = "Yanıt üretmek için soruların ve yaklaşık 50 km'ye yuvarlanmış konumun Kármán'ın sunucusuna ve Anthropic'e gönderilir. Paylaşımı durdurmak için kapat; Kármán'a Sor bir sonraki sorundan önce yeniden izin ister.";
 "Your sky tonight" = "Bu gece senin gökyüzün";
 "active" = "aktif";
 "aurora here" = "burada aurora";
@@ -331,5 +341,5 @@
 "·" = "·";
 "· %@" = "· %@";
 "—" = "—";
-"• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude to generate an answer; they are not used to build a profile.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off." = "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.";
+"• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude only after you agree, to generate an answer; they are not used to build a profile or to train AI models.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off." = "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yalnızca sen izin verdikten sonra, yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak veya yapay zekâ modellerini eğitmek için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.";
 "…" = "…";

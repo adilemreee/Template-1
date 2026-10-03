@@ -73,6 +73,12 @@ extension View {
         self.font(.label(10.5)).tracking(1.6).textCase(.uppercase).foregroundStyle(color)
     }
 
+    /// Primary call to action: tinted Liquid Glass with a dark, high-contrast label
+    /// (Kármán's accent colours are light, so white text would wash out).
+    func primaryAction(_ tint: Color = Theme.ice) -> some View {
+        self.buttonStyle(.glassProminent).tint(tint).foregroundStyle(Theme.ink)
+    }
+
     /// Glass panel (Liquid Glass on iOS 26).
     func glassPanel(cornerRadius: CGFloat = 26, tint: Color? = nil, interactive: Bool = false) -> some View {
         self.glassEffect(tint.map { Glass.regular.tint($0.opacity(0.18)).interactive(interactive) } ?? Glass.regular.interactive(interactive),

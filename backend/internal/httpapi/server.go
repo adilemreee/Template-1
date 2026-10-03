@@ -28,8 +28,12 @@ type Server struct {
 	AskLimit   int
 	PushActive bool
 	Version    string
+	// SupportEmail is shown on /support when set (KARMAN_SUPPORT_EMAIL).
+	SupportEmail string
 
-	limiter *ipLimiter
+	limiter     *ipLimiter
+	supportOnce sync.Once
+	supportPage []byte
 }
 
 func (s *Server) Handler() http.Handler {
@@ -37,6 +41,7 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.health)
 	mux.HandleFunc("GET /privacy", s.privacy)
+	mux.HandleFunc("GET /support", s.support)
 	mux.HandleFunc("GET /v1/snapshot", s.snapshot)
 	mux.HandleFunc("GET /v1/satellites/{group}", s.satellites)
 	mux.HandleFunc("GET /v1/imagery", s.imageryIndex)

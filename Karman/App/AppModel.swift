@@ -200,6 +200,11 @@ final class AppModel {
     func refreshDerived() {
         Task { await recomputePasses() }
         writeWidgetState()
+        let launches = planet.upcomingLaunches
+        #if DEBUG
+        if screenshotScene == "liveactivity" { return } // keeps the staged countdown on screen
+        #endif
+        Task { await NotificationService.shared.syncLaunchActivities(launches) }
     }
 
     func recomputePasses(force: Bool = false) async {

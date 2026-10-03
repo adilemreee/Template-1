@@ -90,6 +90,39 @@ final class NotificationService {
                                   content: ActivityContent(state: state, staleDate: launch.net.addingTimeInterval(1800)))
     }
 
+    /// Keeps launch reminders honest: starts the countdown once a reminded launch is within
+    /// eight hours, follows schedule slips and closes countdowns for launches that are over.
+    func syncLaunchActivities(_ launches: [Launch]) async {
+        let pending = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        for request in pending where request.identifier.hasPrefix("launch-") {
+            let id = String(request.identifier.dropFirst("launch-".count))
+            guard let launch = launches.first(where: { $0.id == id }) else { continue }
+            let planned = (request.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()
+            let due = launch.net.addingTimeInterval(-15 * 60)
+            if let planned, abs(planned.timeIntervalSince(due)) > 60 {
+                if due > Date() {
+                    _ = await scheduleLaunchReminder(launch) // same identifier: replaces the old time
+                } else {
+                    UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [request.identifier])
+                }
+            }
+            startLaunchActivity(launch)
+        }
+        for activity in Activity<LaunchActivityAttributes>.activities {
+            if let launch = launches.first(where: { $0.missionName == activity.attributes.mission }) {
+                let state = LaunchActivityAttributes.ContentState(net: launch.net, status: launch.status)
+                let content = ActivityContent(state: state, staleDate: launch.net.addingTimeInterval(1800))
+                if launch.isDone {
+                    await activity.end(content, dismissalPolicy: .after(Date().addingTimeInterval(30 * 60)))
+                } else if state != activity.content.state {
+                    await activity.update(content)
+                }
+            } else if activity.content.state.net < Date().addingTimeInterval(-3600) {
+                await activity.end(nil, dismissalPolicy: .immediate)
+            }
+        }
+    }
+
     func scheduleLaunchReminder(_ launch: Launch) async -> Bool {
         if !authorized { _ = await requestAuthorization() }
         guard authorized else { return false }

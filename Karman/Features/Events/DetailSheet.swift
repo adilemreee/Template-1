@@ -74,8 +74,7 @@ struct QuakeDetail: View {
                 } label: {
                     Label("Feel it", systemImage: "hand.tap.fill").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.glassProminent)
-                .tint(Theme.quake)
+                .primaryAction(Theme.quake)
                 if let url = quake.url.flatMap(URL.init(string:)) {
                     Link(destination: url) {
                         Label("USGS", systemImage: "arrow.up.right.square").frame(maxWidth: .infinity)
@@ -355,8 +354,7 @@ struct LaunchDetail: View {
                     } label: {
                         Label(reminded ? "Reminder set" : "Remind me", systemImage: reminded ? "bell.badge.fill" : "bell").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(Theme.launch)
+                    .primaryAction(Theme.launch)
                 }
                 if let w = launch.webcast.flatMap(URL.init(string:)) {
                     Link(destination: w) { Label("Watch", systemImage: "play.rectangle.fill").frame(maxWidth: .infinity) }

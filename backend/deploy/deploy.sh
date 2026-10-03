@@ -68,6 +68,8 @@ APNS_KEY_PATH=
 APNS_KEY_ID=
 APNS_TEAM_ID=
 KARMAN_APPLE_APP_ID=
+# Optional: shown on /support
+KARMAN_SUPPORT_EMAIL=
 ENV
 fi
 chown -R karman:karman /opt/karman

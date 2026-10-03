@@ -44,7 +44,12 @@ enum ScreenshotDirector {
             }
         case "space": model.panel = .space
         case "sky": model.panel = .sky
-        case "ask": model.panel = .ask
+        case "ask":
+            model.settings.askConsent = true
+            model.panel = .ask
+        case "askconsent":
+            model.settings.askConsent = false
+            model.panel = .ask
         case "pulse": model.panel = .pulse
         case "realearth":
             let sun = Astro.subsolarPoint(Date())

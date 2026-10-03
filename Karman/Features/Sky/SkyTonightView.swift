@@ -23,7 +23,7 @@ struct SkyTonightView: View {
                             .font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
                         HStack {
                             Button("Use my location") { model.location.useDeviceLocation() }
-                                .buttonStyle(.glassProminent)
+                                .primaryAction()
                             Button("Choose a place") { model.panel = .settings }
                                 .buttonStyle(.glass)
                         }

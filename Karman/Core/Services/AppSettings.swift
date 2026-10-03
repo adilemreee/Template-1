@@ -19,6 +19,8 @@ final class AppSettings {
     var soundscape: Bool { didSet { defaults.set(soundscape, forKey: "soundscape") } }
     var narration: Bool { didSet { defaults.set(narration, forKey: "narration") } }
     var alerts: AlertPreferences { didSet { save(alerts, "alerts") } }
+    /// Explicit permission to send questions (and a ~50 km location) to Anthropic's Claude.
+    var askConsent: Bool { didSet { defaults.set(askConsent, forKey: "askConsent") } }
 
     struct AlertPreferences: Codable, Equatable, Sendable {
         var quakesNearby = true
@@ -41,6 +43,7 @@ final class AppSettings {
         soundscape = defaults.object(forKey: "soundscape") as? Bool ?? true
         narration = defaults.object(forKey: "narration") as? Bool ?? true
         alerts = Self.load("alerts", from: defaults) ?? AlertPreferences()
+        askConsent = defaults.bool(forKey: "askConsent")
     }
 
     private func save<T: Encodable>(_ value: T, _ key: String) {

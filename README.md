@@ -104,7 +104,7 @@ SIMCTL_CHILD_KARMAN_API_BASE_URL=http://127.0.0.1:8787 SIMCTL_CHILD_KARMAN_FAKE_
 ```
 Kendi cihazında DEBUG derlemesiyle yapay zekâ özelliklerini denemek için (Xcode'dan çalıştırılan uygulamaların App Store satın alma kanıtı olmaz): sunucuda `KARMAN_DEV_TOKEN=<gizli-bir-değer>` ayarla ve aynı değeri `project.yml` → `configs.Debug.KARMAN_DEV_TOKEN` alanına yaz. Release derlemeleri bu anahtarı asla içermez.
 
-`KARMAN_SCREEN=hero|briefing|quake|storm|space|sky|ask|realearth|starlink|pulse|preview` ile uygulama ekran görüntüsü sahnelerine otomatik gider (`tools/compose_screenshots.py` bu çekimlerden App Store görsellerini üretir).
+`KARMAN_SCREEN=hero|briefing|quake|quakeglobe|storm|space|sky|ask|askconsent|realearth|starlink|pulse|iss|liveactivity|preview` ile uygulama ekran görüntüsü sahnelerine otomatik gider (`tools/compose_screenshots.py` bu çekimlerden App Store görsellerini üretir).
 
 ## Sunucu (backend) kurulumu
 
@@ -127,8 +127,9 @@ Yapılandırma: `/opt/karman/karman.env` (değiştirdikten sonra `systemctl rest
 | `APNS_KEY_PATH`, `APNS_KEY_ID`, `APNS_TEAM_ID` | Push için `.p8` anahtarı. |
 | `KARMAN_APPLE_APP_ID` | App Store'daki sayısal uygulama kimliği (AppTransaction doğrulamasını sıkılaştırır). |
 | `KARMAN_ALLOW_SANDBOX` | TestFlight/inceleme satın almalarını kabul et (varsayılan `true`). |
+| `KARMAN_SUPPORT_EMAIL` | İsteğe bağlı; `/support` sayfasında iletişim adresi olarak gösterilir. |
 
-Uç noktalar: `/healthz`, `/privacy`, `/v1/snapshot`, `/v1/satellites/{stations|visual|starlink}`, `/v1/imagery/latest`, `/v1/sun/{304|171|195}`, `/v1/briefing?lang=tr`, `/v1/ask` (SSE), `/v1/auth/app-transaction`, `/v1/devices`.
+Uç noktalar: `/healthz`, `/privacy`, `/support`, `/v1/snapshot`, `/v1/satellites/{stations|visual|starlink}`, `/v1/imagery/latest`, `/v1/sun/{304|171|195}`, `/v1/briefing?lang=tr`, `/v1/ask` (SSE), `/v1/auth/app-transaction`, `/v1/devices`.
 
 Yerelde çalıştırma:
 ```bash
@@ -157,7 +158,8 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Meta veriler (EN + TR, karakter sınırları kontrol edildi): `marketing/AppStore-Metadata.md`.
 - [ ] Ekran görüntüleri (6.9", 1320×2868): `marketing/appstore/en/` ve `marketing/appstore/tr/`.
 - [ ] Uygulama önizlemeleri (886×1920, 28,6 sn): `marketing/app-preview/karman-preview-en-886x1920.mp4` ve `karman-preview-tr-886x1920.mp4`.
-- [ ] Gizlilik politikası URL'si: `/privacy` sayfasını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages).
+- [ ] Gizlilik politikası ve Destek URL'leri: `/privacy` ve `/support` sayfalarını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages). İstersen `KARMAN_SUPPORT_EMAIL` ile destek sayfasına iletişim adresi ekle.
+- [ ] Yapay zekâ veri paylaşımı (Kural 5.1.2(i)): "Kármán'a Sor" ilk sorudan önce Anthropic'i adıyla anan tek seferlik bir izin ekranı gösterir; izin Ayarlar → Kármán'a Sor'dan geri alınabilir. İnceleme notu `marketing/AppStore-Metadata.md` içinde hazır.
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
 - [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:8443/healthz` → `"ai": true, "push": true`.
 - [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`).

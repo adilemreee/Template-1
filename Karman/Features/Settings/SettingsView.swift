@@ -81,6 +81,14 @@ struct SettingsView: View {
                     }
                 }
 
+                Section {
+                    Toggle("Share questions with Claude", isOn: $settings.askConsent)
+                } header: {
+                    Text("Ask Kármán")
+                } footer: {
+                    Text("Your questions and a location rounded to about 50 km are sent to Kármán's server and to Anthropic to generate answers. Turn this off to stop sharing; Ask Kármán will ask again before your next question.")
+                }
+
                 Section("About") {
                     NavigationLink { CreditsView() } label: { Label("Data sources & credits", systemImage: "books.vertical") }
                     NavigationLink { PrivacyView() } label: { Label("Privacy", systemImage: "hand.raised") }
@@ -197,7 +205,7 @@ struct PrivacyView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Kármán is built to know the planet, not you.").font(.system(size: 20, weight: .bold))
-                Text("• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude to generate an answer; they are not used to build a profile.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off.")
+                Text("• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude only after you agree, to generate an answer; they are not used to build a profile or to train AI models.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off.")
                     .font(.system(size: 14)).foregroundStyle(.white.opacity(0.85)).lineSpacing(4)
             }
             .padding(20)

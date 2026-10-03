@@ -25,7 +25,7 @@ struct OnboardingCard: View {
                     } label: {
                         Text("Use my location").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
+                    .primaryAction()
                     Button {
                         model.panel = .settings
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.86)) { step = 1 }
@@ -56,8 +56,7 @@ struct OnboardingCard: View {
                     } label: {
                         Text("Turn on alerts").frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(Theme.aurora)
+                    .primaryAction(Theme.aurora)
                     Button { finish() } label: {
                         Text("Not now").frame(maxWidth: .infinity)
                     }

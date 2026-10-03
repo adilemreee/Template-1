@@ -130,12 +130,15 @@ Yaşayan gezegen, canlı. Kármán'a hoş geldin.
   - User Content → *Other User Content* — App Functionality (questions sent to Ask Kármán).
 - Everything else: not collected. Push tokens are used only to deliver chosen alerts.
 
-Privacy policy text is served by the backend at `/privacy` (EN + TR). App Store Connect needs a public HTTPS URL with a trusted certificate — host the same page on your own domain (e.g. `https://adilemree.xyz/karman/privacy`) or GitHub Pages.
+Privacy policy (`/privacy`) and Support (`/support`, FAQ + optional contact address from `KARMAN_SUPPORT_EMAIL`) pages are served by the backend in EN + TR. App Store Connect needs public HTTPS URLs with a trusted certificate for both the **Privacy Policy URL** and the **Support URL** — host the same pages on your own domain (e.g. `https://adilemree.xyz/karman/privacy` and `/karman/support`) or GitHub Pages.
+
+AI data sharing (Guideline 5.1.2(i)): before the first question, Ask Kármán shows a one-time consent screen naming Anthropic and exactly what is shared (the question and a location rounded to ~50 km). Nothing is sent until the user taps "Agree and continue"; Settings → Ask Kármán → "Share questions with Claude" withdraws consent. Planet Briefings send no personal data.
 
 ## App Review notes
 
 > Kármán is a paid app with no account or login. All features work immediately.
 > • The globe, Pulse, Space Weather and Tonight's Sky use public scientific data (USGS, NOAA, NASA, CelesTrak, The Space Devs) via our server.
 > • Planet Briefing and Ask Kármán use Anthropic's Claude on our server. Access is authorised with StoreKit's signed AppTransaction (sandbox purchases are accepted), so they work in TestFlight and review builds.
+> • Ask Kármán asks for explicit permission before the first question is shared with Anthropic (one-time screen; can be withdrawn in Settings → Ask Kármán). Briefings contain no personal data.
 > • Location is optional (Settings → Location → Choose a place). It is only used for "near you" features and alerts.
 > • "Feel it" on an earthquake plays a haptic pattern; it requires a device with haptics.

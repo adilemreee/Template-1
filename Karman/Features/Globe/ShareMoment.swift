@@ -20,7 +20,7 @@ struct ShareMomentSheet: View {
                 Label("Share", systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
+            .primaryAction()
             .controlSize(.large)
             .padding(.horizontal, 28)
             Spacer(minLength: 0)

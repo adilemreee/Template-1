@@ -303,8 +303,20 @@ APP = {
     "·": "·",
     "· %@": "· %@",
     "—": "—",
-    "• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude to generate an answer; they are not used to build a profile.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off.":
-        "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.",
+    "• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude only after you agree, to generate an answer; they are not used to build a profile or to train AI models.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off.":
+        "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yalnızca sen izin verdikten sonra, yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak veya yapay zekâ modellerini eğitmek için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.",
+    "Before your first question": "İlk sorundan önce",
+    "Ask Kármán is powered by Claude, an AI model made by Anthropic. To answer, your question and your approximate location, rounded to about 50 km, are sent to Kármán's server and to Anthropic.":
+        "Kármán'a Sor, Anthropic'in geliştirdiği yapay zekâ modeli Claude ile çalışır. Yanıt verebilmek için sorun ve yaklaşık 50 km'ye yuvarlanmış konumun Kármán'ın sunucusuna ve Anthropic'e gönderilir.",
+    "Not linked to your identity": "Kimliğinle ilişkilendirilmez",
+    "Never used for advertising or profiling, and Anthropic does not train on it": "Reklam ya da profil çıkarmak için asla kullanılmaz; Anthropic de modellerini bununla eğitmez",
+    "You can stop sharing any time in Settings": "Paylaşımı istediğin zaman Ayarlar'dan durdurabilirsin",
+    "Agree and continue": "Kabul et ve devam et",
+    "Privacy Policy": "Gizlilik Politikası",
+    "Ask Kármán": "Kármán'a Sor",
+    "Share questions with Claude": "Soruları Claude ile paylaş",
+    "Your questions and a location rounded to about 50 km are sent to Kármán's server and to Anthropic to generate answers. Turn this off to stop sharing; Ask Kármán will ask again before your next question.":
+        "Yanıt üretmek için soruların ve yaklaşık 50 km'ye yuvarlanmış konumun Kármán'ın sunucusuna ve Anthropic'e gönderilir. Paylaşımı durdurmak için kapat; Kármán'a Sor bir sonraki sorundan önce yeniden izin ister.",
     "…": "…",
     "MAKE IT YOURS": "SANA ÖZEL YAP",
     "SHARE THIS MOMENT": "BU ANI PAYLAŞ",
@@ -331,7 +343,6 @@ APP = {
     "ALERTS": "UYARILAR",
     "Never miss the sky": "Gökyüzünü kaçırma",
     "Get a heads-up for strong earthquakes nearby, aurora you can actually see and space station passes overhead. Fine-tune everything in Settings.": "Yakınındaki güçlü depremler, gerçekten görebileceğin auroralar ve tependen geçen uzay istasyonu için önceden haber al. Her şeyi Ayarlar'dan ince ayarlayabilirsin.",
-    "Turn on alerts": "Uyarıları aç",
     "Not now": "Şimdi değil",
     "Skip": "Atla",
     # Compass points
