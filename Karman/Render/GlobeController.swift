@@ -85,6 +85,15 @@ struct GlobeProjection {
         return CGPoint(x: CGFloat(ndc.x * 0.5 + 0.5) * viewSize.width, y: CGFloat(0.5 - ndc.y * 0.5) * viewSize.height)
     }
 
+    /// Screen point for any position in front of the camera, hidden or not (points inside the
+    /// planet, such as on the Inside the Earth cut).
+    func screenPoint(_ p: SIMD3<Float>) -> CGPoint? {
+        let clip = viewProj * SIMD4(p, 1)
+        guard clip.w > 0.001, viewSize.width > 0 else { return nil }
+        let ndc = SIMD2(clip.x, clip.y) / clip.w
+        return CGPoint(x: CGFloat(ndc.x * 0.5 + 0.5) * viewSize.width, y: CGFloat(0.5 - ndc.y * 0.5) * viewSize.height)
+    }
+
     /// How squarely a surface point faces the camera (1 = straight on, ≤ 0 = hidden).
     func facing(_ p: SIMD3<Float>) -> Float {
         let n = simd_normalize(p)
@@ -266,6 +275,53 @@ final class GlobeController {
         return CACurrentMediaTime() - s.startedAt > SeismicWaves.duration
     }
 
+    // MARK: Inside the Earth
+
+    /// An orange-slice wedge cut out of the planet, pole to pole, opening and closing smoothly.
+    struct Cutaway: Equatable {
+        /// Longitude at the middle of the removed wedge.
+        var longitude: Double
+        var openedAt: CFTimeInterval
+        var closedAt: CFTimeInterval?
+        /// Half the wedge's angle when fully open (a quarter of the planet removed).
+        static let halfAngle = Double.pi / 4
+        static let animation: CFTimeInterval = 1.6
+    }
+
+    private(set) var cutaway: Cutaway?
+
+    func openCutaway(longitude: Double, delay: CFTimeInterval = 0) {
+        let now = CACurrentMediaTime()
+        if var c = cutaway, let closed = c.closedAt {
+            // Still closing: reopen from wherever it has got to.
+            let progress = min(1, max(0, 1 - (now - closed) / Cutaway.animation))
+            c.openedAt = now - progress * Cutaway.animation
+            c.closedAt = nil
+            cutaway = c
+            return
+        }
+        cutaway = Cutaway(longitude: longitude, openedAt: now + delay)
+        sceneVersion &+= 1
+    }
+
+    /// Closes from wherever the opening has got to; the cut is dropped once shut.
+    func closeCutaway() {
+        guard var c = cutaway, c.closedAt == nil else { return }
+        let now = CACurrentMediaTime()
+        let progress = min(1, max(0, (now - c.openedAt) / Cutaway.animation))
+        c.closedAt = now - (1 - progress) * Cutaway.animation
+        cutaway = c
+    }
+
+    /// 0 (whole planet) … 1 (wedge fully open).
+    func cutawayOpening(at now: CFTimeInterval = CACurrentMediaTime()) -> Double {
+        guard let c = cutaway else { return 0 }
+        let t = c.closedAt.map { 1 - (now - $0) / Cutaway.animation } ?? (now - c.openedAt) / Cutaway.animation
+        return Easing.inOutCubic(min(1, max(0, t)))
+    }
+
+    var isCutawayOpen: Bool { cutaway != nil && cutaway?.closedAt == nil }
+
     // MARK: Projection
 
     /// Updated by the renderer every frame.
@@ -383,6 +439,14 @@ final class GlobeController {
     func step(now: CFTimeInterval) -> CameraPose {
         let dt = min(0.05, max(0, now - lastFrame))
         lastFrame = now
+        if let c = cutaway, let closed = c.closedAt, now - closed > Cutaway.animation {
+            cutaway = nil
+            sceneVersion &+= 1
+        }
+        // Markers would float over the hole: fade them while the planet is cut open.
+        let markerTarget: Double = cutaway == nil ? 1 : 0
+        markerFade += (markerTarget - markerFade) * min(1, dt * 5)
+        if abs(markerTarget - markerFade) < 0.002 { markerFade = markerTarget }
         if let follow, let frame = follow(Date()) {
             followFocus = frame.focus
             if followEngaged {

@@ -71,6 +71,14 @@ static float3 limbHaze(float3 color, float NdotV, float NdotL) {
     return mix(color, haze, rim * 0.75 * smoothstep(-0.35, 0.25, NdotL));
 }
 
+/// True inside the orange-slice wedge removed from the planet for the Inside the Earth view:
+/// every point whose longitude lies within the half-angle of the wedge's centre.
+static bool inCutaway(float3 p, float4 cut) {
+    if (cut.w <= 0.0) return false;
+    float len = length(p.xz);
+    return len > 1e-5 && dot(p.xz, cut.xz) > cos(cut.w) * len;
+}
+
 // ---------------------------------------------------------------------------------------
 // Live weather (NOAA GFS) — frames packed by the Kármán API as RGBA8: eastward and northward
 // 10 m wind in 0.5 m/s steps around 128, 2 m temperature in 0.5 °C steps from −80 °C, and
@@ -148,20 +156,11 @@ vertex SphereOut sphere_vertex(uint vid [[vertex_id]],
     return o;
 }
 
-fragment float4 earth_fragment(SphereOut in [[stage_in]],
-                               constant FrameUniforms& u [[buffer(0)]],
-                               texture2d<float> dayTex [[texture(0)]],
-                               texture2d<float> lightsTex [[texture(1)]],
-                               texture2d<float> cloudTex [[texture(2)]],
-                               texture2d<float> waterTex [[texture(3)]],
-                               texture2d<float> normalTex [[texture(4)]],
-                               texture2d<float> liveTex [[texture(5)]],
-                               texture2d<float> detailTex [[texture(6)]],
-                               texture2d<float> detailMask [[texture(7)]],
-                               texture2d_array<float> weatherTex [[texture(8)]],
-                               sampler s [[sampler(0)]],
-                               sampler cs [[sampler(1)]],
-                               sampler ws [[sampler(2)]]) {
+static float4 shadeEarth(SphereOut in, constant FrameUniforms& u,
+                         texture2d<float> dayTex, texture2d<float> lightsTex, texture2d<float> cloudTex,
+                         texture2d<float> waterTex, texture2d<float> normalTex, texture2d<float> liveTex,
+                         texture2d<float> detailTex, texture2d<float> detailMask, texture2d_array<float> weatherTex,
+                         sampler s, sampler cs, sampler ws) {
     float3 N = normalize(in.world);
     float3 V = normalize(u.cameraPos - in.world);
     float3 L = normalize(u.sunDir);
@@ -280,6 +279,118 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     return float4(color * u.sceneFade, 1.0);
 }
 
+fragment float4 earth_fragment(SphereOut in [[stage_in]],
+                               constant FrameUniforms& u [[buffer(0)]],
+                               texture2d<float> dayTex [[texture(0)]],
+                               texture2d<float> lightsTex [[texture(1)]],
+                               texture2d<float> cloudTex [[texture(2)]],
+                               texture2d<float> waterTex [[texture(3)]],
+                               texture2d<float> normalTex [[texture(4)]],
+                               texture2d<float> liveTex [[texture(5)]],
+                               texture2d<float> detailTex [[texture(6)]],
+                               texture2d<float> detailMask [[texture(7)]],
+                               texture2d_array<float> weatherTex [[texture(8)]],
+                               sampler s [[sampler(0)]],
+                               sampler cs [[sampler(1)]],
+                               sampler ws [[sampler(2)]]) {
+    return shadeEarth(in, u, dayTex, lightsTex, cloudTex, waterTex, normalTex, liveTex, detailTex, detailMask, weatherTex, s, cs, ws);
+}
+
+/// The same surface with the Inside the Earth wedge removed (a separate pipeline, so the everyday
+/// globe never pays for the discard).
+fragment float4 earth_cutaway_fragment(SphereOut in [[stage_in]],
+                                       constant FrameUniforms& u [[buffer(0)]],
+                                       texture2d<float> dayTex [[texture(0)]],
+                                       texture2d<float> lightsTex [[texture(1)]],
+                                       texture2d<float> cloudTex [[texture(2)]],
+                                       texture2d<float> waterTex [[texture(3)]],
+                                       texture2d<float> normalTex [[texture(4)]],
+                                       texture2d<float> liveTex [[texture(5)]],
+                                       texture2d<float> detailTex [[texture(6)]],
+                                       texture2d<float> detailMask [[texture(7)]],
+                                       texture2d_array<float> weatherTex [[texture(8)]],
+                                       sampler s [[sampler(0)]],
+                                       sampler cs [[sampler(1)]],
+                                       sampler ws [[sampler(2)]]) {
+    if (inCutaway(in.world, u.cutaway)) discard_fragment();
+    return shadeEarth(in, u, dayTex, lightsTex, cloudTex, waterTex, normalTex, liveTex, detailTex, detailMask, weatherTex, s, cs, ws);
+}
+
+// ---------------------------------------------------------------------------------------
+// Inside the Earth: the two faces of the cut, a half-disc each, with the layers by radius
+// (PREM: inner core 1,221 km, outer core 3,480 km, the 660 km discontinuity; the crust drawn
+// thicker than life so it reads at globe scale).
+// ---------------------------------------------------------------------------------------
+
+struct CutOut {
+    float4 position [[position]];
+    float2 local;    // x: out from the axis, y: along it (north up); 1 = the surface
+    float face;
+};
+
+vertex CutOut cutface_vertex(uint vid [[vertex_id]], uint iid [[instance_id]],
+                             constant FrameUniforms& u [[buffer(0)]]) {
+    // A fan of thin triangles, so the rim is real geometry and gets multisampled edges.
+    const float segments = 96.0;
+    uint tri = vid / 3, corner = vid % 3;
+    float2 local = float2(0.0);
+    if (corner > 0) {
+        float a = M_PI_F * (float(tri + corner - 1) / segments - 0.5);
+        local = float2(cos(a), sin(a));
+    }
+    float lonC = atan2(u.cutaway.x, u.cutaway.z);
+    float lonF = lonC + (iid == 0 ? -u.cutaway.w : u.cutaway.w);
+    float3 world = float3(sin(lonF), 0.0, cos(lonF)) * local.x + float3(0.0, 1.0, 0.0) * local.y;
+    CutOut o;
+    o.position = u.viewProj * float4(world, 1.0);
+    o.local = local;
+    o.face = float(iid);
+    return o;
+}
+
+static float3 earthInterior(float r, float theta, float time, float face) {
+    const float rIC = 0.1917, rOC = 0.5462, rLM = 0.8948, rCrust = 0.985;
+    float3 col;
+    if (r < rIC) {
+        // Inner core: solid iron, white-hot, faintly crystalline.
+        float xtal = valueNoise(float2(r * 90.0 + face * 7.0, theta * 30.0));
+        col = float3(1.0, 0.86, 0.62) * (1.45 + 0.6 * (1.0 - r / rIC)) * (0.92 + 0.08 * xtal);
+    } else if (r < rOC) {
+        // Outer core: liquid iron churning round the axis (the geodynamo).
+        float swirl = fbm(float2(theta * 4.0 + time * 0.10 + sin(r * 16.0 + time * 0.2) * 0.6, r * 18.0 - time * 0.05));
+        float swirl2 = fbm(float2(theta * 9.0 - time * 0.16, r * 30.0 + swirl * 3.0));
+        float heat = saturate(0.35 + 0.9 * swirl + 0.25 * swirl2 - 0.5 * (r - rIC) / (rOC - rIC));
+        col = mix(float3(0.80, 0.18, 0.02), float3(1.0, 0.60, 0.16), heat) * (0.42 + 0.55 * heat);
+    } else if (r < rLM) {
+        // Lower mantle: slow convection, hot plumes rising off the core, cool slabs sinking.
+        float depth = (rLM - r) / (rLM - rOC);
+        float cells = 0.5 + 0.5 * sin(theta * 6.0 + 1.8 * sin(r * 7.0 - time * 0.15) + 0.4);
+        float plume = fbm(float2(theta * 10.0, r * 9.0 - time * 0.06)) * cells;
+        float heat = saturate(0.25 + 0.55 * depth + 0.9 * (plume - 0.3));
+        col = mix(float3(0.30, 0.04, 0.02), float3(0.95, 0.36, 0.07), heat) * (0.18 + 0.42 * heat);
+    } else if (r < rCrust) {
+        // Upper mantle: cooler rock that still creeps.
+        float grain = fbm(float2(theta * 22.0, r * 60.0));
+        col = float3(0.55, 0.12, 0.04) * (0.12 + 0.12 * grain + 0.12 * (rCrust - r) / (rCrust - rLM));
+    } else {
+        // Crust: cold rock in strata.
+        float grain = fbm(float2(theta * 22.0, r * 60.0));
+        col = float3(0.10, 0.08, 0.065) * (0.75 + 0.25 * sin(r * 2400.0 + grain * 4.0));
+    }
+    // Fine dark seams between layers; the core-mantle boundary glows.
+    col *= 1.0 - 0.5 * exp(-pow((r - rIC) / 0.003, 2.0));
+    col *= 1.0 - 0.5 * exp(-pow((r - rLM) / 0.003, 2.0));
+    col *= 1.0 - 0.6 * exp(-pow((r - rCrust) / 0.002, 2.0));
+    col += float3(1.0, 0.5, 0.15) * exp(-pow((r - rOC) / 0.005, 2.0)) * 0.5;
+    return col;
+}
+
+fragment float4 cutface_fragment(CutOut in [[stage_in]], constant FrameUniforms& u [[buffer(0)]]) {
+    float r = min(length(in.local), 1.0);
+    float theta = atan2(in.local.y, max(in.local.x, 1e-5));
+    return float4(earthInterior(r, theta, u.time, in.face) * u.sceneFade, 1.0);
+}
+
 // Analytic atmosphere halo, drawn on the back faces of a slightly larger sphere.
 fragment float4 atmosphere_fragment(SphereOut in [[stage_in]],
                                     constant FrameUniforms& u [[buffer(0)]],
@@ -289,6 +400,8 @@ fragment float4 atmosphere_fragment(SphereOut in [[stage_in]],
     float t = -dot(C, D);
     float3 Q = C + D * t;
     float b = length(Q);
+    // Rays through the planet itself only get here through the Inside the Earth cut.
+    if (b < 1.0) discard_fragment();
     float h = saturate((b - 1.0) / (outerRadius - 1.0));
     float density = exp(-h * 5.0) * (1.0 - h) * (1.0 - h);
 
@@ -323,7 +436,7 @@ fragment float4 aurora_fragment(SphereOut in [[stage_in]],
                                 sampler gs [[sampler(0)]]) {
     float3 P = normalize(in.world);
     float lat = asin(clamp(P.y, -1.0, 1.0)) * 57.2957795;
-    if (abs(lat) < 38.0) discard_fragment();
+    if (abs(lat) < 38.0 || inCutaway(P, u.cutaway)) discard_fragment();
     float lon = atan2(P.x, P.z) * 57.2957795;
     float lonE = lon < 0.0 ? lon + 360.0 : lon;
     float2 guv = float2((lonE + 0.5) / 360.0, (lat + 90.5) / 181.0);
@@ -366,7 +479,7 @@ fragment float4 cloud_fragment(SphereOut in [[stage_in]],
     float2 cuv = float2(in.uv.x + u.cloudDrift, in.uv.y);
     float density = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv).r);
     float alpha = density * amount;
-    if (alpha < 0.004) discard_fragment();
+    if (alpha < 0.004 || inCutaway(in.world, u.cutaway)) discard_fragment();
 
     float3 N = normalize(in.world);
     float3 V = normalize(u.cameraPos - in.world);

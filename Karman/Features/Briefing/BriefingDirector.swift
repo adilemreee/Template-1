@@ -51,6 +51,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
         guard phase == .idle else { return }
         self.model = model
         model.stopSeismicWaves()
+        model.stopInsideEarth()
         model.stopYearReplay()
         model.stopReplay()
         model.resetForecast()

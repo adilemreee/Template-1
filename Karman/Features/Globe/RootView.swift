@@ -28,13 +28,14 @@ struct RootView: View {
                     .ignoresSafeArea()
             }
 
-            if model.settings.layers.plates || model.yearReplaying {
+            if (model.settings.layers.plates || model.yearReplaying) && !model.insideEarth {
                 PlateLabels()
                     .allowsHitTesting(false)
                     .transition(.opacity)
             }
 
-            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil && !model.ambientActive {
+            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil
+                && !model.ambientActive && !model.insideEarth {
                 HomeHUD()
                     .transition(.opacity)
             }
@@ -57,6 +58,11 @@ struct RootView: View {
 
             if model.ambientActive {
                 AmbientView()
+                    .transition(.opacity)
+            }
+
+            if model.insideEarth {
+                InsideEarthOverlay()
                     .transition(.opacity)
             }
 
@@ -118,6 +124,9 @@ struct RootView: View {
             case "ambient":
                 model.skipIntro()
                 model.startAmbient()
+            case "inside":
+                model.skipIntro()
+                model.startInsideEarth()
             case "weather":
                 model.skipIntro()
                 var l = model.settings.layers

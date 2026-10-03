@@ -110,6 +110,18 @@ struct AmbientGlobeIntent: AppIntent {
     }
 }
 
+struct InsideEarthIntent: AppIntent {
+    static let title: LocalizedStringResource = "Show Inside the Earth"
+    static let description = IntentDescription("Slices the globe open to show the crust, mantle and core.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://inside")!)
+        return .result()
+    }
+}
+
 struct KarmanShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: PlayBriefingIntent(),
@@ -139,5 +151,9 @@ struct KarmanShortcuts: AppShortcutsProvider {
         AppShortcut(intent: AmbientGlobeIntent(),
                     phrases: ["Start the ambient globe in \(.applicationName)", "Nightstand mode in \(.applicationName)"],
                     shortTitle: "Ambient Globe", systemImageName: "moon.zzz.fill")
+        // Apple allows ten app shortcuts; this is the tenth.
+        AppShortcut(intent: InsideEarthIntent(),
+                    phrases: ["Show inside the Earth in \(.applicationName)", "Slice the planet open in \(.applicationName)"],
+                    shortTitle: "Inside the Earth", systemImageName: "circle.circle.fill")
     }
 }

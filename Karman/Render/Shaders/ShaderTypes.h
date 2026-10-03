@@ -39,6 +39,7 @@ typedef struct {
     simd_float4 seismicCenter;    // xyz: epicentre (unit vector), w: strength of the wave display (0 = off)
     simd_float4 seismicFronts;    // x: P front, y: S front, z: surface-wave front (radians from the epicentre)
     float milkyWay;               // brightness of the Milky Way backdrop (0 hides it)
+    simd_float4 cutaway;          // xyz: centre of the wedge cut out of the planet (unit vector on the equator), w: its half-angle in radians (0 = whole)
 } FrameUniforms;
 
 typedef struct {

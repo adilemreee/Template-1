@@ -338,9 +338,13 @@ private struct ExperienceCarousel: View {
                                    title: "Point your phone at the sky", subtitle: String(localized: "Name every star, planet and constellation")) { model.openSkyLens(target: nil) }
                         .id(4)
                         .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
+                    ExperienceCard(icon: "circle.circle.fill", tint: Theme.sun, eyebrow: "INSIDE THE EARTH",
+                                   title: "Slice the planet open", subtitle: String(localized: "Crust, mantle and a core as hot as the Sun")) { model.startInsideEarth() }
+                        .id(5)
+                        .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
                     ExperienceCard(icon: "moon.zzz.fill", tint: Theme.auroraViolet, eyebrow: "NIGHTSTAND",
                                    title: "Ambient globe", subtitle: String(localized: "A turning planet and a clock, dimmed for the night")) { model.startAmbient() }
-                        .id(5)
+                        .id(6)
                         .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
                 }
                 .scrollTargetLayout()
@@ -351,7 +355,7 @@ private struct ExperienceCarousel: View {
             .scrollClipDisabled()
             .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 6) {
-                ForEach([0, 1, 2, 3, 4, 5].filter { $0 != 1 || model.canRideAlong }, id: \.self) { i in
+                ForEach([0, 1, 2, 3, 4, 5, 6].filter { $0 != 1 || model.canRideAlong }, id: \.self) { i in
                     Capsule()
                         .fill(Color.white.opacity((page ?? 0) == i ? 0.9 : 0.25))
                         .frame(width: (page ?? 0) == i ? 14 : 5, height: 5)

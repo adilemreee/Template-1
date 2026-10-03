@@ -330,7 +330,7 @@ final class AppModel {
     // MARK: Selection
 
     func handleTap(_ item: GlobeItem?) {
-        guard !briefingActive else { return }
+        guard !briefingActive, !insideEarth else { return }
         if let item, item == selection {
             focusOnSelection()
             return
@@ -345,6 +345,7 @@ final class AppModel {
 
     func startReplay() {
         if briefingActive { BriefingDirector.shared.stop() }
+        stopInsideEarth()
         if yearReplaying { stopYearReplay() }
         stopSeismicWaves()
         resetForecast()
@@ -371,6 +372,7 @@ final class AppModel {
 
     func startAmbient() {
         if briefingActive { BriefingDirector.shared.stop() }
+        stopInsideEarth()
         if ridingISS { stopRideAlong() }
         if replaying { stopReplay() }
         if yearReplaying { stopYearReplay() }
@@ -413,6 +415,7 @@ final class AppModel {
     func startYearReplay() {
         guard !yearReplaying, !yearLoading else { return }
         if briefingActive { BriefingDirector.shared.stop() }
+        stopInsideEarth()
         if ridingISS { stopRideAlong() }
         if replaying { stopReplay() }
         stopSeismicWaves()
@@ -452,6 +455,7 @@ final class AppModel {
 
     func startSeismicWaves(_ quake: Quake) {
         if briefingActive { BriefingDirector.shared.stop() }
+        stopInsideEarth()
         if ambientActive { stopAmbient() }
         if ridingISS { stopRideAlong() }
         if replaying { stopReplay() }
@@ -485,6 +489,40 @@ final class AppModel {
         withAnimation(.easeInOut(duration: 0.5)) { wavesQuake = nil }
     }
 
+    // MARK: Inside the Earth
+
+    /// True while the planet is sliced open to show its layers.
+    private(set) var insideEarth = false
+
+    func startInsideEarth() {
+        guard !insideEarth else { return }
+        if briefingActive { BriefingDirector.shared.stop() }
+        if ambientActive { stopAmbient() }
+        if ridingISS { stopRideAlong() }
+        if replaying { stopReplay() }
+        if yearReplaying { stopYearReplay() }
+        stopSeismicWaves()
+        resetForecast()
+        panel = nil
+        detailItem = nil
+        withAnimation(.easeInOut(duration: 0.4)) { selection = nil }
+        // Look in from a little above and west of the cut, so its eastern face opens toward you
+        // (a cut that is still closing reopens where it is).
+        let lon = globe.cutaway.map { Geo.normalizeLon($0.longitude - 10) } ?? globe.pose.lon
+        globe.autoRotate = false
+        globe.drift = (0, 0)
+        globe.fly(to: CameraPose(lat: 24, lon: lon, distance: 5.4), duration: 1.5)
+        globe.openCutaway(longitude: Geo.normalizeLon(lon + 10), delay: 1.1)
+        withAnimation(.easeInOut(duration: 0.5)) { insideEarth = true }
+    }
+
+    func stopInsideEarth() {
+        guard insideEarth else { return }
+        globe.closeCutaway()
+        globe.autoRotate = true
+        withAnimation(.easeInOut(duration: 0.5)) { insideEarth = false }
+    }
+
     // MARK: Ride along with the ISS
 
     var canRideAlong: Bool {
@@ -495,6 +533,7 @@ final class AppModel {
     func startRideAlong() {
         guard let iss = satellites.iss else { return }
         if briefingActive { BriefingDirector.shared.stop() }
+        stopInsideEarth()
         if replaying { stopReplay() }
         if yearReplaying { stopYearReplay() }
         stopSeismicWaves()

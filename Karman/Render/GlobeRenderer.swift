@@ -24,6 +24,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
     // Pipelines
     private var earthPSO: MTLRenderPipelineState!
+    /// The Inside the Earth variants: the surface with the wedge discarded, and the cut's faces.
+    private var earthCutPSO: MTLRenderPipelineState!
+    private var cutFacePSO: MTLRenderPipelineState!
     private var atmospherePSO: MTLRenderPipelineState!
     private var auroraPSO: MTLRenderPipelineState!
     private var cloudPSO: MTLRenderPipelineState!
@@ -236,6 +239,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         earthPSO = try pipeline("sphere_vertex", "earth_fragment", blend: .opaque)
+        earthCutPSO = try pipeline("sphere_vertex", "earth_cutaway_fragment", blend: .opaque)
+        cutFacePSO = try pipeline("cutface_vertex", "cutface_fragment", blend: .opaque)
         atmospherePSO = try pipeline("sphere_vertex", "atmosphere_fragment", blend: .additive)
         auroraPSO = try pipeline("sphere_vertex", "aurora_fragment", blend: .additive)
         cloudPSO = try pipeline("sphere_vertex", "cloud_fragment", blend: .premultiplied)
@@ -457,6 +462,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.cloudDrift = Float((date.timeIntervalSince1970 / 86400).truncatingRemainder(dividingBy: 1) * 0.012)
         u.starIntensity = starIntensity
         u.milkyWay = 0.10 * starIntensity
+        if let cut = controller.cutaway {
+            let lon = cut.longitude * .pi / 180
+            u.cutaway = SIMD4(Float(sin(lon)), 0, Float(cos(lon)), Float(GlobeController.Cutaway.halfAngle * controller.cutawayOpening(at: now)))
+        }
         u.markerFade = Float(controller.markerFade) * Float(controller.introStart == nil ? 1 : 0)
         u.atmosphereIntensity = 1
         u.reliefStrength = 1.0
@@ -502,8 +511,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         guard let drawable = view.currentDrawable, let cmd = queue.makeCommandBuffer() else { return }
 
         // ---- Wind particles step on the GPU before the scene that draws them
-        weatherLayer?.encodeWind(cmd, enabled: layers.wind && controller.introStart == nil && !controller.isYearReplay, now: now, date: date,
-                                 pose: pose, eye: eye, aspect: aspect)
+        weatherLayer?.encodeWind(cmd, enabled: layers.wind && controller.introStart == nil && !controller.isYearReplay && controller.cutaway == nil,
+                                 now: now, date: date, pose: pose, eye: eye, aspect: aspect)
 
         // ---- Scene pass
         let rp = MTLRenderPassDescriptor()
@@ -529,7 +538,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         if let mesh = earthMesh {
             var radius: Float = 1
-            enc.setRenderPipelineState(earthPSO)
+            enc.setRenderPipelineState(u.cutaway.w > 0 ? earthCutPSO : earthPSO)
             enc.setDepthStencilState(depthWrite)
             enc.setCullMode(.back)
             enc.setFrontFacing(.counterClockwise)
@@ -553,6 +562,15 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         enc.setCullMode(.none)
+        // Inside the Earth: the two faces of the cut (half-discs of 96 slivers each).
+        if u.cutaway.w > 0 {
+            enc.setRenderPipelineState(cutFacePSO)
+            enc.setDepthStencilState(depthWrite)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 96 * 3, instanceCount: 2)
+        }
+
         // The Milky Way fills the sky the Earth leaves uncovered (drawn after it so hidden pixels are skipped).
         if let milkyWayPSO, let milkyWayTex, u.milkyWay > 0 {
             enc.setRenderPipelineState(milkyWayPSO)
