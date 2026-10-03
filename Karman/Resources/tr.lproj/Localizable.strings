@@ -88,8 +88,10 @@
 "Drought" = "Kuraklık";
 "Dust & haze" = "Toz ve pus";
 "E" = "D";
+"EARTH · RIGHT NOW" = "DÜNYA · ŞU AN";
 "EARTHQUAKE" = "DEPREM";
 "EPICENTRE" = "MERKEZ ÜSSÜ";
+"Earth, right now — Kármán" = "Dünya, şu an — Kármán";
 "Earthquake" = "Deprem";
 "Earthquakes" = "Depremler";
 "Earthquakes near me" = "Yakınımdaki depremler";
@@ -194,6 +196,7 @@
 "S" = "G";
 "SATELLITE" = "UYDU";
 "SE" = "GD";
+"SHARE THIS MOMENT" = "BU ANI PAYLAŞ";
 "SOLAR WIND" = "GÜNEŞ RÜZGÂRI";
 "SOLAR X-RAYS · GOES" = "GÜNEŞ X-IŞINLARI · GOES";
 "SPACE STATION PASSES" = "UZAY İSTASYONU GEÇİŞLERİ";
@@ -202,7 +205,9 @@
 "Sea & lake ice" = "Deniz ve göl buzu";
 "See the planet from where you stand" = "Gezegeni bulunduğun yerden gör";
 "Settings" = "Ayarlar";
+"Share" = "Paylaş";
 "Share Kármán" = "Kármán'ı paylaş";
+"Share this moment" = "Bu anı paylaş";
 "Show Space Weather" = "Uzay Havasını Göster";
 "Show Tonight's Sky" = "Bu Gece Gökyüzünü Göster";
 "Show me on the globe" = "Beni kürede göster";
@@ -294,6 +299,7 @@
 "class" = "sınıf";
 "density" = "yoğunluk";
 "depth" = "derinlik";
+"earthquakes · 24h" = "deprem · 24 sa";
 "energy (TNT)" = "enerji (TNT)";
 "felt by %lld" = "%lld kişi hissetti";
 "felt reports" = "hissedildi bildirimi";

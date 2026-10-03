@@ -46,6 +46,14 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
+        .sheet(isPresented: Binding(get: { model.shareCard != nil }, set: { if !$0 { model.shareCard = nil } })) {
+            if let card = model.shareCard {
+                ShareMomentSheet(card: card)
+                    .presentationDetents([.large])
+                    .presentationCornerRadius(34)
+                    .presentationBackground(.clear)
+            }
+        }
         .sheet(item: $model.panel) { panel in
             PanelHost(panel: panel)
                 .presentationBackground(.clear)

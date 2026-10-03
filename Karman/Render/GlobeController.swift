@@ -72,6 +72,8 @@ final class GlobeController {
     var liveImageryTexture: SendableTexture? { didSet { liveImageryVersion &+= 1 } }
     private(set) var liveImageryVersion = 0
     var onTap: ((GlobeItem?) -> Void)?
+    /// Set to receive the next rendered frame (without the HUD) as an image.
+    var captureRequest: ((CGImage?) -> Void)?
 
     weak var satellites: SatelliteEngine?
 

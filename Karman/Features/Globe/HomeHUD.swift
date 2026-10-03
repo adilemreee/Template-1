@@ -82,6 +82,16 @@ private struct TopBar: View {
             .shadow(color: .black.opacity(0.65), radius: 8)
             Spacer()
             Button {
+                model.shareMoment()
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 15, weight: .semibold))
+                    .frame(width: 42, height: 42)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .accessibilityLabel(Text("Share this moment"))
+            Button {
                 model.panel = .settings
             } label: {
                 Image(systemName: "gearshape.fill")

@@ -51,6 +51,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save your Kármán postcards of the planet to your photo library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Kármán uses your approximate location to show what is happening near you: nearby earthquakes, your aurora chances and when the Space Station passes overhead.</string>
 	<key>UIBackgroundModes</key>

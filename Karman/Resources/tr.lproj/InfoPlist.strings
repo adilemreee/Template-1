@@ -1,2 +1,3 @@
 "CFBundleDisplayName" = "Kármán";
 "NSLocationWhenInUseUsageDescription" = "Kármán, yakınındaki depremleri, aurora görme şansını ve Uzay İstasyonu'nun tependen ne zaman geçeceğini göstermek için yaklaşık konumunu kullanır.";
+"NSPhotoLibraryAddUsageDescription" = "Kármán kartpostallarını fotoğraf arşivine kaydet.";

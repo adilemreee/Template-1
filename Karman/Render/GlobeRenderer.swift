@@ -579,6 +579,12 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             ce.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
             ce.endEncoding()
         }
+        if let capture = controller.captureRequest, !view.framebufferOnly {
+            controller.captureRequest = nil
+            encodeCapture(cmd, texture: drawable.texture, completion: capture)
+        } else if controller.captureRequest != nil {
+            view.framebufferOnly = false   // takes effect on the next drawable
+        }
         cmd.present(drawable)
         let semaphore = inFlight
         cmd.addCompletedHandler { _ in semaphore.signal() }
@@ -586,6 +592,34 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         committed = true
 
         DispatchQueue.main.async { [weak self] in self?.updateAnchor() }
+    }
+
+    /// Copies the finished frame into a CPU buffer and hands it back as a CGImage.
+    private func encodeCapture(_ cmd: MTLCommandBuffer, texture: MTLTexture, completion: @escaping (CGImage?) -> Void) {
+        let w = texture.width, h = texture.height, bpr = w * 4
+        guard let buffer = device.makeBuffer(length: bpr * h, options: .storageModeShared), let blit = cmd.makeBlitCommandEncoder() else {
+            completion(nil)
+            return
+        }
+        blit.copy(from: texture, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0), sourceSize: MTLSize(width: w, height: h, depth: 1),
+                  to: buffer, destinationOffset: 0, destinationBytesPerRow: bpr, destinationBytesPerImage: bpr * h)
+        blit.endEncoding()
+        let box = UncheckedCapture(buffer: buffer, completion: completion)
+        cmd.addCompletedHandler { _ in
+            let data = Data(bytes: box.buffer.contents(), count: bpr * h)
+            let image = CGDataProvider(data: data as CFData).flatMap {
+                CGImage(width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: bpr,
+                        space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                        bitmapInfo: CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Little.rawValue | CGImageAlphaInfo.noneSkipFirst.rawValue),
+                        provider: $0, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+            }
+            DispatchQueue.main.async { box.completion(image) }
+        }
+    }
+
+    private struct UncheckedCapture: @unchecked Sendable {
+        let buffer: MTLBuffer
+        let completion: (CGImage?) -> Void
     }
 
     /// 120 Hz while something moves, 60 Hz when the globe is just breathing.

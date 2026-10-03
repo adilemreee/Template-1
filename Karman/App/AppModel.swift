@@ -4,6 +4,7 @@ import Observation
 import QuartzCore
 import simd
 import SwiftUI
+import UIKit
 
 /// Root state shared by every screen.
 @MainActor
@@ -27,6 +28,7 @@ final class AppModel {
     }
     var panel: Panel?
     var detailItem: GlobeItem?
+    var shareCard: UIImage?
     var inspectorFrame: CGRect?
     /// DEBUG-only: drives the UI into a named state for App Store screenshots.
     var screenshotScene: String?

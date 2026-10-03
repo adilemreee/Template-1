@@ -26,6 +26,7 @@
 		4691C93212485ADCEF5C1448 /* KarmanWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A81A753BF768849E62F73F /* KarmanWidgetsBundle.swift */; };
 		4D0011511A4172D16EBFC155 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8A09FE9EF57DEDB31320F999 /* Assets.xcassets */; };
 		54D49FF1F70E665B55967A64 /* SkyTonightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4DBEE47944CF3B8CA9305A0 /* SkyTonightView.swift */; };
+		5699A8FEB286B2504CB2EE78 /* ShareMoment.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3707BC132C67D550C6F11C /* ShareMoment.swift */; };
 		5BCBAE225B332FF87A9E74EB /* GlobeCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B151DE37B477BF8BD07F35 /* GlobeCamera.swift */; };
 		5C045FC7B2FADE8BE723C00D /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70ED95826842647A5B8C6E /* Log.swift */; };
 		5C70EEDCA4DC917577144BA6 /* AuroraPolarMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0580720767CA68600CBFCD95 /* AuroraPolarMap.swift */; };
@@ -188,6 +189,7 @@
 		EA7D5E495D4825DD6E2546F3 /* HomeHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHUD.swift; sourceTree = "<group>"; };
 		EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KarmanApp.swift; sourceTree = "<group>"; };
 		EBE3EF8E55A96991EEA1DF41 /* AskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskService.swift; sourceTree = "<group>"; };
+		EF3707BC132C67D550C6F11C /* ShareMoment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMoment.swift; sourceTree = "<group>"; };
 		F15479F1AFC96D1700780E2E /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		F16DC2464B7939E03DF205CB /* InfoPlist.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F1CD099608C17D25644118ED /* GlobeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeController.swift; sourceTree = "<group>"; };
@@ -388,6 +390,7 @@
 				63C592EB75A6989A6F51D48F /* PulseView.swift */,
 				121CD7BAC7A23FEF05A275E4 /* RootView.swift */,
 				16E32F2E7F416E9FA5E301F2 /* SelectionCallout.swift */,
+				EF3707BC132C67D550C6F11C /* ShareMoment.swift */,
 			);
 			path = Globe;
 			sourceTree = "<group>";
@@ -710,6 +713,7 @@
 				1924418A80A7AE9FF872DFDC /* ScreenshotDirector.swift in Sources */,
 				8397501463C833508102CA32 /* SelectionCallout.swift in Sources */,
 				984EDFCEF579BF3D022F2814 /* SettingsView.swift in Sources */,
+				5699A8FEB286B2504CB2EE78 /* ShareMoment.swift in Sources */,
 				54D49FF1F70E665B55967A64 /* SkyTonightView.swift in Sources */,
 				12A3ADAFD336E674B48D9D28 /* Soundscape.swift in Sources */,
 				F774DD51E6BE1ADC40BF9541 /* SpaceWeatherView.swift in Sources */,

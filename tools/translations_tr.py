@@ -307,6 +307,12 @@ APP = {
         "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.",
     "…": "…",
     "MAKE IT YOURS": "SANA ÖZEL YAP",
+    "SHARE THIS MOMENT": "BU ANI PAYLAŞ",
+    "Share": "Paylaş",
+    "Share this moment": "Bu anı paylaş",
+    "Earth, right now — Kármán": "Dünya, şu an — Kármán",
+    "EARTH · RIGHT NOW": "DÜNYA · ŞU AN",
+    "earthquakes · 24h": "deprem · 24 sa",
     "Done": "Bitti",
     "Live globe": "Canlı küre",
     "%lld earthquakes in the last 24 hours, %lld storms, Kp %@": "Son 24 saatte %1$lld deprem, %2$lld fırtına, Kp %3$@",
@@ -378,6 +384,7 @@ WIDGETS = {
 }
 
 INFO_APP = {
+    "NSPhotoLibraryAddUsageDescription": "Kármán kartpostallarını fotoğraf arşivine kaydet.",
     "CFBundleDisplayName": "Kármán",
     "NSLocationWhenInUseUsageDescription": "Kármán, yakınındaki depremleri, aurora görme şansını ve Uzay İstasyonu'nun tependen ne zaman geçeceğini göstermek için yaklaşık konumunu kullanır.",
 }
