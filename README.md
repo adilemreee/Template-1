@@ -153,7 +153,7 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Fiyat: **9,99 USD** (ücretli; abonelik yok). Gerekçe `marketing/AppStore-Metadata.md` içinde.
 - [ ] Meta veriler (EN + TR, karakter sınırları kontrol edildi): `marketing/AppStore-Metadata.md`.
 - [ ] Ekran görüntüleri (6.9", 1320×2868): `marketing/appstore/en/` ve `marketing/appstore/tr/`.
-- [ ] Uygulama önizlemesi (886×1920, 28,6 sn): `marketing/app-preview/karman-preview-en-886x1920.mp4`.
+- [ ] Uygulama önizlemeleri (886×1920, 28,6 sn): `marketing/app-preview/karman-preview-en-886x1920.mp4` ve `karman-preview-tr-886x1920.mp4`.
 - [ ] Gizlilik politikası URL'si: `/privacy` sayfasını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages).
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
 - [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:8443/healthz` → `"ai": true, "push": true`.

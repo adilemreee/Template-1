@@ -1,6 +1,6 @@
 # Kármán — App Store metadata
 
-All fields are within App Store Connect limits (checked). Screenshots: `marketing/appstore/{en,tr}/` (1320×2868, 6.9" iPhone). App Preview: `marketing/app-preview/karman-preview-en-886x1920.mp4` (28.6 s, H.264 + AAC stereo).
+All fields are within App Store Connect limits (checked). Screenshots: `marketing/appstore/{en,tr}/` (1320×2868, 6.9" iPhone). App Previews: `marketing/app-preview/karman-preview-en-886x1920.mp4` and `karman-preview-tr-886x1920.mp4` (28.6 s each, 886×1920, H.264 + AAC stereo, generative soundtrack).
 
 ## Business setup
 
