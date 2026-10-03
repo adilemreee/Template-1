@@ -60,6 +60,13 @@ type Service struct {
 	// failedUntil short-circuits generation after a failure so users get the template
 	// instantly instead of waiting for the model to time out again.
 	failedUntil map[string]time.Time
+
+	// The digest Ask Kármán shares for a minute (see askDigest).
+	askDigestAt    time.Time
+	askDigestJSON  []byte
+	askDigestValue Digest
+	// local describes conditions at a coarse location for Ask (see SetLocal).
+	local func(lat, lon float64) string
 }
 
 func NewService(log *slog.Logger, apiKey, model string, store Store, digest func() Digest) *Service {
@@ -177,7 +184,8 @@ Write a "Planet Briefing": a 60-90 second narrated tour built only from the live
 Structure:
 - 5 to 7 scenes. Open with the single most consequential or striking item; close with something that leaves a sense of wonder (aurora, a launch, the Sun, an asteroid passing harmlessly).
 - Every scene must reference exactly one digest item through its refId and reuse that item's lat/lon. Use focus "overview" with refId "" only for an optional opening wide shot, at most once.
-- altitudeKm frames the shot: 2500-5000 for a single quake, fire or volcano; 5000-9000 for storms and launch sites; 12000-20000 for aurora ovals, the Sun and asteroids.
+- altitudeKm frames the shot: 2500-5000 for a single quake, fire or volcano; 5000-9000 for storms, weather extremes and launch sites; 12000-20000 for aurora ovals, the Sun and asteroids.
+- Weather extremes (focus "weather") come from a global forecast model: name the region from the coordinates, say "about", and use one at most, when it is genuinely striking.
 
 Narration is spoken aloud:
 - 25-45 words per scene, short sentences, written for the ear. Say "magnitude 6.2", never "M6.2". Spell out units on first use. No markdown, emojis, URLs, parentheses or lists.
@@ -197,7 +205,7 @@ var briefingSchema = map[string]any{
 			"items": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
-					"focus":      map[string]any{"type": "string", "enum": []string{"overview", "quake", "storm", "wildfire", "volcano", "ice", "aurora", "sun", "launch", "asteroid", "other"}},
+					"focus":      map[string]any{"type": "string", "enum": []string{"overview", "quake", "storm", "wildfire", "volcano", "ice", "aurora", "sun", "launch", "asteroid", "weather", "other"}},
 					"refId":      map[string]any{"type": "string"},
 					"lat":        map[string]any{"type": "number"},
 					"lon":        map[string]any{"type": "number"},
@@ -274,6 +282,7 @@ func validateBriefing(b *Briefing, d Digest) error {
 	add(d.Space.Items)
 	add(d.Launches)
 	add(d.Asteroids)
+	add(d.Weather)
 
 	var scenes []Scene
 	for _, sc := range b.Scenes {

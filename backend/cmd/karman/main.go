@@ -82,8 +82,19 @@ func main() {
 	defer st.Close()
 
 	aiSvc := ai.NewService(log, env("ANTHROPIC_API_KEY", ""), env("KARMAN_AI_MODEL", "claude-opus-5-5"), st, func() ai.Digest {
-		return ai.BuildDigest(hub.Current())
+		d := ai.BuildDigest(hub.Current())
+		if y, ok := hub.YearStats(); ok {
+			q := y.Strongest
+			d.Year = &ai.YearDigest{M45Plus: y.M45Plus, M6Plus: y.M6Plus, M7Plus: y.M7Plus,
+				Strongest: fmt.Sprintf("magnitude %.1f, %s, %s", q.Mag, q.Place, q.Time.Format("2 January 2006"))}
+		}
+		for _, x := range hub.WeatherExtremes(time.Now()) {
+			d.Weather = append(d.Weather, ai.DigestItem{ID: x.ID, Kind: "weather", Title: x.Kind + " place on Earth right now", Lat: x.Lat, Lon: x.Lon,
+				When: "now", Details: fmt.Sprintf("%s %.1f %s (NOAA GFS model, 1° grid)", x.Kind, x.Value, x.Unit)})
+		}
+		return d
 	})
+	aiSvc.SetLocal(func(lat, lon float64) string { return localConditions(hub, lat, lon) })
 	aiSvc.Prewarm(ctx, strings.Split(env("KARMAN_PREWARM_LANGS", "en,tr"), ",")...)
 
 	appID, _ := strconv.ParseInt(env("KARMAN_APPLE_APP_ID", "0"), 10, 64)
@@ -136,6 +147,26 @@ func main() {
 		log.Error("server", "err", err)
 		os.Exit(1)
 	}
+}
+
+// localConditions describes the weather and aurora odds near a coarse location for Ask Kármán.
+func localConditions(hub *feeds.Hub, lat, lon float64) string {
+	var parts []string
+	if w, ok := hub.WeatherAt(lat, lon, time.Now()); ok {
+		rain := "no rain"
+		if w.RainMMH >= 0.1 {
+			rain = fmt.Sprintf("rain %.1f mm per hour", w.RainMMH)
+		}
+		parts = append(parts, fmt.Sprintf("Local weather (NOAA GFS model, %s): %.0f °C, wind %.0f km/h from %.0f°, %s.",
+			w.Valid.Format("15:04 UTC"), w.TempC, w.WindSpeed*3.6, w.WindFrom, rain))
+	}
+	if snap := hub.Current(); snap.Aurora != nil {
+		if grid, err := base64.StdEncoding.DecodeString(snap.Aurora.Grid); err == nil && len(grid) == snap.Aurora.GridWidth*snap.Aurora.GridHeight {
+			parts = append(parts, fmt.Sprintf("Chance of seeing aurora from here right now, if the sky is dark and clear: %d%%.",
+				push.VisibleAuroraChance(grid, snap.Aurora.GridWidth, lat, lon)))
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 // genCert creates a self-signed ECDSA certificate for an IP/hostname and prints the SPKI pin

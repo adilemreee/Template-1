@@ -366,3 +366,67 @@ func sampleWeather(raw []byte, lat, lon float64, channel int) float64 {
 	bottom := at(x0, y1)*(1-fx) + at(x1, y1)*fx
 	return top*(1-fy) + bottom*fy
 }
+
+// WeatherExtreme is one of the planet's most striking model cells right now.
+type WeatherExtreme struct {
+	ID    string  `json:"id"`
+	Kind  string  `json:"kind"` // hottest, coldest, windiest, wettest
+	Lat   float64 `json:"lat"`
+	Lon   float64 `json:"lon"`
+	Value float64 `json:"value"`
+	Unit  string  `json:"unit"`
+}
+
+// WeatherExtremes scans the frame nearest t for the hottest, coldest, windiest and wettest cells.
+func (h *Hub) WeatherExtremes(t time.Time) []WeatherExtreme {
+	h.mu.RLock()
+	frames := h.weather
+	h.mu.RUnlock()
+	if len(frames) == 0 {
+		return nil
+	}
+	f := frames[0]
+	for _, c := range frames[1:] {
+		if math.Abs(c.Valid.Sub(t).Seconds()) < math.Abs(f.Valid.Sub(t).Seconds()) {
+			f = c
+		}
+	}
+	hot := WeatherExtreme{ID: "wx-hottest", Kind: "hottest", Unit: "°C", Value: math.Inf(-1)}
+	cold := WeatherExtreme{ID: "wx-coldest", Kind: "coldest", Unit: "°C", Value: math.Inf(1)}
+	windy := WeatherExtreme{ID: "wx-windiest", Kind: "windiest", Unit: "km/h"}
+	wet := WeatherExtreme{ID: "wx-wettest", Kind: "wettest", Unit: "mm/h"}
+	for row := 0; row < WeatherHeight; row++ {
+		lat := 90 - float64(row)
+		for col := 0; col < WeatherWidth; col++ {
+			i := (row*WeatherWidth + col) * 4
+			lon := float64(col)
+			if lon > 180 {
+				lon -= 360
+			}
+			temp := decodeTemp(float64(f.raw[i+2]))
+			if temp > hot.Value {
+				hot.Value, hot.Lat, hot.Lon = temp, lat, lon
+			}
+			if temp < cold.Value {
+				cold.Value, cold.Lat, cold.Lon = temp, lat, lon
+			}
+			if math.Abs(lat) < 85 { // winds at the pole rows are an artefact of the grid
+				speed := math.Hypot(decodeWind(float64(f.raw[i])), decodeWind(float64(f.raw[i+1]))) * 3.6
+				if speed > windy.Value {
+					windy.Value, windy.Lat, windy.Lon = speed, lat, lon
+				}
+			}
+			if rain := decodeRain(float64(f.raw[i+3])); rain > wet.Value {
+				wet.Value, wet.Lat, wet.Lon = rain, lat, lon
+			}
+		}
+	}
+	out := []WeatherExtreme{hot, cold, windy}
+	if wet.Value >= 1 {
+		out = append(out, wet)
+	}
+	for i := range out {
+		out[i].Value = round(out[i].Value, 1)
+	}
+	return out
+}

@@ -25,6 +25,18 @@ type Digest struct {
 	Space      SpaceDigest  `json:"spaceWeather"`
 	Launches   []DigestItem `json:"upcomingLaunches"`
 	Asteroids  []DigestItem `json:"asteroidCloseApproaches"`
+	Year       *YearDigest  `json:"earthquakesLastYear,omitempty"`
+	// Weather holds the most striking cells of the NOAA GFS model right now (hottest, coldest,
+	// windiest, wettest); the narrator names the region from the coordinates.
+	Weather []DigestItem `json:"weatherExtremesNow,omitempty"`
+}
+
+// YearDigest puts today's earthquakes in context: the last 365 days at M4.5 and above.
+type YearDigest struct {
+	M45Plus   int    `json:"magnitude4_5Plus"`
+	M6Plus    int    `json:"magnitude6Plus"`
+	M7Plus    int    `json:"magnitude7Plus"`
+	Strongest string `json:"strongest"`
 }
 
 type DigestItem struct {

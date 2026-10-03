@@ -415,7 +415,9 @@ func (s *Server) ask(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	}
-	err = s.AI.Ask(r.Context(), req, func(text string) error { return emit("delta", map[string]string{"text": text}) })
+	err = s.AI.Ask(r.Context(), req,
+		func(text string) error { return emit("delta", map[string]string{"text": text}) },
+		func(items []ai.GlobeFocus) error { return emit("focus", map[string]any{"items": items}) })
 	if err != nil {
 		s.Log.Warn("ask failed", "err", err)
 		s.Store.Refund(c.Subject)
@@ -440,6 +442,21 @@ func (s *Server) registerDevice(w http.ResponseWriter, r *http.Request) {
 		d.Lat, d.Lon = &lat, &lon
 	}
 	d.Prefs.QuakeRadiusKm = clamp(d.Prefs.QuakeRadiusKm, 50, 2000)
+	if len(d.Places) > maxPlaces {
+		d.Places = d.Places[:maxPlaces]
+	}
+	places := d.Places[:0]
+	for _, p := range d.Places {
+		name := strings.Join(strings.Fields(p.Name), " ")
+		if r := []rune(name); len(r) > 40 {
+			name = string(r[:40])
+		}
+		if name == "" || math.IsNaN(p.Lat) || math.IsNaN(p.Lon) || p.Lat < -90 || p.Lat > 90 || p.Lon < -180 || p.Lon > 180 {
+			continue
+		}
+		places = append(places, store.Place{Name: name, Lat: roundTo(p.Lat, 0.5), Lon: roundTo(p.Lon, 0.5)})
+	}
+	d.Places = places
 	if err := s.Store.UpsertDevice(d); err != nil {
 		writeError(w, http.StatusInternalServerError, "could not save")
 		return
@@ -451,6 +468,9 @@ func (s *Server) deleteDevice(w http.ResponseWriter, r *http.Request) {
 	_ = s.Store.DeleteDevice(r.PathValue("token"))
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
+
+// maxPlaces bounds how many watched places a device can register.
+const maxPlaces = 5
 
 func roundTo(v, step float64) float64 {
 	return float64(int(v/step+0.5*sign(v))) * step

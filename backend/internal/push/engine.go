@@ -121,18 +121,27 @@ func (e *Engine) checkQuakes(ctx context.Context) {
 				})
 				continue
 			}
-			if d.Lat == nil || d.Lon == nil || d.Prefs.QuakeMinMag <= 0 || q.Mag < d.Prefs.QuakeMinMag {
+			if d.Prefs.QuakeMinMag <= 0 || q.Mag < d.Prefs.QuakeMinMag {
 				continue
 			}
-			dist := haversineKm(*d.Lat, *d.Lon, q.Lat, q.Lon)
-			if dist > d.Prefs.QuakeRadiusKm {
-				continue
+			if d.Lat != nil && d.Lon != nil {
+				if dist := haversineKm(*d.Lat, *d.Lon, q.Lat, q.Lon); dist <= d.Prefs.QuakeRadiusKm {
+					e.send(ctx, d, "q:"+q.ID, Notification{
+						Title: fmt.Sprintf(t.nearTitle, q.Mag), Subtitle: fmt.Sprintf(t.nearSubtitle, dist), Body: q.Place,
+						ThreadID: "quakes", Critical: q.Mag >= 5.5, CollapseID: q.ID,
+						Data: map[string]any{"kind": "quake", "id": q.ID, "lat": q.Lat, "lon": q.Lon},
+					})
+					continue
+				}
 			}
-			e.send(ctx, d, "q:"+q.ID, Notification{
-				Title: fmt.Sprintf(t.nearTitle, q.Mag), Subtitle: fmt.Sprintf(t.nearSubtitle, dist), Body: q.Place,
-				ThreadID: "quakes", Critical: q.Mag >= 5.5, CollapseID: q.ID,
-				Data: map[string]any{"kind": "quake", "id": q.ID, "lat": q.Lat, "lon": q.Lon},
-			})
+			// The places the user watches: the closest one inside the alert radius speaks.
+			if p, dist, ok := nearestPlace(d.Places, q.Lat, q.Lon, d.Prefs.QuakeRadiusKm); ok {
+				e.send(ctx, d, "q:"+q.ID, Notification{
+					Title: fmt.Sprintf(t.placeTitle, p.Name, q.Mag), Subtitle: fmt.Sprintf(t.placeSubtitle, dist, p.Name), Body: q.Place,
+					ThreadID: "quakes", Critical: q.Mag >= 6, CollapseID: q.ID,
+					Data: map[string]any{"kind": "quake", "id": q.ID, "lat": q.Lat, "lon": q.Lon},
+				})
+			}
 		}
 	}
 }
@@ -252,6 +261,18 @@ func haversineKm(lat1, lon1, lat2, lon2 float64) float64 {
 	return 2 * r * math.Asin(math.Min(1, math.Sqrt(a)))
 }
 
+// nearestPlace finds the closest watched place within radiusKm of a point.
+func nearestPlace(places []store.Place, lat, lon, radiusKm float64) (store.Place, float64, bool) {
+	var best store.Place
+	bestDist := math.Inf(1)
+	for _, p := range places {
+		if d := haversineKm(p.Lat, p.Lon, lat, lon); d <= radiusKm && d < bestDist {
+			best, bestDist = p, d
+		}
+	}
+	return best, bestDist, !math.IsInf(bestDist, 1)
+}
+
 func sunAltitude(lat, lon, sunLat, sunLon float64) float64 {
 	ang := haversineKm(lat, lon, sunLat, sunLon) / 6371.0 * 180 / math.Pi
 	return 90 - ang
@@ -259,6 +280,7 @@ func sunAltitude(lat, lon, sunLat, sunLon float64) float64 {
 
 type copyText struct {
 	majorTitle, nearTitle, nearSubtitle string
+	placeTitle, placeSubtitle           string
 	stormTitle, stormBody               string
 	auroraTitle, auroraBody             string
 	launchTitle, launchBody             string
@@ -268,6 +290,7 @@ func strings(lang string) copyText {
 	if lang == "tr" {
 		return copyText{
 			majorTitle: "Büyük deprem · %.1f", nearTitle: "Yakınında deprem · %.1f", nearSubtitle: "Sana yaklaşık %.0f km uzaklıkta",
+			placeTitle: "%s yakınında deprem · %.1f", placeSubtitle: "Yaklaşık %.0f km uzakta: %s",
 			stormTitle: "G%d jeomanyetik fırtına", stormBody: "Güçlü bir uzay havası olayı sürüyor. Kutup ışıkları alışılmadık enlemlerde görülebilir.",
 			auroraTitle: "Bu gece kutup ışıkları olabilir", auroraBody: "Konumundan görülme ihtimali yaklaşık %%%d. Karanlık bir yere geç ve kuzeye bak.",
 			launchTitle: "%s 30 dakika içinde fırlatılıyor", launchBody: "%s · %s",
@@ -275,6 +298,7 @@ func strings(lang string) copyText {
 	}
 	return copyText{
 		majorTitle: "Major earthquake · M%.1f", nearTitle: "Earthquake near you · M%.1f", nearSubtitle: "About %.0f km from you",
+		placeTitle: "Earthquake near %s · M%.1f", placeSubtitle: "About %.0f km from %s",
 		stormTitle: "G%d geomagnetic storm", stormBody: "A strong space-weather event is underway. Aurora may reach unusual latitudes.",
 		auroraTitle: "Aurora possible tonight", auroraBody: "About %d%% chance from your location. Find a dark spot and look toward the pole.",
 		launchTitle: "%s lifts off in 30 minutes", launchBody: "%s · %s",

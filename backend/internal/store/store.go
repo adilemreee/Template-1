@@ -28,14 +28,23 @@ type DevicePrefs struct {
 }
 
 type Device struct {
-	Token     string      `json:"token"`
-	Env       string      `json:"env"` // "sandbox" | "production"
-	Lat       *float64    `json:"lat,omitempty"`
-	Lon       *float64    `json:"lon,omitempty"`
-	Language  string      `json:"language"`
-	TZOffset  int         `json:"tzOffsetMinutes"`
-	Prefs     DevicePrefs `json:"prefs"`
-	UpdatedAt time.Time   `json:"updatedAt"`
+	Token    string      `json:"token"`
+	Env      string      `json:"env"` // "sandbox" | "production"
+	Lat      *float64    `json:"lat,omitempty"`
+	Lon      *float64    `json:"lon,omitempty"`
+	Language string      `json:"language"`
+	TZOffset int         `json:"tzOffsetMinutes"`
+	Prefs    DevicePrefs `json:"prefs"`
+	// Places are the other locations the user watches (family, a second home), coarse like Lat/Lon.
+	Places    []Place   `json:"places,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// Place is a watched location, rounded to about 50 km.
+type Place struct {
+	Name string  `json:"name"`
+	Lat  float64 `json:"lat"`
+	Lon  float64 `json:"lon"`
 }
 
 func Open(dir string) (*Store, error) {
