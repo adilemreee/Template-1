@@ -65,12 +65,16 @@ struct SpaceWeatherView: View {
 
 // MARK: - Live Sun
 
+/// The live Sun from GOES-19 SUVI: the latest frame at once, then the last six hours as a
+/// time-lapse. Frames are added as light onto a deep-space backdrop, so the image's black
+/// surroundings vanish instead of showing as a pasted square.
 struct SunViewer: View {
     @State private var band = "304"
-    @State private var images: [String: Image] = [:]
+    @State private var stills: [String: UIImage] = [:]
+    @State private var loop: (band: String, frames: [UIImage], times: [Date])?
     @State private var observed: Date?
-    @State private var rotate = false
     @State private var failed = false
+    @State private var playing = true
 
     private let bands: [(id: String, name: LocalizedStringKey, tint: Color)] = [
         ("304", "Chromosphere", Color(red: 1, green: 0.45, blue: 0.2)),
@@ -81,32 +85,34 @@ struct SunViewer: View {
     var body: some View {
         Card(padding: 0) {
             ZStack(alignment: .bottomLeading) {
-                ZStack {
-                    RadialGradient(colors: [bandTint.opacity(0.35), .clear], center: .center, startRadius: 40, endRadius: 220)
-                    if let img = images[band] {
-                        img.resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaleEffect(1.18)
-                            .rotationEffect(.degrees(rotate ? 2 : -2))
-                            .mask(RadialGradient(colors: [.black, .black, .clear], center: .center, startRadius: 60, endRadius: 175))
-                            .transition(.opacity.combined(with: .scale(scale: 0.97)))
-                            .id(band)
-                    } else if failed {
-                        Image(systemName: "sun.max.fill").font(.system(size: 80)).foregroundStyle(bandTint)
-                    } else {
-                        ProgressView().tint(.white)
+                let frames = loop?.band == band ? loop?.frames ?? [] : []
+                SunStage(still: stills[band], frames: frames, times: loop?.band == band ? loop?.times ?? [] : [],
+                         tint: bandTint, playing: playing, failed: failed)
+                    .frame(height: 330)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        guard frames.count > 1 else { return }
+                        Haptics.shared.select()
+                        playing.toggle()
                     }
-                }
-                .frame(height: 300)
-                .frame(maxWidth: .infinity)
-                .clipped()
-                LinearGradient(colors: [.clear, .black.opacity(0.75)], startPoint: .center, endPoint: .bottom)
+                    .accessibilityLabel(Text("The Sun, live from GOES-19"))
+                    .accessibilityHint(frames.count > 1 ? Text("Double-tap to pause or play the six-hour time-lapse.") : Text(""))
+                LinearGradient(colors: [.clear, .black.opacity(0.8)], startPoint: .center, endPoint: .bottom)
+                    .allowsHitTesting(false)
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 6) {
                         PulsingDot(color: bandTint)
-                        Text("THE SUN · LIVE").eyebrow(.white)
+                        Text(frames.count > 1 ? "THE SUN · LAST 6 HOURS" : "THE SUN · LIVE").eyebrow(.white)
                         if let observed {
                             Text("· \(Fmt.relative(observed))").font(.system(size: 11)).foregroundStyle(Theme.textSecondary)
+                        }
+                        Spacer(minLength: 0)
+                        if frames.count > 1 {
+                            Image(systemName: playing ? "pause.fill" : "play.fill")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.white.opacity(0.7))
+                                .contentTransition(.symbolEffect(.replace))
                         }
                     }
                     HStack(spacing: 8) {
@@ -132,22 +138,125 @@ struct SunViewer: View {
             }
         }
         .task(id: band) { await load(band) }
-        .onAppear { withAnimation(.easeInOut(duration: 9).repeatForever()) { rotate = true } }
     }
 
     private var bandTint: Color { bands.first { $0.id == band }?.tint ?? .orange }
 
     private func load(_ b: String) async {
-        guard images[b] == nil else { return }
-        do {
-            let (data, obs) = try await APIClient.shared.sunImage(band: b)
-            if let ui = UIImage(data: data) {
-                withAnimation(.easeOut(duration: 0.6)) { images[b] = Image(uiImage: ui) }
-                observed = obs
+        failed = false
+        if stills[b] == nil {
+            do {
+                let (data, obs) = try await APIClient.shared.sunImage(band: b)
+                if let ui = await UIImage(data: data)?.byPreparingForDisplay() {
+                    withAnimation(.easeOut(duration: 0.6)) { stills[b] = ui }
+                    observed = obs
+                }
+            } catch {
+                failed = stills[b] == nil
             }
-        } catch {
-            failed = true
         }
+        guard loop?.band != b else { return }
+        // Only one band's time-lapse stays decoded at a time (about 25 MB).
+        guard let list = try? await APIClient.shared.sunFrames(band: b), list.frames.count > 1 else { return }
+        var images = [UIImage?](repeating: nil, count: list.frames.count)
+        await withTaskGroup(of: (Int, UIImage?).self) { group in
+            for (i, f) in list.frames.enumerated() {
+                group.addTask {
+                    guard let data = try? await APIClient.shared.sunFrame(band: b, id: f.id) else { return (i, nil) }
+                    return (i, await UIImage(data: data)?.byPreparingForDisplay())
+                }
+            }
+            for await (i, img) in group { images[i] = img }
+        }
+        guard !Task.isCancelled, band == b else { return }
+        let pairs = zip(images, list.frames).compactMap { img, f in img.map { ($0, f.t) } }
+        guard pairs.count > 5 else { return }
+        withAnimation(.easeInOut(duration: 0.8)) {
+            loop = (b, pairs.map(\.0), pairs.map(\.1))
+        }
+    }
+}
+
+/// Draws the Sun as light: additive frames over a deep-space backdrop with a bloom halo,
+/// crossfading through the time-lapse.
+private struct SunStage: View {
+    let still: UIImage?
+    let frames: [UIImage]
+    let times: [Date]
+    let tint: Color
+    let playing: Bool
+    let failed: Bool
+
+    private static let frameDuration = 0.16
+    private static let hold = 1.4
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30, paused: frames.count < 2 || !playing)) { ctx in
+            let (a, b, mix, index) = blend(at: ctx.date)
+            GeometryReader { geo in
+                let side = min(geo.size.width, geo.size.height) * 1.08
+                ZStack {
+                    LinearGradient(colors: [Color(red: 0.035, green: 0.03, blue: 0.045), Color(red: 0.01, green: 0.01, blue: 0.02)],
+                                   startPoint: .top, endPoint: .bottom)
+                    // Warm scattered light around (not on) the disc, which spans ~0.32 of the frame.
+                    RadialGradient(colors: [tint.opacity(0.22), tint.opacity(0.05), .clear],
+                                   center: .center, startRadius: side * 0.3, endRadius: side * 0.78)
+                    if a != nil {
+                        // Bloom: the same light, blurred wide.
+                        disc(a, b, mix, side: side)
+                            .blur(radius: side * 0.07)
+                            .opacity(0.42)
+                        disc(a, b, mix, side: side)
+                    } else if failed {
+                        Image(systemName: "sun.max.fill").font(.system(size: 80)).foregroundStyle(tint)
+                    } else {
+                        ProgressView().tint(.white)
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+                .drawingGroup()
+                .overlay(alignment: .topTrailing) {
+                    if let index, times.indices.contains(index) {
+                        Text(times[index], format: .dateTime.hour().minute())
+                            .font(.mono(11, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .background(Capsule().fill(.black.opacity(0.35)))
+                            .padding(12)
+                            .contentTransition(.numericText())
+                    }
+                }
+            }
+        }
+    }
+
+    private func disc(_ a: UIImage?, _ b: UIImage?, _ mix: Double, side: CGFloat) -> some View {
+        ZStack {
+            if let a {
+                Image(uiImage: a).resizable().interpolation(.high).scaledToFit()
+                    .opacity(1 - mix).blendMode(.plusLighter)
+            }
+            if let b, mix > 0 {
+                Image(uiImage: b).resizable().interpolation(.high).scaledToFit()
+                    .opacity(mix).blendMode(.plusLighter)
+            }
+        }
+        .frame(width: side, height: side)
+        // A soft circular edge keeps any faint sensor background from drawing a square.
+        .mask(RadialGradient(colors: [.white, .white, .clear], center: .center, startRadius: 0, endRadius: side * 0.5))
+    }
+
+    /// Frames to show at `date`: two neighbours and how far to crossfade, plus the index for the clock.
+    private func blend(at date: Date) -> (UIImage?, UIImage?, Double, Int?) {
+        guard frames.count > 1 else { return (still, nil, 0, nil) }
+        let run = Double(frames.count - 1) * Self.frameDuration
+        let t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: run + Self.hold)
+        guard t < run, playing else { return (frames.last, nil, 0, frames.count - 1) }
+        let pos = t / Self.frameDuration
+        let i = Int(pos)
+        let f = pos - Double(i)
+        let eased = f * f * (3 - 2 * f)
+        return (frames[i], frames[i + 1], eased, eased < 0.5 ? i : i + 1)
     }
 }
 

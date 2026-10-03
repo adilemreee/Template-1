@@ -50,6 +50,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/imagery/{day}", s.imagery)
 	mux.HandleFunc("GET /v1/briefing", s.briefing)
 	mux.HandleFunc("GET /v1/sun/{band}", s.sun)
+	mux.HandleFunc("GET /v1/sun/{band}/frames", s.sunFrames)
+	mux.HandleFunc("GET /v1/sun/{band}/frames/{id}", s.sunFrame)
 	mux.HandleFunc("POST /v1/auth/app-transaction", s.authAppTransaction)
 	mux.HandleFunc("GET /v1/ask/quota", s.askQuota)
 	mux.HandleFunc("POST /v1/ask", s.ask)
@@ -212,6 +214,33 @@ func (s *Server) sun(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Observed", taken.UTC().Format(time.RFC3339))
 	w.Header().Set("X-Attribution", "NOAA GOES-19 SUVI")
 	_, _ = w.Write(img)
+}
+
+// sunFrames lists the band's time-lapse (oldest first); frame images are immutable.
+func (s *Server) sunFrames(w http.ResponseWriter, r *http.Request) {
+	band := r.PathValue("band")
+	if !feeds.SunBands[band] {
+		writeError(w, http.StatusNotFound, "unknown band")
+		return
+	}
+	frames := s.Hub.SunFrames(band)
+	if len(frames) == 0 {
+		writeError(w, http.StatusServiceUnavailable, "time-lapse not ready")
+		return
+	}
+	w.Header().Set("Cache-Control", "public, max-age=300")
+	writeJSON(w, http.StatusOK, map[string]any{"band": band, "frames": frames, "attribution": "NOAA GOES-19 SUVI"})
+}
+
+func (s *Server) sunFrame(w http.ResponseWriter, r *http.Request) {
+	jpg, ok := s.Hub.SunFrameJPEG(r.PathValue("band"), strings.TrimSuffix(r.PathValue("id"), ".jpg"))
+	if !ok {
+		writeError(w, http.StatusNotFound, "frame not found")
+		return
+	}
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	_, _ = w.Write(jpg)
 }
 
 func (s *Server) briefing(w http.ResponseWriter, r *http.Request) {

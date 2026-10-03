@@ -141,6 +141,20 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
         return (data, http.value(forHTTPHeaderField: "X-Observed").flatMap(KarmanJSON.parseISO8601))
     }
 
+    struct SunFrames: Decodable {
+        struct Frame: Decodable { var id: String; var t: Date }
+        var frames: [Frame]
+    }
+
+    func sunFrames(band: String) async throws -> SunFrames {
+        let (data, _) = try await data(for: request("v1/sun/\(band)/frames"))
+        return try KarmanJSON.decoder().decode(SunFrames.self, from: data)
+    }
+
+    func sunFrame(band: String, id: String) async throws -> Data {
+        try await data(for: request("v1/sun/\(band)/frames/\(id)")).0
+    }
+
     func latestImagery() async throws -> (day: String, data: Data) {
         let (data, http) = try await data(for: request("v1/imagery/latest"))
         return (http.value(forHTTPHeaderField: "X-Imagery-Day") ?? "", data)

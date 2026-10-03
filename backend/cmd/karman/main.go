@@ -68,6 +68,7 @@ func main() {
 	hub := feeds.NewHub(log, filepath.Join(dataDir, "cache"), env("NASA_API_KEY", "DEMO_KEY"))
 	hub.Start(ctx)
 	hub.StartImagery(ctx)
+	hub.StartSunFrames(ctx)
 	go hub.PersistLoop(ctx)
 
 	st, err := store.Open(dataDir)
