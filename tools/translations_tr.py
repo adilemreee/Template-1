@@ -351,6 +351,9 @@ APP = {
 
 WIDGETS = {
     "LIFTOFF": "KALKIŞ",
+    "Planet Briefing": "Gezegen Brifingi",
+    "Play Planet Briefing": "Gezegen Brifingini Oynat",
+    "Play the narrated tour of what is happening on Earth right now.": "Dünya'da şu an olanların sesli turunu başlat.",
     "%@ · %@": "%1$@ · %2$@",
     "ISS PASS": "ISS GEÇİŞİ",
     "%@ → %@ · %lld°": "%1$@ → %2$@ · %3$lld°",

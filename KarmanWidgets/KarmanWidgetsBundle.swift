@@ -8,6 +8,7 @@ struct KarmanWidgetsBundle: WidgetBundle {
         AuroraWidget()
         StationWidget()
         LaunchLiveActivity()
+        BriefingControl()
     }
 }
 

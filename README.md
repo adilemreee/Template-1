@@ -43,6 +43,7 @@
 | **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım; fırlatma ertelenirse hatırlatıcı ve geri sayım kendini günceller. |
 | **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
 | **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü" — Eylem Düğmesi'ne de atanabilir. |
+| **Denetim Merkezi kontrolü** | "Gezegen Brifingi" kontrolü Denetim Merkezi'ne, Kilit Ekranı'na veya Eylem Düğmesi'ne eklenir; dokununca uygulama doğrudan brifingle açılır. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
 | **Gizlilik** | Hesap yok, reklam yok, takip yok. Hassas konum cihazdan çıkmaz (sunucuya ~50 km yuvarlanmış gider). |
 | **Dil** | İngilizce + tam Türkçe yerelleştirme. |
