@@ -14,6 +14,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     /// Devices with less memory (iPhone 11–13) get 2× MSAA; everything newer gets 4×.
     static let isHighEnd = ProcessInfo.processInfo.physicalMemory >= 5_500_000_000
     static let sampleCount = isHighEnd ? 4 : 2
+    /// The cloud layer's shell (kCloudShell in Globe.metal): high enough to cast shadows close up.
+    static let cloudShellRadius: Float = 1.006
 
     let device: MTLDevice
     let queue: MTLCommandQueue
@@ -24,7 +26,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var earthPSO: MTLRenderPipelineState!
     private var atmospherePSO: MTLRenderPipelineState!
     private var auroraPSO: MTLRenderPipelineState!
+    private var cloudPSO: MTLRenderPipelineState!
     private var starPSO: MTLRenderPipelineState!
+    /// Optional like the wind: without it the sky is simply stars on black.
+    private var milkyWayPSO: MTLRenderPipelineState?
     private var sunPSO: MTLRenderPipelineState!
     private var ringPSO: MTLRenderPipelineState!
     private var iconPSO: MTLRenderPipelineState!
@@ -43,7 +48,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var depthOff: MTLDepthStencilState!
     private var surfaceSampler: MTLSamplerState!
     private var clampSampler: MTLSamplerState!
-    private var auroraSampler: MTLSamplerState!
+    /// Wraps around in longitude and clamps at the poles (aurora oval, Milky Way panorama).
+    private var wrapSampler: MTLSamplerState!
     private var detailSampler: MTLSamplerState!
     /// Regional NASA GIBS imagery for close-ups (nil if the device can't spare the memory).
     private var detail: DetailImagery?
@@ -70,6 +76,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var flatNormalTex: MTLTexture?
     private var iconAtlas: MTLTexture?
     private var auroraTex: MTLTexture?
+    private var milkyWayTex: MTLTexture?
     private(set) var texturesReady = false
 
     // Render targets
@@ -231,7 +238,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         earthPSO = try pipeline("sphere_vertex", "earth_fragment", blend: .opaque)
         atmospherePSO = try pipeline("sphere_vertex", "atmosphere_fragment", blend: .additive)
         auroraPSO = try pipeline("sphere_vertex", "aurora_fragment", blend: .additive)
+        cloudPSO = try pipeline("sphere_vertex", "cloud_fragment", blend: .premultiplied)
         starPSO = try pipeline("star_vertex", "star_fragment", blend: .additive)
+        milkyWayPSO = try? pipeline("milkyway_vertex", "milkyway_fragment", blend: .additive)
         sunPSO = try pipeline("sun_vertex", "sun_fragment", blend: .additive)
         ringPSO = try pipeline("ring_vertex", "ring_fragment", blend: .additive)
         iconPSO = try pipeline("icon_vertex", "icon_fragment", blend: .premultiplied)
@@ -278,7 +287,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         a.magFilter = .linear
         a.sAddressMode = .repeat
         a.tAddressMode = .clampToEdge
-        auroraSampler = device.makeSamplerState(descriptor: a)
+        wrapSampler = device.makeSamplerState(descriptor: a)
         let d = MTLSamplerDescriptor()
         d.minFilter = .linear
         d.magFilter = .linear
@@ -309,9 +318,13 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             let normal = url("earth_normal.jpg").flatMap { MetalResources.loadTexture(url: $0, kind: .color, device: device, queue: queue) }
             let maxDay = ProcessInfo.processInfo.physicalMemory > 5_000_000_000 ? 8192 : 4096
             let day = url("earth_day.jpg").flatMap { MetalResources.loadTexture(url: $0, kind: .colorSRGB, device: device, queue: queue, maxWidth: maxDay) }
+            // Always magnified on screen, so no mipmaps: 16 MB at 4096 wide, 4 MB on smaller devices.
+            let milkyWay = url("milkyway.jpg").flatMap {
+                MetalResources.loadTexture(url: $0, kind: .colorSRGB, device: device, queue: queue, maxWidth: maxDay / 2, mipmapped: false)
+            }
             let atlas = await MainActor.run { MetalResources.iconAtlas(device: device, queue: queue).map(SendableTexture.init) }
             let pack = (day.map(SendableTexture.init), small.map(SendableTexture.init), clouds.map(SendableTexture.init),
-                        water.map(SendableTexture.init), normal.map(SendableTexture.init), atlas)
+                        water.map(SendableTexture.init), normal.map(SendableTexture.init), atlas, milkyWay.map(SendableTexture.init))
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.dayTex = pack.0?.texture
@@ -320,6 +333,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
                 self.waterTex = pack.3?.texture
                 self.normalTex = pack.4?.texture
                 self.iconAtlas = pack.5?.texture
+                self.milkyWayTex = pack.6?.texture
                 self.texturesReady = self.dayTex != nil
             }
         }
@@ -442,6 +456,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.pixelScale = Float(view.contentScaleFactor)
         u.cloudDrift = Float((date.timeIntervalSince1970 / 86400).truncatingRemainder(dividingBy: 1) * 0.012)
         u.starIntensity = starIntensity
+        u.milkyWay = 0.10 * starIntensity
         u.markerFade = Float(controller.markerFade) * Float(controller.introStart == nil ? 1 : 0)
         u.atmosphereIntensity = 1
         u.reliefStrength = 1.0
@@ -538,6 +553,36 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         enc.setCullMode(.none)
+        // The Milky Way fills the sky the Earth leaves uncovered (drawn after it so hidden pixels are skipped).
+        if let milkyWayPSO, let milkyWayTex, u.milkyWay > 0 {
+            enc.setRenderPipelineState(milkyWayPSO)
+            enc.setDepthStencilState(depthTest)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentTexture(milkyWayTex, index: 0)
+            enc.setFragmentSamplerState(wrapSampler, index: 0)
+            enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+        }
+
+        // Clouds on their own shell above the ground (wind, storms and markers still draw over them).
+        if let shell = shellMesh, u.cloudOpacity > 0 {
+            enc.setCullMode(.back)
+            var radius = Self.cloudShellRadius
+            enc.setRenderPipelineState(cloudPSO)
+            enc.setDepthStencilState(depthTest)
+            enc.setVertexBuffer(shell.vertices, offset: 0, index: 0)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 1)
+            enc.setVertexBytes(&radius, length: 4, index: 2)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentBytes(&radius, length: 4, index: 1)
+            enc.setFragmentTexture(cloudTex ?? blackTex, index: 0)
+            enc.setFragmentTexture(detail?.mask ?? blackTex, index: 1)
+            enc.setFragmentSamplerState(surfaceSampler, index: 0)
+            enc.setFragmentSamplerState(detailSampler, index: 1)
+            enc.drawIndexedPrimitives(type: .triangle, indexCount: shell.indexCount, indexType: .uint32, indexBuffer: shell.indices, indexBufferOffset: 0)
+        }
+
+        enc.setCullMode(.none)
         enc.setRenderPipelineState(sunPSO)
         enc.setDepthStencilState(depthTest)
         enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
@@ -573,7 +618,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
                 enc.setRenderPipelineState(auroraPSO)
                 enc.setCullMode(.back)
                 enc.setFragmentTexture(auroraTex, index: 0)
-                enc.setFragmentSamplerState(auroraSampler, index: 0)
+                enc.setFragmentSamplerState(wrapSampler, index: 0)
                 for (radius, layer) in [(Float(1.014), Float(0)), (Float(1.024), Float(1))] {
                     var r = radius, l = layer
                     enc.setVertexBytes(&r, length: 4, index: 2)

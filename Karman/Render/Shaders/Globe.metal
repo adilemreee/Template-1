@@ -42,6 +42,35 @@ static float3 tangentEast(float3 n) {
     return len < 1e-4 ? float3(1, 0, 0) : e / len;
 }
 
+static float2 sphereUV(float3 p) {
+    return float2(atan2(p.x, p.z) / (2.0 * M_PI_F) + 0.5, 0.5 - asin(clamp(p.y, -1.0, 1.0)) / M_PI_F);
+}
+
+// The cloud layer floats on its own shell (GlobeRenderer.cloudShellRadius), well above real cloud
+// tops so that close up it casts visible shadows and stays sunlit after the ground has gone dark.
+constant float kCloudShell = 1.006;
+
+/// How much of the regional 500 m imagery covers this texture coordinate (0 outside it), and where.
+static float detailCoverage(float2 uv, constant FrameUniforms& u, texture2d<float> detailMask, sampler cs, thread float2& duv) {
+    duv = float2(-1.0);
+    if (u.detailBlend <= 0.001) return 0.0;
+    float lonDeg = uv.x * 360.0 - 180.0;
+    float latDeg = 90.0 - uv.y * 180.0;
+    float dLon = lonDeg - u.detailBounds.x;
+    dLon -= 360.0 * floor(dLon / 360.0);
+    duv = float2(dLon / u.detailBounds.z, (u.detailBounds.y - latDeg) / u.detailBounds.w);
+    if (duv.x < 0.0 || duv.x > 1.0 || duv.y < 0.0 || duv.y > 1.0) return 0.0;
+    float2 edge = min(duv, 1.0 - duv);
+    return detailMask.sample(cs, duv).r * smoothstep(0.0, 0.025, min(edge.x, edge.y)) * u.detailBlend;
+}
+
+/// The limb's blue in-scatter, shared by the ground and the cloud tops.
+static float3 limbHaze(float3 color, float NdotV, float NdotL) {
+    float rim = pow(1.0 - NdotV, 2.4);
+    float3 haze = float3(0.30, 0.56, 1.0) * saturate(NdotL + 0.25) * 1.35;
+    return mix(color, haze, rim * 0.75 * smoothstep(-0.35, 0.25, NdotL));
+}
+
 // ---------------------------------------------------------------------------------------
 // Live weather (NOAA GFS) — frames packed by the Kármán API as RGBA8: eastward and northward
 // 10 m wind in 0.5 m/s steps around 128, 2 m temperature in 0.5 °C steps from −80 °C, and
@@ -140,20 +169,9 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
 
     // Regional 500 m imagery streamed for the area under the camera (NASA GIBS). It carries
     // its own shaded relief, so the coarse relief map and static clouds step back where it shows.
-    float detailW = 0.0;
-    float4 detail = float4(0.0);
-    if (u.detailBlend > 0.001) {
-        float lonDeg = uv.x * 360.0 - 180.0;
-        float latDeg = 90.0 - uv.y * 180.0;
-        float dLon = lonDeg - u.detailBounds.x;
-        dLon -= 360.0 * floor(dLon / 360.0);
-        float2 duv = float2(dLon / u.detailBounds.z, (u.detailBounds.y - latDeg) / u.detailBounds.w);
-        if (duv.x >= 0.0 && duv.x <= 1.0 && duv.y >= 0.0 && duv.y <= 1.0) {
-            float2 edge = min(duv, 1.0 - duv);
-            detailW = detailMask.sample(cs, duv).r * smoothstep(0.0, 0.025, min(edge.x, edge.y)) * u.detailBlend;
-            detail = detailTex.sample(cs, duv);
-        }
-    }
+    float2 duv;
+    float detailW = detailCoverage(uv, u, detailMask, cs, duv);
+    float4 detail = detailW > 0.0 ? detailTex.sample(cs, duv) : float4(0.0);
 
     // Relief from the GEBCO-derived normal map (tangent space: x east, y north, z up).
     float3 east = tangentEast(N);
@@ -176,31 +194,32 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     }
     albedo = pow(max(albedo, 0.0), float3(1.06)) * 1.04;
 
-    float2 cuv = float2(uv.x + u.cloudDrift, uv.y);
+    // Cloud shadows: follow the sunbeam through this point up to the cloud shell (cloud_fragment
+    // draws the clouds themselves), so a low Sun throws long shadows across the ground.
     float cloudAmount = u.cloudOpacity * (1.0 - u.liveImagery * 0.9) * (1.0 - 0.75 * detailW);
-    float cloud = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv).r) * cloudAmount;
-    float2 shadowShift = float2(dot(L, east), -dot(L, north)) * 0.0022;
-    float shadow = smoothstep(0.2, 0.9, cloudTex.sample(s, cuv + shadowShift).r) * cloudAmount;
+    float shadow = 0.0;
+    if (cloudAmount > 0.001 && NdotL > -0.05) {
+        float reach = -NdotL + sqrt(max(NdotL * NdotL - 1.0 + kCloudShell * kCloudShell, 0.0));
+        float2 suv = sphereUV(normalize(N + L * reach));
+        // The ground's own derivatives pick the mip level (suv jumps at the antimeridian).
+        float cover = cloudTex.sample(s, float2(suv.x + u.cloudDrift, suv.y), gradient2d(dfdx(uv), dfdy(uv))).r;
+        shadow = smoothstep(0.2, 0.9, cover) * cloudAmount * smoothstep(-0.05, 0.1, NdotL);
+    }
 
     float water = waterTex.sample(s, uv).r;
 
     float3 sunColor = mix(float3(1.0, 0.62, 0.38), float3(1.0, 0.97, 0.93), smoothstep(-0.02, 0.22, NdotL));
-    float3 surface = albedo * (1.0 - 0.5 * shadow);
+    float3 surface = albedo * (1.0 - 0.6 * shadow);
     float3 lit = surface * sunColor * relief * 2.3 * day;
 
     // Ocean glint and sheen.
     float3 H = normalize(L + V);
     float NdotH = saturate(dot(N, H));
     float glint = pow(NdotH, 1400.0) * 3.2 + pow(NdotH, 160.0) * 0.16 + pow(NdotH, 16.0) * 0.035;
-    lit += sunColor * glint * water * day * (1.0 - cloud);
+    lit += sunColor * glint * water * day;
+    float3 color = lit;
 
-    // Clouds with wrap lighting; faint on the night side.
-    float cloudLight = saturate(NdotL * 0.85 + 0.15);
-    float3 cloudColor = sunColor * cloudLight * 1.75 * smoothstep(-0.3, 0.15, NdotL);
-    float3 color = mix(lit, cloudColor, cloud);
-    color += float3(0.004, 0.006, 0.010) * cloud * (1.0 - day);
-
-    // City lights, softened by clouds, with a slow shimmer.
+    // City lights with a slow shimmer (the cloud shell dims them where it is thick).
     float lights = lightsTex.sample(s, uv).r;
     lights = mix(lights, detail.a, detailW * u.detailNight);
     float night = 1.0 - smoothstep(-0.20, 0.05, NdotL);
@@ -208,11 +227,11 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     float3 sodium = mix(float3(1.0, 0.52, 0.20), float3(1.0, 0.86, 0.64), smoothstep(0.35, 1.0, lights));
     // Sharp 500 m lights saturate whole metro areas, so they get a gentler gain than the soft base.
     float lightsGain = mix(2.4, 1.05, detailW * u.detailNight);
-    color += sodium * lights * lights * lightsGain * night * (1.0 - cloud * 0.8) * u.cityLights * shimmer;
+    color += sodium * lights * lights * lightsGain * night * u.cityLights * shimmer;
     // Faint moonlit ambient so continents stay readable on the night side.
-    color += albedo * float3(0.30, 0.42, 0.65) * 0.045 * night * (1.0 - cloud * 0.5);
+    color += albedo * float3(0.30, 0.42, 0.65) * 0.045 * night;
 
-    // Live weather maps over the surface and clouds: 2 m temperature with isotherms every
+    // Live weather maps over the surface (the cloud shell thins out above them): 2 m temperature with isotherms every
     // 10 °C (the freezing line brighter), and precipitation in radar colours.
     if (u.weatherSlices > 0.5 && (u.temperatureOverlay > 0.001 || u.rainOverlay > 0.001)) {
         float4 wx = sampleWeather(weatherTex, ws, weatherUV(90.0 - uv.y * 180.0, uv.x * 360.0 - 180.0), u.weatherSlice, u.weatherSlices);
@@ -255,10 +274,7 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     color += float3(1.0, 0.40, 0.14) * twilight * 0.03;
 
     // Atmospheric in-scatter toward the limb.
-    float NdotV = saturate(dot(N, V));
-    float rim = pow(1.0 - NdotV, 2.4);
-    float3 haze = float3(0.30, 0.56, 1.0) * saturate(NdotL + 0.25) * 1.35;
-    color = mix(color, haze, rim * 0.75 * smoothstep(-0.35, 0.25, NdotL));
+    color = limbHaze(color, saturate(dot(N, V)), NdotL);
     color += float3(0.008, 0.022, 0.055) * day;
 
     return float4(color * u.sceneFade, 1.0);
@@ -333,6 +349,61 @@ fragment float4 aurora_fragment(SphereOut in [[stage_in]],
     return float4(col * intensity * u.sceneFade, 0.0);
 }
 
+// Clouds on their own shell: lit by the Sun with relief from the cloud map's slopes, turning gold
+// and then rose as the Sun sets beneath them, still glowing after the ground below has gone dark.
+fragment float4 cloud_fragment(SphereOut in [[stage_in]],
+                               constant FrameUniforms& u [[buffer(0)]],
+                               constant float& shellRadius [[buffer(1)]],
+                               texture2d<float> cloudTex [[texture(0)]],
+                               texture2d<float> detailMask [[texture(1)]],
+                               sampler s [[sampler(0)]],
+                               sampler cs [[sampler(1)]]) {
+    float2 duv;
+    float detailW = detailCoverage(in.uv, u, detailMask, cs, duv);
+    float amount = u.cloudOpacity * (1.0 - u.liveImagery * 0.9) * (1.0 - 0.75 * detailW);
+    // Step aside for the weather maps and seismic waves painted on the ground beneath.
+    amount *= (1.0 - 0.6 * max(u.temperatureOverlay, u.rainOverlay)) * (1.0 - 0.5 * u.seismicCenter.w);
+    float2 cuv = float2(in.uv.x + u.cloudDrift, in.uv.y);
+    float density = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv).r);
+    float alpha = density * amount;
+    if (alpha < 0.004) discard_fragment();
+
+    float3 N = normalize(in.world);
+    float3 V = normalize(u.cameraPos - in.world);
+    float3 L = normalize(u.sunDir);
+    float NdotL = dot(N, L);
+    float NdotV = saturate(dot(N, V));
+
+    // Relief: thick cloud bulges up, so the map's slopes tilt the normal. The step follows the
+    // footprint of a pixel, keeping the relief alive when the texture is minified.
+    float texel = 1.0 / float(cloudTex.get_width());
+    float footprint = clamp(length(fwidth(in.world)) / (2.0 * M_PI_F * texel), 1.0, 8.0);
+    float2 o = float2(texel, 1.0 / float(cloudTex.get_height())) * 2.5 * footprint;
+    float gE = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(o.x, 0)).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(o.x, 0)).r);
+    float gN = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(0, o.y)).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(0, o.y)).r);
+    float3 east = tangentEast(N);
+    float3 north = cross(N, east);
+    float3 Nc = normalize(N - (east * gE + north * gN) * 1.2);
+
+    // Sunlight at the cloud tops: white by day, gold then rose at sunset, gone in Earth's shadow.
+    float shadowEdge = -sqrt(max(1.0 - 1.0 / (shellRadius * shellRadius), 0.0));
+    float sunlit = smoothstep(shadowEdge - 0.004, shadowEdge + 0.035, NdotL);
+    float3 sunColor = mix(float3(1.0, 0.97, 0.93), float3(1.0, 0.66, 0.38), 1.0 - smoothstep(-0.02, 0.32, NdotL));
+    sunColor = mix(sunColor, float3(0.95, 0.36, 0.30), 1.0 - smoothstep(shadowEdge + 0.01, 0.04, NdotL));
+    float lambert = saturate(dot(Nc, L) * 0.65 + 0.35);
+    float3 color = sunColor * lambert * 1.75 * sunlit * (0.75 + 0.25 * density);
+    color += float3(0.03, 0.048, 0.078) * smoothstep(-0.1, 0.3, NdotL);     // blue skylight
+    color += float3(0.006, 0.009, 0.016);                                    // moonlit at night
+    color = limbHaze(color, NdotV, NdotL);
+
+    // Seen obliquely the layer is thicker; fade at the shell's own silhouette so it never rings
+    // the planet. At night, city glow bleeds through.
+    alpha = 1.0 - pow(1.0 - min(alpha, 0.999), min(1.0 / max(NdotV, 0.05), 3.5));
+    alpha *= smoothstep(0.0, 0.12, NdotV) * mix(0.8, 1.0, smoothstep(-0.2, 0.05, NdotL));
+    alpha *= u.sceneFade;
+    return float4(color * alpha, alpha);
+}
+
 // ---------------------------------------------------------------------------------------
 // Stars & Sun
 // ---------------------------------------------------------------------------------------
@@ -403,6 +474,47 @@ fragment float4 sun_fragment(SunOut in [[stage_in]], constant FrameUniforms& u [
     float rays = pow(abs(cos(ang * 4.0 + u.time * 0.05)), 60.0) * exp(-r * 5.0) * 0.5;
     float3 col = float3(1.0, 0.93, 0.82) * (disc + (glow + rays) * edge);
     return float4(col * u.sceneFade, 0.0);
+}
+
+// ---------------------------------------------------------------------------------------
+// Milky Way backdrop: a panorama in galactic coordinates baked by tools/build_milkyway.py
+// (l = 0 in the middle, increasing to the left; b = +45° at the top edge, −45° at the bottom).
+// ---------------------------------------------------------------------------------------
+
+// J2000 equatorial → galactic (the IAU definition as tabulated for Hipparcos), by columns.
+constant float3x3 kEquatorialToGalactic = float3x3(
+    float3(-0.0548755604, 0.4941094279, -0.8676661490),
+    float3(-0.8734370902, -0.4448296300, -0.1980763734),
+    float3(-0.4838350155, 0.7469822445, 0.4559837762));
+
+struct SkyOut {
+    float4 position [[position]];
+    float3 ray;    // render-frame view ray; linear across the screen, so it interpolates exactly
+};
+
+vertex SkyOut milkyway_vertex(uint vid [[vertex_id]], constant FrameUniforms& u [[buffer(0)]]) {
+    float2 ndc = float2((vid << 1) & 2, vid & 2) * 2.0 - 1.0;
+    float3 forward = cross(u.cameraUp, u.cameraRight);
+    SkyOut o;
+    // Just in front of the far plane like the stars: the depth test keeps it behind everything.
+    o.position = float4(ndc, 0.99999, 1.0);
+    o.ray = forward + u.cameraRight * (ndc.x / u.proj[0][0]) + u.cameraUp * (ndc.y / u.proj[1][1]);
+    return o;
+}
+
+fragment float4 milkyway_fragment(SkyOut in [[stage_in]],
+                                  constant FrameUniforms& u [[buffer(0)]],
+                                  texture2d<float> sky [[texture(0)]],
+                                  sampler s [[sampler(0)]]) {
+    float3 d = normalize(in.ray);
+    // starRotation's columns are the equatorial axes seen in the render frame.
+    float3 eq = float3(dot(u.starRotation[0].xyz, d), dot(u.starRotation[1].xyz, d), dot(u.starRotation[2].xyz, d));
+    float3 g = kEquatorialToGalactic * eq;
+    float lon = atan2(g.y, g.x);
+    float lat = asin(clamp(g.z, -1.0, 1.0));
+    float2 uv = float2(0.5 - lon * (0.5 / M_PI_F), 0.5 - lat * (2.0 / M_PI_F));
+    float3 c = sky.sample(s, uv, level(0.0)).rgb;
+    return float4(c * u.milkyWay * u.sceneFade, 0.0);
 }
 
 // ---------------------------------------------------------------------------------------

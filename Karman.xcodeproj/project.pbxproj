@@ -50,6 +50,7 @@
 		661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */; };
 		6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F669B24228503A0F50BEFB5C /* BriefingDirector.swift */; };
 		6A74DF09EAC19CB089BBFE90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B37297F3AA3EFD93526695C /* Assets.xcassets */; };
+		6C0F912FB67E87DB6576FA38 /* milkyway.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 82B6CFD3E8CDC06CF6579558 /* milkyway.jpg */; };
 		6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 15550FFB007FB9B1657980D0 /* earth_clouds.jpg */; };
 		6ECAAD250AD053865048E2BC /* DirectFeeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC97298659782BDDF939295 /* DirectFeeds.swift */; };
 		6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */; };
@@ -201,6 +202,7 @@
 		7F337C1F20D478B8EFBB7036 /* plates.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = plates.json; sourceTree = "<group>"; };
 		807F4860102BB25A38CABD5F /* WeatherBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherBar.swift; sourceTree = "<group>"; };
 		80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveImagery.swift; sourceTree = "<group>"; };
+		82B6CFD3E8CDC06CF6579558 /* milkyway.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = milkyway.jpg; sourceTree = "<group>"; };
 		8475F9268862AEDC750CAB3E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		8680D3FC92CEFA2BA844A696 /* ScreenshotDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotDirector.swift; sourceTree = "<group>"; };
 		87E7D0170506DF75EEE13B0B /* earth_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_day.jpg; sourceTree = "<group>"; };
@@ -541,6 +543,7 @@
 				A0D0F1C9D90908EDA5544933 /* earth_mask_small.png */,
 				6D73214AB73ED56539866317 /* earth_normal.jpg */,
 				2659D154FEE07FBFBB433FE0 /* earth_water.png */,
+				82B6CFD3E8CDC06CF6579558 /* milkyway.jpg */,
 				FF6B47423238D4C7B83FF18F /* moon.jpg */,
 				34DC9B586E7A631FD358E629 /* stars.bin */,
 			);
@@ -791,6 +794,7 @@
 				415515C85ABD1B4C2136D4B0 /* earth_mask_small.png in Resources */,
 				FEF3D39A44448B68C8DAF00F /* earth_normal.jpg in Resources */,
 				874C9FBAA9279098BD0EDE34 /* earth_water.png in Resources */,
+				6C0F912FB67E87DB6576FA38 /* milkyway.jpg in Resources */,
 				30216CB9A7A778136D6861D2 /* moon.jpg in Resources */,
 				C79CC041087C4B3AD4A49FAB /* plates.json in Resources */,
 				2044E6A65BE930A8FA61931B /* sky.json in Resources */,

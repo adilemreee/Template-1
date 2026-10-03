@@ -38,6 +38,7 @@ typedef struct {
     float rainOverlay;            // 0..1 opacity of the precipitation map
     simd_float4 seismicCenter;    // xyz: epicentre (unit vector), w: strength of the wave display (0 = off)
     simd_float4 seismicFronts;    // x: P front, y: S front, z: surface-wave front (radians from the epicentre)
+    float milkyWay;               // brightness of the Milky Way backdrop (0 hides it)
 } FrameUniforms;
 
 typedef struct {

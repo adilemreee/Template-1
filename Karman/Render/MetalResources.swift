@@ -12,7 +12,7 @@ enum TextureKind {
 
 enum MetalResources {
     /// Decodes an image file straight into a shared buffer and blits it into a mipmapped private texture.
-    static func loadTexture(url: URL, kind: TextureKind, device: MTLDevice, queue: MTLCommandQueue, maxWidth: Int? = nil) -> MTLTexture? {
+    static func loadTexture(url: URL, kind: TextureKind, device: MTLDevice, queue: MTLCommandQueue, maxWidth: Int? = nil, mipmapped: Bool = true) -> MTLTexture? {
         let options = [kCGImageSourceShouldCache: false] as CFDictionary
         guard let source = CGImageSourceCreateWithURL(url as CFURL, options) else { return nil }
         var image: CGImage?
@@ -25,7 +25,7 @@ enum MetalResources {
             image = CGImageSourceCreateImageAtIndex(source, 0, [kCGImageSourceShouldCacheImmediately: true] as CFDictionary)
         }
         guard let image else { return nil }
-        return makeTexture(from: image, kind: kind, device: device, queue: queue)
+        return makeTexture(from: image, kind: kind, device: device, queue: queue, mipmapped: mipmapped)
     }
 
     static func makeTexture(from image: CGImage, kind: TextureKind, device: MTLDevice, queue: MTLCommandQueue, mipmapped: Bool = true) -> MTLTexture? {
