@@ -415,6 +415,97 @@ fragment float4 icon_fragment(IconOut in [[stage_in]],
 }
 
 // ---------------------------------------------------------------------------------------
+// Tropical cyclones: a procedural cloud spiral lying on the globe, lit by the Sun
+// ---------------------------------------------------------------------------------------
+
+struct StormOut {
+    float4 position [[position]];
+    float2 local;
+    float strength;
+    float hemi;
+    float phase;
+    float emphasis;
+    float lit;
+    float facing;
+};
+
+vertex StormOut storm_vertex(uint vid [[vertex_id]], uint iid [[instance_id]],
+                             const device StormInstance* storms [[buffer(0)]],
+                             constant FrameUniforms& u [[buffer(1)]]) {
+    StormInstance s = storms[iid];
+    float2 c = kQuad[vid];
+    float3 N = normalize(s.position);
+    float3 east = tangentEast(N);
+    float3 north = cross(N, east);
+    // Stay readable from orbit: never smaller than ~20 points across on screen.
+    float dist = max(length(u.cameraPos - N), 0.05);
+    float pxPerUnit = 0.5 * u.viewport.y * u.proj[1][1] / dist;
+    float radius = max(s.radius, 20.0 * u.pixelScale / pxPerUnit) * (1.0 + s.emphasis * 0.08);
+    float3 world = N * 1.004 + (east * c.x + north * c.y) * radius;
+    StormOut o;
+    o.position = u.viewProj * float4(world, 1.0);
+    o.local = c;
+    o.strength = s.strength;
+    o.hemi = s.hemisphere;
+    o.phase = s.phase;
+    o.emphasis = s.emphasis;
+    o.lit = dot(N, u.sunDir);
+    o.facing = dot(N, normalize(u.cameraPos - N));
+    return o;
+}
+
+static float3 stormCategoryColor(float s) {
+    // Tropical storm cyan → category 1 yellow → 3 orange → 5 magenta.
+    float3 c = mix(float3(0.35, 0.85, 1.0), float3(1.0, 0.9, 0.35), smoothstep(0.15, 0.4, s));
+    c = mix(c, float3(1.0, 0.5, 0.2), smoothstep(0.45, 0.7, s));
+    return mix(c, float3(1.0, 0.3, 0.75), smoothstep(0.75, 1.0, s));
+}
+
+fragment float4 storm_fragment(StormOut in [[stage_in]], constant FrameUniforms& u [[buffer(0)]]) {
+    float r = length(in.local);
+    if (r > 1.0) discard_fragment();
+    float theta = atan2(in.local.y, in.local.x);
+    float h = in.hemi;
+    float t = u.time + in.phase * 40.0;
+    float omega = 0.22 + 0.18 * in.strength;
+
+    // Trailing logarithmic spiral bands, mirrored south of the equator.
+    float phi = h * theta + 2.3 * log(r + 0.04) - omega * t;
+    float bands = pow(0.5 + 0.5 * cos(3.0 * phi), 1.6);
+
+    // Cloud texture turning with the storm.
+    float a = -h * omega * t * 0.6;
+    float2 q = float2(in.local.x * cos(a) - in.local.y * sin(a), in.local.x * sin(a) + in.local.y * cos(a));
+    float n = fbm(q * 5.5 + in.phase * 13.0);
+    float fine = fbm(q * 14.0 + 3.7);
+
+    float eye = mix(0.10, 0.045, in.strength);
+    float eyewall = smoothstep(eye, eye + 0.035, r) * smoothstep(eye + 0.24, eye + 0.06, r);
+    float core = smoothstep(0.55, 0.12, r) * (0.55 + 0.45 * in.strength);
+    float arms = bands * smoothstep(1.0, 0.3, r) * smoothstep(0.06, 0.22, r);
+    float density = max(eyewall, core * 0.85 + arms * 0.75);
+    density *= 0.7 + 0.45 * n + 0.15 * fine;
+    density *= smoothstep(eye * 0.6, eye, r) * smoothstep(1.0, 0.82, r);
+    density = saturate(density);
+
+    // Sunlit white tops; deep blue-grey on the night side.
+    float day = smoothstep(-0.12, 0.3, in.lit);
+    float shade = 0.78 + 0.22 * bands;
+    // Night tops stay faintly visible, as in infrared imagery, and hide the city lights below.
+    float3 cloud = mix(float3(0.10, 0.12, 0.18), float3(0.96, 0.97, 1.0), day) * shade * (0.88 + 0.12 * fine);
+
+    // A thin category-coloured glow on the eyewall keeps storms legible day and night.
+    float3 cat = stormCategoryColor(in.strength);
+    float rim = smoothstep(0.035, 0.0, abs(r - (eye + 0.05))) * (0.35 + 0.9 * in.emphasis);
+    float halo = smoothstep(1.0, 0.0, r) * 0.05 * (1.0 - day);
+
+    float vis = smoothstep(0.0, 0.18, in.facing) * u.markerFade * u.sceneFade;
+    float alpha = density * 0.92 * vis;
+    float3 emissive = cat * (rim + halo) * vis;
+    return float4(cloud * alpha + emissive, alpha);
+}
+
+// ---------------------------------------------------------------------------------------
 // Satellites (points interpolated between two propagated keyframes)
 // ---------------------------------------------------------------------------------------
 

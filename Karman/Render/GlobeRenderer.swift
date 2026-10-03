@@ -28,6 +28,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var sunPSO: MTLRenderPipelineState!
     private var ringPSO: MTLRenderPipelineState!
     private var iconPSO: MTLRenderPipelineState!
+    private var stormPSO: MTLRenderPipelineState!
     private var satellitePSO: MTLRenderPipelineState!
     private var pathPSO: MTLRenderPipelineState!
     private var prefilterPSO: MTLRenderPipelineState!
@@ -73,6 +74,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var ringCount = 0
     private var iconBuffer: MTLBuffer?
     private var iconCount = 0
+    private var stormBuffer: MTLBuffer?
+    private var stormCount = 0
     private var trackBuffer: MTLBuffer?
     private var trackRanges: [(start: Int, count: Int)] = []
     private var issPathBuffer: MTLBuffer?
@@ -183,6 +186,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         sunPSO = try pipeline("sun_vertex", "sun_fragment", blend: .additive)
         ringPSO = try pipeline("ring_vertex", "ring_fragment", blend: .additive)
         iconPSO = try pipeline("icon_vertex", "icon_fragment", blend: .premultiplied)
+        stormPSO = try pipeline("storm_vertex", "storm_fragment", blend: .premultiplied)
         satellitePSO = try pipeline("satellite_vertex", "satellite_fragment", blend: .additive)
         pathPSO = try pipeline("path_vertex", "path_fragment", blend: .additive)
         prefilterPSO = try pipeline("fullscreen_vertex", "bloom_prefilter", blend: .opaque, depth: false, samples: 1)
@@ -430,6 +434,16 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
         enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
         enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+
+        // Tropical cyclones as cloud spirals on the surface (under the atmosphere's haze).
+        if let stormBuffer, stormCount > 0 {
+            enc.setRenderPipelineState(stormPSO)
+            enc.setDepthStencilState(depthTest)
+            enc.setVertexBuffer(stormBuffer, offset: 0, index: 0)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 1)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: stormCount)
+        }
 
         if let shell = shellMesh {
             var outer: Float = 1.045
@@ -694,6 +708,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         var rings: [RingInstance] = []
         var icons: [IconInstance] = []
+        var storms: [StormInstance] = []
         var picks: [Pickable] = []
         var tracks: [PathVertex] = []
         var ranges: [(Int, Int)] = []
@@ -727,8 +742,13 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             case .storm:
                 guard layers.storms else { continue }
                 let emphasis: Float = selected == .event(e.id) ? 1 : 0
-                let size = Float(18 + min(12, (e.value ?? 40) / 12))
-                icons.append(IconInstance(position: pos, sizePx: size, color: Palette.storm, atlasIndex: Float(GlobeIcon.storm.rawValue), rotationSpeed: -1.6, altitude: 0.012, emphasis: emphasis))
+                // Cloud shield grows with wind speed: ~220 km for a tropical storm, ~560 km at category 5.
+                let knots = e.value ?? 45
+                let radiusKm = 220 + min(max(knots - 35, 0), 120) * 2.8
+                storms.append(StormInstance(position: pos, radius: Float(radiusKm / 6371),
+                                            strength: Float(min(max((knots - 30) / 110, 0), 1)),
+                                            hemisphere: e.lat >= 0 ? 1 : -1,
+                                            phase: Float(abs(e.id.hashValue % 1000)) / 1000, emphasis: emphasis))
                 picks.append(Pickable(item: .event(e.id), position: pos * 1.01, weight: 7))
                 if let track = e.track, track.count > 1 {
                     let start = tracks.count
@@ -776,6 +796,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         ringBuffer = rings.isEmpty ? nil : device.makeBuffer(bytes: rings, length: MemoryLayout<RingInstance>.stride * rings.count, options: .storageModeShared)
         iconCount = icons.count
         iconBuffer = icons.isEmpty ? nil : device.makeBuffer(bytes: icons, length: MemoryLayout<IconInstance>.stride * icons.count, options: .storageModeShared)
+        stormCount = storms.count
+        stormBuffer = storms.isEmpty ? nil : device.makeBuffer(bytes: storms, length: MemoryLayout<StormInstance>.stride * storms.count, options: .storageModeShared)
         trackRanges = ranges.map { (start: $0.0, count: $0.1) }
         trackBuffer = tracks.isEmpty ? nil : device.makeBuffer(bytes: tracks, length: MemoryLayout<PathVertex>.stride * tracks.count, options: .storageModeShared)
         pickables = picks

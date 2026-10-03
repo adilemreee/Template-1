@@ -52,6 +52,15 @@ typedef struct {
 } IconInstance;
 
 typedef struct {
+    simd_float3 position;         // unit vector at the storm's centre
+    float radius;                 // cloud-shield radius in globe units
+    float strength;               // 0 tropical depression … 1 category 5
+    float hemisphere;             // +1 north (spins counter-clockwise), -1 south
+    float phase;                  // per-storm animation offset
+    float emphasis;               // 0..1 selection highlight
+} StormInstance;
+
+typedef struct {
     simd_float3 position;         // render-frame position (globe units)
     float sizePx;
     simd_float4 color;

@@ -38,7 +38,10 @@ enum ScreenshotDirector {
         case "quakeglobe":
             if let q = model.planet.strongestRecentQuake { model.select(.quake(q.id)) }
         case "storm":
-            if let s = model.planet.activeStorms.first {
+            // KARMAN_STORM=<name fragment> picks a particular storm (e.g. one on the day side).
+            let wanted = ProcessInfo.processInfo.environment["KARMAN_STORM"]?.lowercased()
+            let storm = wanted.flatMap { w in model.planet.activeStorms.first { $0.title.lowercased().contains(w) } }
+            if let s = storm ?? model.planet.activeStorms.first {
                 model.select(.event(s.id), fly: false)
                 model.globe.fly(to: CameraPose(lat: s.lat - 4, lon: s.lon, distance: 1.9, tilt: 30, heading: -15), duration: 2.5)
             }
