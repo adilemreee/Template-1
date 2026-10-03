@@ -154,6 +154,11 @@ ON CONFLICT(subject, day) DO UPDATE SET count = count + 1`, subject, day); err !
 	return limit - count - 1, tx.Commit()
 }
 
+// Refund gives back one question when the answer could not be produced.
+func (s *Store) Refund(subject string) {
+	_, _ = s.db.Exec(`UPDATE usage SET count = count - 1 WHERE subject = ? AND day = ? AND count > 0`, subject, time.Now().UTC().Format("2006-01-02"))
+}
+
 func (s *Store) Remaining(subject string, limit int) int {
 	var count int
 	_ = s.db.QueryRow(`SELECT count FROM usage WHERE subject = ? AND day = ?`, subject, time.Now().UTC().Format("2006-01-02")).Scan(&count)

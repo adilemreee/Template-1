@@ -292,6 +292,7 @@ func (s *Server) ask(w http.ResponseWriter, r *http.Request) {
 	err = s.AI.Ask(r.Context(), req, func(text string) error { return emit("delta", map[string]string{"text": text}) })
 	if err != nil {
 		s.Log.Warn("ask failed", "err", err)
+		s.Store.Refund(c.Subject)
 		_ = emit("error", map[string]string{"message": "The planet is a little busy - please try again in a moment."})
 		return
 	}

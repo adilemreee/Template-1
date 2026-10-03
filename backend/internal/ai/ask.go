@@ -48,24 +48,37 @@ func (s *Service) Ask(ctx context.Context, req AskRequest, onDelta func(string) 
 		where = fmt.Sprintf("approximately %.0f°, %.0f° (lat, lon)", *req.Lat, *req.Lon)
 	}
 
-	var msgs []anthropic.MessageParam
+	// Normalise history: strictly alternating turns that start with the user and end with
+	// the assistant, so the new question becomes the final user turn.
+	var turns []Turn
 	for _, t := range trimHistory(req.History, 6) {
 		text := strings.TrimSpace(t.Text)
+		role := "user"
+		if t.Role == "assistant" {
+			role = "assistant"
+		}
 		if text == "" {
 			continue
 		}
-		if t.Role == "assistant" {
-			msgs = append(msgs, anthropic.NewAssistantMessage(anthropic.NewTextBlock(text)))
-		} else {
-			msgs = append(msgs, anthropic.NewUserMessage(anthropic.NewTextBlock(text)))
+		if n := len(turns); n > 0 && turns[n-1].Role == role {
+			turns[n-1].Text += "\n\n" + text
+			continue
 		}
+		turns = append(turns, Turn{Role: role, Text: text})
 	}
-	// History must start with a user turn and alternate; drop a leading assistant turn.
-	for len(msgs) > 0 && msgs[0].Role == anthropic.MessageParamRoleAssistant {
-		msgs = msgs[1:]
+	for len(turns) > 0 && turns[0].Role == "assistant" {
+		turns = turns[1:]
 	}
-	if len(msgs) > 0 && msgs[len(msgs)-1].Role == anthropic.MessageParamRoleUser {
-		msgs = msgs[:len(msgs)-1]
+	if n := len(turns); n > 0 && turns[n-1].Role == "user" {
+		turns = turns[:n-1]
+	}
+	var msgs []anthropic.MessageParam
+	for _, t := range turns {
+		if t.Role == "assistant" {
+			msgs = append(msgs, anthropic.NewAssistantMessage(anthropic.NewTextBlock(t.Text)))
+		} else {
+			msgs = append(msgs, anthropic.NewUserMessage(anthropic.NewTextBlock(t.Text)))
+		}
 	}
 	question := fmt.Sprintf("(Preferred language: %s. My location: %s.)\n\n%s", lang, where, strings.TrimSpace(req.Question))
 	msgs = append(msgs, anthropic.NewUserMessage(anthropic.NewTextBlock(question)))

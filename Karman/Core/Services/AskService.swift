@@ -28,7 +28,7 @@ final class AskService {
         messages.append(Message(role: .user, text: q))
         messages.append(Message(role: .assistant, text: "", streaming: true))
         isStreaming = true
-        let history = messages.dropLast(2).suffix(6).map { APIClient.AskTurn(role: $0.role == .user ? "user" : "assistant", text: $0.text) }
+        let history = messages.dropLast(2).filter { !$0.failed }.suffix(6).map { APIClient.AskTurn(role: $0.role == .user ? "user" : "assistant", text: $0.text) }
         let loc = model.location.point
         let body = APIClient.AskBody(question: q, language: Locale.current.language.languageCode?.identifier ?? "en",
                                      lat: loc.map { ($0.lat * 2).rounded() / 2 }, lon: loc.map { ($0.lon * 2).rounded() / 2 }, history: Array(history))

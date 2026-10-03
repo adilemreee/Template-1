@@ -57,10 +57,13 @@ type Service struct {
 
 	mu       sync.Mutex
 	inflight map[string]chan struct{}
+	// failedUntil short-circuits generation after a failure so users get the template
+	// instantly instead of waiting for the model to time out again.
+	failedUntil map[string]time.Time
 }
 
 func NewService(log *slog.Logger, apiKey, model string, store Store, digest func() Digest) *Service {
-	s := &Service{log: log, model: model, store: store, snap: digest, inflight: map[string]chan struct{}{}}
+	s := &Service{log: log, model: model, store: store, snap: digest, inflight: map[string]chan struct{}{}, failedUntil: map[string]time.Time{}}
 	if apiKey != "" {
 		c := anthropic.NewClient(option.WithAPIKey(apiKey), option.WithMaxRetries(2))
 		s.client = &c
@@ -117,12 +120,18 @@ func (s *Service) Briefing(ctx context.Context, lang string) (*Briefing, error) 
 
 	digest := s.snap()
 	var b *Briefing
-	if s.client != nil {
+	s.mu.Lock()
+	coolingDown := time.Now().Before(s.failedUntil[key])
+	s.mu.Unlock()
+	if s.client != nil && !coolingDown {
 		gctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 90*time.Second)
 		generated, err := s.generate(gctx, digest, lang)
 		cancel()
 		if err != nil {
 			s.log.Warn("briefing generation failed, using template", "lang", lang, "err", err)
+			s.mu.Lock()
+			s.failedUntil[key] = time.Now().Add(10 * time.Minute)
+			s.mu.Unlock()
 		} else {
 			b = generated
 		}
