@@ -66,6 +66,7 @@
 		B9371E5AD6CA40A4DEE5AAB8 /* BriefingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3CCA73CCC77381AB02E5A3D /* BriefingControl.swift */; };
 		BC0AB80EAE9FF637C973CF1A /* LaunchActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 658D34D0B4DA642F45AFF311 /* LaunchActivity.swift */; };
 		BD15AA17003751C3505F08B5 /* GlobeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CD099608C17D25644118ED /* GlobeController.swift */; };
+		BDC10F6218A7D80E3F22C07D /* RideAlong.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75EDF7FF5EC7C4E6EE7F9DAD /* RideAlong.swift */; };
 		BF8798FC382D2B589496FE4C /* earth_day.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 87E7D0170506DF75EEE13B0B /* earth_day.jpg */; };
 		C01E01792D1959FEEF33EEC5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB66E612BD5347E84CCE808 /* AppDelegate.swift */; };
 		C2181D441672E5E4AD9B3D2F /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D98059E112454A80B106DE2 /* WidgetBridge.swift */; };
@@ -155,6 +156,7 @@
 		6D73214AB73ED56539866317 /* earth_normal.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_normal.jpg; sourceTree = "<group>"; };
 		700B4A5218599F90EBDC59C3 /* OnboardingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCard.swift; sourceTree = "<group>"; };
 		7449C1D28C0E6A4635316A7F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		75EDF7FF5EC7C4E6EE7F9DAD /* RideAlong.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RideAlong.swift; sourceTree = "<group>"; };
 		7D359214F18B022C04C45349 /* DetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailSheet.swift; sourceTree = "<group>"; };
 		80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveImagery.swift; sourceTree = "<group>"; };
 		8475F9268862AEDC750CAB3E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -265,6 +267,7 @@
 				5B58E8F6A13A79A2CB1E8ECC /* Events */,
 				8C2D05172361B73461F172E0 /* Globe */,
 				D8C35B23C4146EB891C37031 /* Intro */,
+				FBB12A4FEAC259A9A35C2193 /* RideAlong */,
 				B761AFC80324BDF862820FF0 /* Settings */,
 				87B6A7EEEBFBE6368FA12C37 /* Sky */,
 				9098FF413F6BE223A22334FF /* SpaceWeather */,
@@ -523,6 +526,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FBB12A4FEAC259A9A35C2193 /* RideAlong */ = {
+			isa = PBXGroup;
+			children = (
+				75EDF7FF5EC7C4E6EE7F9DAD /* RideAlong.swift */,
+			);
+			path = RideAlong;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -710,6 +721,7 @@
 				6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */,
 				33ABD3864694C4BEC72380A5 /* PulseView.swift in Sources */,
 				FE2FF231AF337FCC216F33F7 /* ReviewPrompter.swift in Sources */,
+				BDC10F6218A7D80E3F22C07D /* RideAlong.swift in Sources */,
 				9907F01ABC07CD613F07101F /* RootView.swift in Sources */,
 				CDA4BCDB9834BD8737B530F6 /* SGP4.swift in Sources */,
 				8D865D8DF61E1BDCBDCD6CDC /* SatelliteEngine.swift in Sources */,

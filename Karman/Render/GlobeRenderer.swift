@@ -393,7 +393,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         if detail == nil, texturesReady { detail = DetailImagery(device: device, queue: queue, grid: Self.isHighEnd ? 6 : 4) }
         if let detail, controller.introStart == nil {
             let moving = controller.isFlying || now - controller.lastInteractionTime < 0.35
-            detail.update(pose: pose, sunDir: sunDir, isMoving: moving, now: now)
+            detail.update(pose: pose, center: controller.followFocus, sunDir: sunDir, isMoving: moving, now: now)
             u.detailBounds = detail.bounds
             u.detailBlend = detail.blend
             u.detailNight = detail.hasNight ? 1 : 0
@@ -511,7 +511,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         // ISS orbit
-        if controller.layers.satellites, let issPathBuffer, issPathCount > 1 {
+        if controller.layers.satellites, !controller.isFollowing, let issPathBuffer, issPathCount > 1 {
             var style = PathStyle(color: SIMD4(0.45, 0.75, 1.0, 0.42), widthPx: 1.0, glow: 0.5, dash: 0, pad: 0)
             enc.setRenderPipelineState(pathPSO)
             enc.setDepthStencilState(depthTest)
@@ -542,7 +542,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             if controller.layers.starlink { groups.append((.starlink, PointInstance(position: .zero, sizePx: 2.2, color: SIMD4(0.55, 0.72, 1.0, 0.9)))) }
             if controller.layers.satellites {
                 groups.append((.visual, PointInstance(position: .zero, sizePx: 3.0, color: SIMD4(0.85, 0.93, 1.0, 0.75))))
-                groups.append((.stations, PointInstance(position: .zero, sizePx: 5.5, color: SIMD4(1.0, 1.0, 1.0, 1.1))))
+                // Riding along, the station is right in front of the camera: draw it bigger and brighter.
+                let station: Float = controller.isFollowing ? 9 : 5.5
+                groups.append((.stations, PointInstance(position: .zero, sizePx: station, color: SIMD4(1.0, 1.0, 1.0, controller.isFollowing ? 1.8 : 1.1))))
             }
             for (group, var style) in groups {
                 guard let k = sats.keyframes(for: group), k.count > 0 else { continue }

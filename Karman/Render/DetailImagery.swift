@@ -39,6 +39,7 @@ final class DetailImagery {
     private var mipsDirty = false
     private var lastMips: CFTimeInterval = 0
     private var lastUpdate: CFTimeInterval = 0
+    private var scratch: MTLTexture?
 
     init?(device: MTLDevice, queue: MTLCommandQueue, grid: Int) {
         let side = grid * Self.tileSize
@@ -67,9 +68,15 @@ final class DetailImagery {
     }
 
     /// Called every frame; cheap unless the window has to move.
-    func update(pose: CameraPose, sunDir: SIMD3<Float>, isMoving: Bool, now: CFTimeInterval) {
+    /// - Parameter center: ground point to keep sharp; defaults to the camera's target.
+    func update(pose: CameraPose, center: GeoPoint? = nil, sunDir: SIMD3<Float>, isMoving: Bool, now: CFTimeInterval) {
         let dt = Float(min(0.1, max(0, now - lastUpdate)))
         lastUpdate = now
+        var pose = pose
+        if let center {
+            pose.lat = center.lat
+            pose.lon = center.lon
+        }
         let target = Self.desiredWindow(pose: pose, sunDir: sunDir, grid: grid)
         let goal: Float = (target != nil && window != nil) ? 1 : 0
         blend += (goal - blend) * min(1, dt * 4)
@@ -136,18 +143,43 @@ final class DetailImagery {
 
     private func start(_ target: Window) {
         loadTask?.cancel()
+        let old = window
         window = target
         pending = nil
         hasNight = target.night
         let deg = Self.tileDegrees(target.level)
         bounds = SIMD4(Float(-180 + Double(target.col0) * deg), Float(90 - Double(target.row0) * deg),
                        Float(deg * Double(grid)), Float(deg * Double(grid)))
-        maskBytes = [UInt8](repeating: 0, count: grid * grid)
+        let cols = Int((360 / deg).rounded())
+
+        // Keep tiles the old window already shows (shifted into their new slots), so panning and
+        // following the ISS only fetch the new edge instead of flashing back to the coarse base.
+        var newMask = [UInt8](repeating: 0, count: grid * grid)
+        if let old, old.level == target.level, old.night || !target.night {
+            var dx = (target.col0 - old.col0) % cols
+            if dx > cols / 2 { dx -= cols }
+            if dx < -cols / 2 { dx += cols }
+            let dy = target.row0 - old.row0
+            var moves: [(from: Int, to: Int)] = []
+            let js = dy >= 0 ? Array(0..<grid) : Array((0..<grid).reversed())
+            let iz = dx >= 0 ? Array(0..<grid) : Array((0..<grid).reversed())
+            for j in js {
+                for i in iz {
+                    let oi = i + dx, oj = j + dy
+                    guard oi >= 0, oi < grid, oj >= 0, oj < grid, maskBytes[oj * grid + oi] == 255 else { continue }
+                    moves.append((oj * grid + oi, j * grid + i))
+                }
+            }
+            if !moves.isEmpty, shiftTiles(moves) {
+                for m in moves { newMask[m.to] = 255 }
+                mipsDirty = true
+            }
+        }
+        maskBytes = newMask
         mask.replace(region: MTLRegionMake2D(0, 0, grid, grid), mipmapLevel: 0, withBytes: maskBytes, bytesPerRow: grid)
 
-        let cols = Int((360 / deg).rounded())
         let center = Double(grid - 1) / 2
-        let order = (0..<(grid * grid)).sorted { a, b in
+        let order = (0..<(grid * grid)).filter { newMask[$0] == 0 }.sorted { a, b in
             let da = pow(Double(a % grid) - center, 2) + pow(Double(a / grid) - center, 2)
             let db = pow(Double(b % grid) - center, 2) + pow(Double(b / grid) - center, 2)
             return da < db
@@ -173,6 +205,35 @@ final class DetailImagery {
                 }
             }
         }
+    }
+
+    /// Moves tiles inside the texture (through a one-tile scratch, in an order where no source is
+    /// overwritten before it is read). Waits for the GPU so later CPU uploads land on top.
+    private func shiftTiles(_ moves: [(from: Int, to: Int)]) -> Bool {
+        if scratch == nil {
+            let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: texture.pixelFormat, width: Self.tileSize, height: Self.tileSize, mipmapped: false)
+            d.usage = .shaderRead
+            d.storageMode = .private
+            scratch = device.makeTexture(descriptor: d)
+        }
+        guard let scratch, let cmd = queue.makeCommandBuffer() else { return false }
+        let size = MTLSize(width: Self.tileSize, height: Self.tileSize, depth: 1)
+        func origin(_ index: Int) -> MTLOrigin {
+            MTLOrigin(x: (index % grid) * Self.tileSize, y: (index / grid) * Self.tileSize, z: 0)
+        }
+        for m in moves where m.from != m.to {
+            guard let a = cmd.makeBlitCommandEncoder() else { return false }
+            a.copy(from: texture, sourceSlice: 0, sourceLevel: 0, sourceOrigin: origin(m.from), sourceSize: size,
+                   to: scratch, destinationSlice: 0, destinationLevel: 0, destinationOrigin: MTLOrigin())
+            a.endEncoding()
+            guard let b = cmd.makeBlitCommandEncoder() else { return false }
+            b.copy(from: scratch, sourceSlice: 0, sourceLevel: 0, sourceOrigin: MTLOrigin(), sourceSize: size,
+                   to: texture, destinationSlice: 0, destinationLevel: 0, destinationOrigin: origin(m.to))
+            b.endEncoding()
+        }
+        cmd.commit()
+        cmd.waitUntilCompleted()
+        return cmd.status == .completed
     }
 
     private func place(_ pixels: Data, index: Int, for target: Window) {

@@ -12,6 +12,8 @@ struct SkyTonightView: View {
                     Text(model.location.placeName ?? String(localized: "Above you")).font(.display(26, weight: .bold)).foregroundStyle(.white)
                 }
 
+                if model.canRideAlong { RideAlongCard() }
+
                 if let observer = model.location.point {
                     MoonCard(observer: observer)
                     SunTimelineCard(observer: observer)
@@ -397,5 +399,51 @@ private struct DistanceScale: View {
             .frame(height: 14)
         }
         .frame(height: 14)
+    }
+}
+
+// MARK: - Ride along
+
+/// Invites the user to fly with the ISS: a slowly drifting Earth limb behind a call to action.
+struct RideAlongCard: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        Card(padding: 0) {
+            ZStack(alignment: .bottomLeading) {
+                TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
+                    let t = ctx.date.timeIntervalSinceReferenceDate
+                    Canvas { g, size in
+                        // A curved horizon with an atmosphere glow, like the view from orbit.
+                        let r = size.width * 1.6
+                        let c = CGPoint(x: size.width * 0.5 + sin(t * 0.05) * 18, y: size.height + r * 0.82)
+                        let earth = Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2))
+                        g.fill(earth, with: .linearGradient(Gradient(colors: [Color(red: 0.08, green: 0.22, blue: 0.42), .black]),
+                                                             startPoint: CGPoint(x: c.x, y: c.y - r), endPoint: CGPoint(x: c.x, y: c.y - r * 0.7)))
+                        g.stroke(earth, with: .color(Color(red: 0.45, green: 0.75, blue: 1.0).opacity(0.85)), lineWidth: 2)
+                        g.addFilter(.blur(radius: 10))
+                        g.stroke(earth, with: .color(Color(red: 0.35, green: 0.6, blue: 1.0).opacity(0.7)), lineWidth: 14)
+                    }
+                    .background(Color(red: 0.01, green: 0.015, blue: 0.03))
+                }
+                .frame(height: 150)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("RIDE ALONG").eyebrow(Theme.ice)
+                    Text("Fly with the ISS").font(.display(20, weight: .bold)).foregroundStyle(.white)
+                    Text("400 km up at 28,000 km/h, with a sunrise every 92 minutes.")
+                        .font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                    Button {
+                        model.startRideAlong()
+                    } label: {
+                        Label("Ride with the ISS", systemImage: "airplane.departure").frame(maxWidth: .infinity)
+                    }
+                    .primaryAction()
+                    .controlSize(.large)
+                    .padding(.top, 4)
+                }
+                .padding(16)
+                .padding(.top, 70)
+            }
+        }
     }
 }

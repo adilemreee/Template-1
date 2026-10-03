@@ -94,8 +94,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     private func reverseGeocode(_ loc: CLLocation) async {
         if let last = lastGeocoded, last.distance(from: loc) < 20_000, placeName != nil { return }
         lastGeocoded = loc
-        guard let request = MKReverseGeocodingRequest(location: loc),
-              let item = try? await request.mapItems.first else { return }
+        guard let request = MKReverseGeocodingRequest(location: loc) else { return }
+        request.preferredLocale = Locale(identifier: "en_US") // the app is English-only
+        guard let item = try? await request.mapItems.first else { return }
         let name = item.addressRepresentations?.cityName ?? item.name
         if let name, let p = point { store(p, name: name) }
     }

@@ -201,7 +201,13 @@ fragment float4 atmosphere_fragment(SphereOut in [[stage_in]],
     float mie = pow(cosTheta, 10.0) * 2.0 + pow(cosTheta, 180.0) * 16.0;
     col += float3(1.0, 0.80, 0.58) * mie * (0.25 + sunsetBand + sunlit * 0.2);
 
-    return float4(col * density * u.atmosphereIntensity * u.sceneFade, 0.0);
+    // Night airglow: the thin green (557.7 nm oxygen) layer ~95 km up that crews photograph
+    // hugging the night limb. Seen edge-on, it shows where the ray grazes that altitude.
+    float nightSide = 1.0 - smoothstep(-0.22, 0.04, mu);
+    float airglow = exp(-pow((b - 1.0150) / 0.0010, 2.0)) * nightSide;
+    float3 glow = float3(0.30, 1.0, 0.50) * airglow * 0.16;
+
+    return float4((col * density + glow) * u.atmosphereIntensity * u.sceneFade, 0.0);
 }
 
 // Aurora shells driven by NOAA's OVATION probability grid.

@@ -28,8 +28,14 @@ struct RootView: View {
                     .ignoresSafeArea()
             }
 
-            if model.hudVisible && !model.briefingActive {
+            if model.hudVisible && !model.briefingActive && !model.ridingISS {
                 HomeHUD()
+                    .transition(.opacity)
+            }
+
+            if model.ridingISS {
+                RideAlongMarker()
+                RideAlongOverlay()
                     .transition(.opacity)
             }
 
@@ -70,6 +76,9 @@ struct RootView: View {
         .onOpenURL { url in
             guard let host = url.host() else { return }
             switch host {
+            case "ride":
+                model.skipIntro()
+                model.startRideAlong()
             case "pulse": model.panel = .pulse
             case "space": model.panel = .space
             case "sky": model.panel = .sky

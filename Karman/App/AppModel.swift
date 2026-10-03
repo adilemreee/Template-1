@@ -36,6 +36,8 @@ final class AppModel {
     var showTitle = false
     var hudVisible = false
     var briefingActive = false
+    /// True while the camera rides along with the ISS.
+    var ridingISS = false
     var onboardingDone = UserDefaults.standard.bool(forKey: "onboardingDone") {
         didSet { UserDefaults.standard.set(onboardingDone, forKey: "onboardingDone") }
     }
@@ -53,6 +55,9 @@ final class AppModel {
         globe.satellites = satellites
         globe.layers = settings.layers
         globe.onTap = { [weak self] item in self?.handleTap(item) }
+        globe.onFollowEnded = { [weak self] in
+            withAnimation(.easeInOut(duration: 0.5)) { self?.ridingISS = false }
+        }
     }
 
     func start() {
@@ -255,6 +260,32 @@ final class AppModel {
         }
         withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { selection = item }
         if item != nil { Haptics.shared.tap() }
+    }
+
+    // MARK: Ride along with the ISS
+
+    var canRideAlong: Bool { satellites.iss != nil }
+
+    func startRideAlong() {
+        guard let iss = satellites.iss else { return }
+        if briefingActive { BriefingDirector.shared.stop() }
+        panel = nil
+        detailItem = nil
+        withAnimation(.easeInOut(duration: 0.4)) { selection = nil }
+        if !settings.layers.satellites {
+            settings.layers.satellites = true
+            applyLayers(settings.layers)
+        }
+        Haptics.shared.tap()
+        globe.startFollow { date in RideAlongMath.frame(for: iss, at: date) }
+        withAnimation(.easeInOut(duration: 0.6)) { ridingISS = true }
+    }
+
+    func stopRideAlong() {
+        let below = satellites.iss.flatMap { try? $0.ecef(at: Date()) }.map { SatGeo.subpoint(ecef: $0).point }
+        globe.stopFollow()
+        withAnimation(.easeInOut(duration: 0.5)) { ridingISS = false }
+        if let below { globe.fly(to: CameraPose(lat: below.lat, lon: below.lon, distance: 2.8), duration: 2.6) }
     }
 
     func select(_ item: GlobeItem, fly: Bool = true) {

@@ -41,6 +41,14 @@ nonisolated struct GeoPoint: Codable, Sendable, Hashable {
         return (atan2(y, x) * 180 / .pi + 360).truncatingRemainder(dividingBy: 360)
     }
 
+    /// The point reached by travelling `angle` radians along a great circle at `bearing` degrees.
+    func destination(bearing: Double, angle: Double) -> GeoPoint {
+        let φ1 = lat * .pi / 180, λ1 = lon * .pi / 180, θ = bearing * .pi / 180
+        let φ2 = asin(sin(φ1) * cos(angle) + cos(φ1) * sin(angle) * cos(θ))
+        let λ2 = λ1 + atan2(sin(θ) * sin(angle) * cos(φ1), cos(angle) - sin(φ1) * sin(φ2))
+        return GeoPoint(lat: φ2 * 180 / .pi, lon: Geo.normalizeLon(λ2 * 180 / .pi))
+    }
+
     static func compassName(_ bearing: Double) -> String {
         let names = [String(localized: "N", comment: "Compass: north"), String(localized: "NE", comment: "Compass: north-east"),
                      String(localized: "E", comment: "Compass: east"), String(localized: "SE", comment: "Compass: south-east"),

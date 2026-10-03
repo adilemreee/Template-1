@@ -43,8 +43,6 @@
 	<string>$(KARMAN_API_PIN)</string>
 	<key>KarmanDevToken</key>
 	<string>$(KARMAN_DEV_TOKEN)</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -55,7 +53,6 @@
 		<dict>
 			<key>karman.adilemree.xyz</key>
 			<dict>
-				<!-- Self-signed certificate, verified in code by public-key pinning (APIClient). -->
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
 				<key>NSIncludesSubdomains</key>
@@ -63,19 +60,21 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Save your Kármán postcards of the planet to your photo library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Kármán uses your approximate location to show what is happening near you: nearby earthquakes, your aurora chances and when the Space Station passes overhead.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save your Kármán postcards of the planet to your photo library.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

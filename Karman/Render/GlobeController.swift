@@ -77,6 +77,40 @@ final class GlobeController {
 
     weak var satellites: SatelliteEngine?
 
+    // Follow mode (ride along with the ISS)
+    private var follow: (@MainActor (Date) -> RideAlongMath.Frame?)?
+    private var followEngaged = false
+    /// Ground point the detail imagery should centre on while following.
+    private(set) var followFocus: GeoPoint?
+    var isFollowing: Bool { follow != nil }
+    /// True once the fly-in has finished and the camera is locked to the station.
+    var isFollowEngaged: Bool { follow != nil && followEngaged }
+    /// Called when the user takes the camera back with a gesture.
+    var onFollowEnded: (() -> Void)?
+
+    func startFollow(_ provider: @escaping @MainActor (Date) -> RideAlongMath.Frame?) {
+        guard let first = provider(Date()) else { return }
+        follow = provider
+        followEngaged = false
+        followFocus = first.focus
+        autoRotate = false
+        drift = (0, 0)
+        fly(to: first.pose, duration: 3.2)
+    }
+
+    func stopFollow() {
+        follow = nil
+        followEngaged = false
+        followFocus = nil
+        autoRotate = true
+    }
+
+    private func endFollowByGesture() {
+        guard follow != nil else { return }
+        stopFollow()
+        onFollowEnded?()
+    }
+
     func update(scene newScene: GlobeSceneData) {
         scene = newScene
         sceneVersion &+= 1
@@ -111,6 +145,7 @@ final class GlobeController {
     }
 
     func pan(by delta: CGSize, viewHeight: CGFloat) {
+        endFollowByGesture()
         flight = nil
         markInteraction()
         let scale = degreesPerPoint(viewHeight: viewHeight)
@@ -127,6 +162,7 @@ final class GlobeController {
     }
 
     func zoom(by factor: CGFloat) {
+        endFollowByGesture()
         flight = nil
         markInteraction()
         let altitude = (pose.distance - 1) / Double(factor)
@@ -134,6 +170,7 @@ final class GlobeController {
     }
 
     func adjustTilt(by delta: CGFloat) {
+        endFollowByGesture()
         flight = nil
         markInteraction()
         pose.tilt = max(0, min(60, pose.tilt - Double(delta) * 0.25))
@@ -149,10 +186,23 @@ final class GlobeController {
     func step(now: CFTimeInterval) -> CameraPose {
         let dt = min(0.05, max(0, now - lastFrame))
         lastFrame = now
+        if let follow, let frame = follow(Date()) {
+            followFocus = frame.focus
+            if followEngaged {
+                pose = frame.pose
+                return pose
+            }
+            // Fly in, steering the flight's end toward the moving station.
+            flight?.to = frame.pose
+            if flight == nil { followEngaged = true; pose = frame.pose; return pose }
+        }
         if let f = flight {
             let (p, done) = f.pose(at: now)
             pose = p
-            if done { flight = nil }
+            if done {
+                flight = nil
+                if follow != nil { followEngaged = true }
+            }
         } else {
             if simd_length(velocity) > 0.01 {
                 pose.lon = Geo.normalizeLon(pose.lon + velocity.x * dt)

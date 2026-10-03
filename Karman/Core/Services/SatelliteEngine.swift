@@ -91,8 +91,9 @@ final class SatelliteEngine {
         for group in Group.allCases where enabledGroups.contains(group) {
             guard let props = propagators[group], !props.isEmpty else { continue }
             let existing = keyframes[group]
-            // The next keyframe is one second after the current "next" (or two seconds out at start).
-            let targetMedia = (existing?.nextTime ?? now) + 1.0
+            // The next keyframe is one second out. Anchor to the clock, not the previous keyframe:
+            // the loop runs slightly slower than 1 Hz and chaining would let satellites fall behind.
+            let targetMedia = max(existing?.nextTime ?? now, now) + 1.0
             let targetDate = wall.addingTimeInterval(targetMedia - now)
             let result = await Self.propagate(props, at: targetDate)
             ensureBuffers(group: group, count: props.count)

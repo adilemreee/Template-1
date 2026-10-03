@@ -220,6 +220,17 @@ private struct SatelliteSummary: View {
                         Text("Visible from you \(Fmt.dayTime(pass.start)) · \(Int(pass.maxElevation))° high")
                             .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.ice)
                     }
+                    if id == 25544 {
+                        Button {
+                            model.startRideAlong()
+                        } label: {
+                            Label("Ride along", systemImage: "airplane.departure")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .primaryAction()
+                        .controlSize(.small)
+                        .padding(.top, 4)
+                    }
                 }
                 Spacer(minLength: 0)
             }
