@@ -9,7 +9,7 @@ set -euo pipefail
 
 TARGET="${1:?usage: deploy.sh user@host [ssh-key] [port]}"
 KEY="${2:-$HOME/.ssh/id_ed25519}"
-PORT="${3:-8443}"
+PORT="${3:-9443}"
 HOST="${TARGET#*@}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 BACKEND="$(cd "$HERE/.." && pwd)"
@@ -82,6 +82,15 @@ fi
 grep -q '^KARMAN_SITE_DIR=' /opt/karman/karman.env || echo 'KARMAN_SITE_DIR=/opt/karman/site' >> /opt/karman/karman.env
 chown -R karman:karman /opt/karman
 chmod 600 /opt/karman/karman.env /opt/karman/tls/tls.key
+# Hosts without ufw but with a catch-all REJECT/DROP in iptables (e.g. Oracle Cloud images):
+# the service opens and closes its own port, tagged "karman-api"; no other rule or file changes.
+FW_PRE=""; FW_POST=""
+if ! (command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active") && command -v iptables >/dev/null 2>&1 \
+   && iptables -S INPUT 2>/dev/null | grep -qE -- '^-P INPUT (DROP|REJECT)|^-A INPUT -j (DROP|REJECT)'; then
+  RULE="INPUT -p tcp --dport $PORT -m comment --comment karman-api -j ACCEPT"
+  FW_PRE="ExecStartPre=+/bin/sh -c 'iptables -C $RULE 2>/dev/null || iptables -I $RULE'"
+  FW_POST="ExecStopPost=+/bin/sh -c 'while iptables -D $RULE 2>/dev/null; do :; done'"
+fi
 cat > /etc/systemd/system/karman.service <<UNIT
 [Unit]
 Description=Karman API (live Earth data, briefings, alerts)
@@ -92,7 +101,9 @@ Wants=network-online.target
 User=karman
 Group=karman
 EnvironmentFile=/opt/karman/karman.env
+$FW_PRE
 ExecStart=/opt/karman/bin/karman
+$FW_POST
 Restart=always
 RestartSec=3
 AmbientCapabilities=

@@ -99,7 +99,7 @@ Gereksinimler: Xcode 27, iOS 26+ hedef, [XcodeGen](https://github.com/yonaskolb/
    ```bash
    open Karman.xcodeproj
    ```
-5. API adresi ve sertifika sabitlemesi `project.yml` → `KARMAN_API_BASE_URL` / `KARMAN_API_PIN` (şu an `https://92.5.38.182:8443` ve bu depodaki sertifikanın pin'i). Sunucuyu bir alan adına taşırsan (gerçek sertifikayla) `KARMAN_API_PIN`'i boş bırakman yeterli.
+5. API adresi ve sertifika sabitlemesi `project.yml` → `KARMAN_API_BASE_URL` / `KARMAN_API_PIN` (şu an `https://92.5.38.182:9443` ve bu depodaki sertifikanın pin'i). Sunucuyu bir alan adına taşırsan (gerçek sertifikayla) `KARMAN_API_PIN`'i boş bırakman yeterli.
 
 Simülatörde yerel backend ile test (yalnızca DEBUG):
 ```bash
@@ -111,13 +111,15 @@ Kendi cihazında DEBUG derlemesiyle yapay zekâ özelliklerini denemek için (Xc
 
 ## Sunucu (backend) kurulumu
 
-Tek Go binary'si; Docker gerekmez. Sunucudaki hiçbir mevcut servise (nginx dahil) dokunmaz: ayrı `karman` sistem kullanıcısı, her şey `/opt/karman` altında, kendi portunda (8443) kendi TLS sertifikasıyla çalışan sıkılaştırılmış bir `systemd` servisi.
+Tek Go binary'si; Docker gerekmez. Sunucudaki hiçbir mevcut servise (nginx dahil) dokunmaz: ayrı `karman` sistem kullanıcısı, her şey `/opt/karman` altında, kendi portunda (9443) kendi TLS sertifikasıyla çalışan sıkılaştırılmış bir `systemd` servisi.
 
 ```bash
-backend/deploy/deploy.sh root@92.5.38.182 ~/.ssh/id_ed25519_sevgili 8443
+backend/deploy/deploy.sh root@92.5.38.182 ~/.ssh/id_ed25519_sevgili 9443
 ```
 
 Betik: sunucu mimarisini algılar → Linux binary'sini derler → yükler → `karman` kullanıcısını ve servisi kurar → uygulamaya gömülü pin'e karşılık gelen sertifikayı (`backend/deploy/certs/`, git'e girmez) kurar → sağlık kontrolü yapar. Host güvenlik duvarı (ufw) aktifse yalnızca 8443/tcp'yi açar. Bulut sağlayıcının güvenlik grubunda da 8443/tcp'nin açık olması gerekir.
+
+Bu sunucuda 8443 nginx tarafından kullanıldığı için API **9443** portunda çalışır. Sunucu Oracle Cloud'da: host güvenlik duvarı (iptables) yalnızca izin verilen portları kabul edip gerisini reddediyor. Kármán servisi kendi portunu `karman-api` etiketli tek bir kuralla başlarken açar, dururken kapatır; başka kural ya da dosya değişmez. Ayrıca **Oracle Cloud konsolunda** VCN güvenlik listesine (veya örneğe bağlı NSG'ye) bir giriş kuralı gerekir: kaynak `0.0.0.0/0`, TCP, hedef port `9443`.
 
 Yapılandırma: `/opt/karman/karman.env` (değiştirdikten sonra `systemctl restart karman`):
 
@@ -151,7 +153,7 @@ App Store Connect, **Privacy Policy URL** ve **Support URL** için güvenilir se
 1. **Kendi alan adın (önerilen):** Kurulum betiği tanıtım sitesini de sunucuya yükler (`/opt/karman/site`, `KARMAN_SITE_DIR`). Sunucundaki nginx'e (bunu sen eklersin; betik nginx'e dokunmaz) mevcut HTTPS `server` bloğuna şunu ekle ve `nginx -s reload` yap:
    ```nginx
    location /karman/ {
-       proxy_pass https://127.0.0.1:8443/;
+       proxy_pass https://127.0.0.1:9443/;
        proxy_ssl_verify off;
        proxy_set_header X-Real-IP $remote_addr;
        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -188,7 +190,7 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Gizlilik politikası ve Destek URL'leri: `/privacy` ve `/support` sayfalarını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages). İstersen `KARMAN_SUPPORT_EMAIL` ile destek sayfasına iletişim adresi ekle.
 - [ ] Yapay zekâ veri paylaşımı (Kural 5.1.2(i)): "Kármán'a Sor" ilk sorudan önce Anthropic'i adıyla anan tek seferlik bir izin ekranı gösterir; izin Ayarlar → Kármán'a Sor'dan geri alınabilir. İnceleme notu `marketing/AppStore-Metadata.md` içinde hazır.
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
-- [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:8443/healthz` → `"ai": true, "push": true`.
+- [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:9443/healthz` → `"ai": true, "push": true`.
 - [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`) ve aynısını tanıtım sayfasındaki `APP_STORE_URL` sabitinde yap (`marketing/site/index.html`).
 - [ ] Xcode → Product → Archive → Distribute (App Store Connect).
 

@@ -108,7 +108,7 @@ func main() {
 		SupportEmail: env("KARMAN_SUPPORT_EMAIL", ""), SiteDir: env("KARMAN_SITE_DIR", "")}
 
 	srv := &http.Server{
-		Addr:              env("KARMAN_ADDR", ":8443"),
+		Addr:              env("KARMAN_ADDR", ":9443"),
 		Handler:           api.Handler(),
 		ReadHeaderTimeout: 10 * time.Second,
 		IdleTimeout:       120 * time.Second,

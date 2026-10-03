@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -124,6 +125,16 @@ func (h *Hub) every(ctx context.Context, name string, interval time.Duration, fn
 	go func() {
 		// Stagger start-up so we do not hit every upstream in the same second.
 		delay := time.Duration(rand.Int64N(int64(4 * time.Second)))
+		// Slow feeds whose cached copy is still fresh are not downloaded again on restart:
+		// CelesTrak in particular answers 403 to repeat downloads within its update cycle.
+		if interval >= time.Hour {
+			h.mu.RLock()
+			last := h.sources[name].UpdatedAt
+			h.mu.RUnlock()
+			if wait := time.Until(last.Add(interval)); wait > delay {
+				delay = wait
+			}
+		}
 		failures := 0
 		for {
 			select {
@@ -138,6 +149,10 @@ func (h *Hub) every(ctx context.Context, name string, interval time.Duration, fn
 				failures++
 				h.markSource(name, false)
 				backoff := min(interval, time.Duration(failures)*30*time.Second)
+				if errors.Is(err, errRateLimited) {
+					// Hammering a source that refused us risks a longer block; wait it out.
+					backoff = max(backoff, min(interval, 2*time.Hour))
+				}
 				h.log.Warn("feed failed", "feed", name, "err", err, "retry_in", backoff)
 				delay = backoff
 				continue
@@ -186,7 +201,7 @@ func (h *Hub) get(ctx context.Context, url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "KarmanEarth/1.0 (+https://github.com/adilemre)")
+	req.Header.Set("User-Agent", "KarmanEarth/1.0 (backend for the Karman iOS app)")
 	req.Header.Set("Accept", "application/json, */*")
 	resp, err := h.client.Do(req)
 	if err != nil {
@@ -195,6 +210,9 @@ func (h *Hub) get(ctx context.Context, url string) ([]byte, error) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		io.Copy(io.Discard, io.LimitReader(resp.Body, 1<<16))
+		if resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusTooManyRequests {
+			return nil, fmt.Errorf("GET %s: HTTP %d: %w", url, resp.StatusCode, errRateLimited)
+		}
 		return nil, fmt.Errorf("GET %s: HTTP %d", url, resp.StatusCode)
 	}
 	return io.ReadAll(io.LimitReader(resp.Body, 64<<20))
@@ -278,6 +296,8 @@ type diskCache struct {
 	Launches []planet.Launch               `json:"launches"`
 	NEOs     []planet.NEO                  `json:"neos"`
 	Sats     map[string][]planet.Satellite `json:"sats"`
+	// Sources remembers when each feed last succeeded, so restarts do not refetch fresh data.
+	Sources map[string]planet.SourceState `json:"sources,omitempty"`
 }
 
 func (h *Hub) cachePath() string { return filepath.Join(h.cacheDir, "planet-cache.json") }
@@ -295,6 +315,14 @@ func (h *Hub) loadCaches() {
 	h.quakes, h.events, h.aurora, h.space, h.launches, h.neos = c.Quakes, c.Events, c.Aurora, c.Space, c.Launches, c.NEOs
 	if c.Sats != nil {
 		h.sats = c.Sats
+	}
+	for name, st := range c.Sources {
+		// Only feeds whose data actually came back from the cache count as fresh.
+		if strings.HasPrefix(name, "celestrak-") && len(h.sats[strings.TrimPrefix(name, "celestrak-")]) == 0 {
+			continue
+		}
+		st.OK = true
+		h.sources[name] = st
 	}
 	h.log.Info("warm start from cache", "quakes", len(h.quakes), "events", len(h.events))
 }
@@ -316,7 +344,13 @@ func (h *Hub) PersistLoop(ctx context.Context) {
 
 func (h *Hub) persist() {
 	h.mu.RLock()
-	c := diskCache{Quakes: h.quakes, Events: h.events, Aurora: h.aurora, Space: h.space, Launches: h.launches, NEOs: h.neos, Sats: h.sats}
+	c := diskCache{Quakes: h.quakes, Events: h.events, Aurora: h.aurora, Space: h.space, Launches: h.launches, NEOs: h.neos, Sats: h.sats,
+		Sources: map[string]planet.SourceState{}}
+	for name, st := range h.sources {
+		if !st.UpdatedAt.IsZero() {
+			c.Sources[name] = st
+		}
+	}
 	b, err := json.Marshal(c)
 	h.mu.RUnlock()
 	if err != nil {
@@ -329,3 +363,6 @@ func (h *Hub) persist() {
 }
 
 var errNoData = errors.New("feed returned no usable data")
+
+// errRateLimited marks upstream refusals (403/429) that call for a long back-off.
+var errRateLimited = errors.New("rate limited by upstream")

@@ -27,7 +27,7 @@ settings:
     LOCALIZATION_PREFERS_STRING_CATALOGS: NO
     SWIFT_EMIT_LOC_STRINGS: YES
     # Kármán API (self-hosted). The pin is the base64 SHA-256 of the server's SubjectPublicKeyInfo.
-    KARMAN_API_BASE_URL: "https://92.5.38.182:8443"
+    KARMAN_API_BASE_URL: "https://92.5.38.182:9443"
     KARMAN_API_PIN: "5Nw6Cz7fhWbHzw/Z7+BR/2HQ8R97IW458jnXjOuI0ng="
   configs:
     Debug:

@@ -28,7 +28,7 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
 
     override init() {
         let info = Bundle.main.infoDictionary ?? [:]
-        let base = (info["KarmanAPIBaseURL"] as? String).flatMap { $0.isEmpty || $0.contains("$(") ? nil : $0 } ?? "https://92.5.38.182:8443"
+        let base = (info["KarmanAPIBaseURL"] as? String).flatMap { $0.isEmpty || $0.contains("$(") ? nil : $0 } ?? "https://92.5.38.182:9443"
         #if targetEnvironment(simulator)
         let override = ProcessInfo.processInfo.environment["KARMAN_API_BASE_URL"]
         baseURL = URL(string: override ?? base)!
