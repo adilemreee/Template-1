@@ -15,6 +15,8 @@
 - [Depo yapısı](#depo-yapısı)
 - [iOS uygulamasını derleme](#ios-uygulamasını-derleme)
 - [Sunucu (backend) kurulumu](#sunucu-backend-kurulumu)
+- [Tanıtım sitesi](#tanıtım-sitesi)
+- [Gizlilik ve Destek sayfaları](#gizlilik-ve-destek-sayfaları-app-store-için)
 - [Yapay zekâ (Claude) ayarları ve maliyet](#yapay-zekâ-claude-ayarları-ve-maliyet)
 - [Push bildirimleri (APNs)](#push-bildirimleri-apns)
 - [App Store'a gönderme kontrol listesi](#app-storea-gönderme-kontrol-listesi)
@@ -36,9 +38,9 @@
 | **Uzay Havası** | GOES-19 SUVI'den birkaç dakika önceki canlı Güneş görüntüsü (3 dalga boyu), Kp göstergesi, konumuna göre aurora görme ihtimali, gerçek kıtalar üzerinde kutup aurora haritası, güneş rüzgârı/Bz, X-ışını grafiği ve patlamalar, 3 günlük Kp tahmini, NOAA uyarıları. |
 | **Bu Gece Gökyüzü** | Ay evresi (NASA LRO dokusuyla render), ay doğuşu/batışı, 24 saatlik ışık zaman çizelgesi (altın/mavi saat), görünür ISS/Tiangong geçişleri + gök kubbesi çizimi ve hatırlatıcı, fırlatma geri sayımları, asteroit geçişleri. |
 | **Dünkü gerçek Dünya** | NASA GIBS VIIRS günlük mozaiği ile küre dünün gerçek bulut/tayfun/duman görüntüsüyle kaplanır. |
-| **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci sohbet asistanı. |
+| **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci sohbet asistanı. İlk sorudan önce Anthropic'i adıyla anan açık izin ekranı (App Store Kural 5.1.2(i)); izin Ayarlar'dan geri alınabilir. |
 | **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu (ISS + Tiangong); kilit ekranı widget'ları. |
-| **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım. |
+| **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım; fırlatma ertelenirse hatırlatıcı ve geri sayım kendini günceller. |
 | **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
 | **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü" — Eylem Düğmesi'ne de atanabilir. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
