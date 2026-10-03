@@ -21,6 +21,10 @@ enum ScreenshotDirector {
     }
 
     static func run(_ model: AppModel) async {
+        // KARMAN_SHIFT_HOURS=-6 lights the scene as it was six hours ago (e.g. a storm in daylight).
+        if let shift = ProcessInfo.processInfo.environment["KARMAN_SHIFT_HOURS"].flatMap(Double.init) {
+            model.globe.freezeTime(at: Date().addingTimeInterval(shift * 3600))
+        }
         if ["hero", "starlink", "briefing", "pulse"].contains(model.screenshotScene ?? "") {
             model.globe.set(pose: heroPose())
             model.globe.homePose = heroPose()

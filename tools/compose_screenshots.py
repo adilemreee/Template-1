@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Composes App Store marketing screenshots (1320x2868, 6.9" iPhone) from raw simulator captures.
-Usage: compose_screenshots.py <captures dir with en/ tr/> <output dir>
+Usage: compose_screenshots.py <captures dir with en/> <output dir>
 Renders HTML with headless Chrome so typography uses the system SF Pro faces.
 """
 import base64
@@ -15,34 +15,27 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 src, out = sys.argv[1], sys.argv[2]
 
 SHOTS = [
-    # (file, accent, en headline, en sub, tr headline, tr sub)
+    # (capture file, accent, headline, subline) — English only; the app ships in English.
     ("hero", "#7fd4ff",
-     "The whole planet.<br>Live.", "Earthquakes, storms, wildfires, aurora and satellites — in real time on a cinematic 3D Earth.",
-     "Bütün gezegen.<br>Canlı.", "Depremler, kasırgalar, yangınlar, aurora ve uydular — sinematik bir 3D Dünya'da, gerçek zamanlı."),
+     "The whole planet.<br>Live.", "Earthquakes, storms, wildfires, aurora and satellites — in real time on a cinematic 3D Earth."),
+    ("ride", "#7fd4ff",
+     "Ride with<br>the ISS.", "Fly 400 km up at 28,000 km/h, and watch the Sun rise every 92 minutes."),
+    ("closeup", "#ffcf7a",
+     "Dive into<br>any city.", "NASA imagery streams in at 500 m as you zoom — down to the street grids of light at night."),
     ("briefing_46", "#c9a8ff",
-     "Your planet,<br>narrated.", "An AI-written documentary of what's happening right now — flown in 3D, with word-synced captions.",
-     "Gezegenin belgeseli,<br>her gün.", "Yapay zekâ şu an olanları yazar ve seslendirir; kamera olayların üzerine uçar."),
-    ("quake", "#ff5c33",
-     "Feel every<br>earthquake.", "Depth, energy and aftershocks — plus a haptic seismogram you can feel in your hand.",
-     "Her depremi<br>hisset.", "Derinlik, enerji ve artçılar — üstelik elinde titreşen bir sismogram."),
-    ("starlink", "#8fb8ff",
-     "11,000 satellites.<br>Real orbits.", "The Space Station, Starlink and more — propagated live on your iPhone.",
-     "11.000 uydu.<br>Gerçek yörüngeler.", "Uzay İstasyonu, Starlink ve fazlası — iPhone'unda canlı hesaplanır."),
-    ("space", "#ffb04a",
-     "The Sun,<br>minutes ago.", "Live solar imagery from GOES-19, solar wind, flares — and your odds of seeing the aurora.",
-     "Güneş,<br>birkaç dakika önce.", "GOES-19'dan canlı Güneş görüntüleri, güneş rüzgârı, patlamalar ve aurora şansın."),
-    ("realearth", "#5ad0ff",
-     "Yesterday's Earth,<br>from orbit.", "NASA's daily satellite mosaic: the real clouds, typhoons and smoke, wrapped around the globe.",
-     "Dünkü Dünya,<br>yörüngeden.", "NASA'nın günlük uydu mozaiği: gerçek bulutlar, tayfunlar ve dumanlar kürenin üzerinde."),
-    ("sky", "#3dffa0",
-     "Know when<br>to look up.", "Space station passes, moonrise and golden hour — computed for exactly where you are.",
-     "Ne zaman bakacağını<br>bil.", "Uzay istasyonu geçişleri, ay doğuşu ve altın saat — tam bulunduğun yer için."),
-    ("ask", "#3dffa0",
-     "Ask the planet<br>anything.", "A planetary scientist that answers with live data from USGS, NOAA and NASA.",
-     "Gezegene her şeyi<br>sor.", "USGS, NOAA ve NASA'nın canlı verileriyle yanıt veren kişisel gezegen bilimcin."),
+     "Your planet,<br>narrated.", "An AI-written documentary of what's happening right now — flown in 3D, with word-synced captions."),
     ("storm", "#c9a8ff",
-     "Track every storm.", "Hurricanes and typhoons with their full tracks, wind speed and category — as they happen.",
-     "Her fırtınayı izle.", "Kasırgalar ve tayfunlar; tüm rotaları, rüzgâr hızları ve kategorileriyle, anbean."),
+     "Watch storms<br>breathe.", "Hurricanes and typhoons as living cloud spirals, with their tracks, wind speed and category."),
+    ("space", "#ffb04a",
+     "The Sun,<br>alive.", "Six hours of GOES-19 imagery as a time-lapse — plus solar wind, flares and your aurora odds."),
+    ("replay", "#3dffa0",
+     "Rewind<br>the planet.", "Replay the last 24 hours: daylight sweeps round the globe as every earthquake ripples in."),
+    ("quake", "#ff5c33",
+     "Feel every<br>earthquake.", "Depth, energy and aftershocks — plus a haptic seismogram you can feel in your hand."),
+    ("sky", "#3dffa0",
+     "Know when<br>to look up.", "Space station passes, moonrise and golden hour — computed for exactly where you are."),
+    ("ask", "#3dffa0",
+     "Ask the planet<br>anything.", "A planetary scientist that answers with live data from USGS, NOAA and NASA."),
 ]
 
 TEMPLATE = """<!doctype html><html><head><meta charset="utf-8"><style>
@@ -85,13 +78,12 @@ STARS = star_layer()
 
 
 def render(lang, idx, shot):
-    name, accent, en_h, en_s, tr_h, tr_s = shot
+    name, accent, headline, sub = shot
     path = os.path.join(src, lang, name + ".png")
     if not os.path.exists(path):
         print("missing", path)
         return
     img = base64.b64encode(open(path, "rb").read()).decode()
-    headline, sub = (en_h, en_s) if lang == "en" else (tr_h, tr_s)
     two_lines = "<br>" in headline
     page = TEMPLATE.format(accent=accent, stars=STARS, headline=headline, sub=html.escape(sub),
                            img=img, device_top=650 if two_lines else 560)
@@ -107,6 +99,5 @@ def render(lang, idx, shot):
     print("wrote", target)
 
 
-for lang in ("en", "tr"):
-    for i, shot in enumerate(SHOTS, start=1):
-        render(lang, i, shot)
+for i, shot in enumerate(SHOTS, start=1):
+    render("en", i, shot)

@@ -118,6 +118,14 @@ final class GlobeController {
         sceneVersion &+= 1
     }
 
+    #if DEBUG
+    /// Screenshots only: render the scene's lighting at a fixed instant (the data stays live).
+    func freezeTime(at date: Date) {
+        replay = Replay(from: date, to: date, startedAt: CACurrentMediaTime(), duration: 1)
+        sceneVersion &+= 1
+    }
+    #endif
+
     func stopReplay() {
         replay = nil
         autoRotate = true

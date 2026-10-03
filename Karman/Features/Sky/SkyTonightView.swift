@@ -410,40 +410,67 @@ struct RideAlongCard: View {
 
     var body: some View {
         Card(padding: 0) {
-            ZStack(alignment: .bottomLeading) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("RIDE ALONG").eyebrow(Theme.ice)
+                Text("Fly with the ISS").font(.display(20, weight: .bold)).foregroundStyle(.white)
+                Text("400 km up at 28,000 km/h, with a sunrise every 92 minutes.")
+                    .font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
+                Button {
+                    model.startRideAlong()
+                } label: {
+                    Label("Ride with the ISS", systemImage: "airplane.departure").frame(maxWidth: .infinity)
+                }
+                .primaryAction()
+                .controlSize(.large)
+                .padding(.top, 4)
+            }
+            .padding(16)
+            .padding(.top, 64)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
                 TimelineView(.animation(minimumInterval: 1 / 30)) { ctx in
                     let t = ctx.date.timeIntervalSinceReferenceDate
                     Canvas { g, size in
-                        // A curved horizon with an atmosphere glow, like the view from orbit.
-                        let r = size.width * 1.6
-                        let c = CGPoint(x: size.width * 0.5 + sin(t * 0.05) * 18, y: size.height + r * 0.82)
-                        let earth = Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2))
-                        g.fill(earth, with: .linearGradient(Gradient(colors: [Color(red: 0.08, green: 0.22, blue: 0.42), .black]),
-                                                             startPoint: CGPoint(x: c.x, y: c.y - r), endPoint: CGPoint(x: c.x, y: c.y - r * 0.7)))
-                        g.stroke(earth, with: .color(Color(red: 0.45, green: 0.75, blue: 1.0).opacity(0.85)), lineWidth: 2)
-                        g.addFilter(.blur(radius: 10))
-                        g.stroke(earth, with: .color(Color(red: 0.35, green: 0.6, blue: 1.0).opacity(0.7)), lineWidth: 14)
+                        // Stars, a curved horizon with its blue atmosphere, and the station gliding over it.
+                        var rng = SeededRandom(seed: 7)
+                        for _ in 0..<40 {
+                            let p = CGPoint(x: rng.next() * size.width, y: rng.next() * size.height * 0.75)
+                            let r = 0.6 + rng.next() * 1.1
+                            g.fill(Path(ellipseIn: CGRect(x: p.x - r / 2, y: p.y - r / 2, width: r, height: r)),
+                                   with: .color(.white.opacity(0.25 + rng.next() * 0.55)))
+                        }
+                        let radius = size.width * 1.5
+                        let centre = CGPoint(x: size.width * 0.5 + sin(t * 0.06) * 14, y: size.height * 0.8 + radius)
+                        let earth = Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2))
+                        var glow = g
+                        glow.addFilter(.blur(radius: 18))
+                        glow.stroke(earth, with: .color(Color(red: 0.25, green: 0.55, blue: 1.0).opacity(0.9)), lineWidth: 26)
+                        g.fill(earth, with: .linearGradient(Gradient(colors: [Color(red: 0.12, green: 0.32, blue: 0.62), Color(red: 0.02, green: 0.06, blue: 0.14)]),
+                                                             startPoint: CGPoint(x: centre.x, y: centre.y - radius),
+                                                             endPoint: CGPoint(x: centre.x, y: centre.y - radius + size.height * 0.3)))
+                        g.stroke(earth, with: .color(Color(red: 0.6, green: 0.85, blue: 1.0).opacity(0.9)), lineWidth: 1.5)
+                        // The ISS crossing the frame every ~12 s.
+                        let x = (t / 12).truncatingRemainder(dividingBy: 1) * (size.width + 60) - 30
+                        let iss = CGRect(x: x - 2.5, y: size.height * 0.36 - 2.5, width: 5, height: 5)
+                        var halo = g
+                        halo.addFilter(.blur(radius: 4))
+                        halo.fill(Path(ellipseIn: iss.insetBy(dx: -3, dy: -3)), with: .color(.white.opacity(0.7)))
+                        g.fill(Path(ellipseIn: iss), with: .color(.white))
                     }
-                    .background(Color(red: 0.01, green: 0.015, blue: 0.03))
+                    .background(LinearGradient(colors: [Color(red: 0.0, green: 0.01, blue: 0.03), Color(red: 0.02, green: 0.04, blue: 0.09)],
+                                               startPoint: .top, endPoint: .bottom))
                 }
-                .frame(height: 150)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("RIDE ALONG").eyebrow(Theme.ice)
-                    Text("Fly with the ISS").font(.display(20, weight: .bold)).foregroundStyle(.white)
-                    Text("400 km up at 28,000 km/h, with a sunrise every 92 minutes.")
-                        .font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
-                    Button {
-                        model.startRideAlong()
-                    } label: {
-                        Label("Ride with the ISS", systemImage: "airplane.departure").frame(maxWidth: .infinity)
-                    }
-                    .primaryAction()
-                    .controlSize(.large)
-                    .padding(.top, 4)
-                }
-                .padding(16)
-                .padding(.top, 70)
             }
         }
+    }
+}
+
+/// Tiny deterministic generator so decorative stars stay put between frames.
+struct SeededRandom {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed &* 0x9E3779B97F4A7C15 }
+    mutating func next() -> Double {
+        state = state &* 6364136223846793005 &+ 1442695040888963407
+        return Double(state >> 11) / Double(1 << 53)
     }
 }

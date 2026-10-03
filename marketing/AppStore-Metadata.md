@@ -1,6 +1,6 @@
 # Kármán — App Store metadata
 
-All fields are within App Store Connect limits (checked). Screenshots: `marketing/appstore/{en,tr}/` (1320×2868, 6.9" iPhone). App Previews: `marketing/app-preview/karman-preview-en-886x1920.mp4` and `karman-preview-tr-886x1920.mp4` (28.6 s each, 886×1920, H.264 + AAC stereo, generative soundtrack).
+All fields are within App Store Connect limits (checked). Screenshots: `marketing/appstore/en/` (10 images, 1320×2868, 6.9" iPhone). App Preview: `marketing/app-preview/karman-preview-en-886x1920.mp4` (29.3 s, 886×1920, H.264 + AAC stereo, generative soundtrack): intro → riding with the ISS through an orbital sunrise → diving into New York at night → the 24-hour replay → a typhoon spiral.
 
 ## Business setup
 
@@ -27,11 +27,11 @@ Why paid up front: the Top Paid chart only ranks paid downloads, and "one purcha
 
 **Subtitle (28/30):** Quakes, storms, aurora & ISS
 
-**Promotional text (159/170):**
-The whole planet, live. Watch earthquakes, hurricanes, wildfires, aurora and 11,000 satellites on a cinematic 3D Earth — and let the planet brief you each day.
+**Promotional text (151/170):**
+Ride with the ISS, rewind the last 24 hours and dive into any city at 500 m. The whole planet, live on a cinematic 3D Earth — narrated by AI every day.
 
-**Keywords (97/100):**
-`earthquake,hurricane,satellite,space weather,typhoon,starlink,nasa,kp index,globe,tsunami,volcano`
+**Keywords (93/100):**
+`earthquake,hurricane,iss,satellite,space weather,typhoon,starlink,nasa,kp index,globe,volcano`
 
 **Description:**
 
@@ -39,14 +39,23 @@ See the whole planet, live — the way astronauts do.
 
 Kármán renders a cinematic, real-time Earth: city lights on the night side, a glowing atmosphere, real relief and clouds, the Sun rising over the limb. On top of it, everything that is happening right now: earthquakes pulsing as they strike, hurricanes and typhoons with their full tracks, wildfires, volcanoes, the aurora driven by NOAA's live model, rocket launches, and more than 11,000 satellites on their real orbits.
 
+RIDE WITH THE ISS
+Fly along with the International Space Station, 400 km up at 28,000 km/h. The camera chases the station over the curve of the Earth as city lights, aurora and the thin green airglow slide by — with a countdown to the next orbital sunrise.
+
+REWIND THE PLANET
+Replay the last 24 hours in half a minute: daylight sweeps round the globe, the stars wheel overhead and every earthquake ripples in where and when it happened.
+
+DIVE INTO ANY CITY
+Zoom in and NASA imagery streams in at 500 m: mountain ranges in shaded relief by day, and at night the street grids of light of New York, Istanbul or Tokyo.
+
 PLANET BRIEFING — YOUR DAILY DOCUMENTARY
 Press play and Kármán flies you around the globe. An AI narrator writes a short documentary from the latest data — the strongest earthquake, the storm to watch, tonight's aurora, the next launch — and reads it to you while the camera swoops in. Captions light up word by word over a generative ambient score.
 
 FEEL EVERY EARTHQUAKE
-Tap a quake to see its depth in a living cross-section of the crust, the energy it released, nearby aftershocks — and press "Feel it" to hold a haptic seismogram in your hand.
+Tap a quake to see its depth in a living cross-section of the crust, the energy it released, nearby aftershocks — and press "Feel it" to hold a haptic seismogram in your hand. Hurricanes and typhoons turn as living cloud spirals with their full tracks.
 
-THE SUN, MINUTES AGO
-Live imagery of the Sun from the GOES-19 satellite, solar wind speed and magnetic field, X-ray flares, the Kp index and a 3-day forecast. A polar map of the auroral oval shows where the northern and southern lights are glowing right now — and your own odds of seeing them.
+THE SUN, ALIVE
+The last six hours of the Sun from the GOES-19 satellite as a time-lapse, solar wind speed and magnetic field, X-ray flares, the Kp index and a 3-day forecast. A polar map of the auroral oval shows where the northern and southern lights are glowing right now — and your own odds of seeing them.
 
 TONIGHT'S SKY
 Space station passes for exactly where you are, drawn on a sky dome, plus moonrise, the Moon's phase, golden hour and blue hour. Get a reminder before the station flies over.
@@ -58,7 +67,7 @@ ASK THE PLANET
 Ask anything — "Why was there an earthquake near Japan?", "Could I see the aurora tonight?" — and get a clear answer grounded in live data from USGS, NOAA and NASA.
 
 ON YOUR HOME SCREEN
-Earth Now, Aurora & Kp and Space Station widgets, including Lock Screen widgets. Rocket launch countdowns live on your Lock Screen and in the Dynamic Island. Optional alerts for nearby earthquakes, aurora, geomagnetic storms and launches. Siri and Shortcuts can play your briefing.
+Earth Now, Aurora & Kp and Space Station widgets, including Lock Screen widgets. Rocket launch countdowns live on your Lock Screen and in the Dynamic Island. Optional alerts for nearby earthquakes, aurora, geomagnetic storms and launches. Add a Planet Briefing control to Control Center or the Action button, or ask Siri to "Ride with the ISS".
 
 SHARE THE MOMENT
 Turn the planet right now into a beautiful postcard — the live globe, the date and the day's numbers — and share it anywhere.
@@ -73,55 +82,9 @@ The living planet, live. Welcome to Kármán.
 
 ---
 
-## Türkçe
+## Turkish listing
 
-**Ad (19/30):** Kármán: Canlı Dünya
-
-**Alt başlık (28/30):** Deprem, fırtına, aurora, ISS
-
-**Tanıtım metni (153/170):**
-Bütün gezegen, canlı. Depremleri, kasırgaları, yangınları, aurorayı ve 11.000 uyduyu sinematik bir 3D Dünya'da izle; gezegen sana her gün brifing versin.
-
-**Anahtar kelimeler (90/100):**
-`kutup ışığı,kasırga,uydu,uzay havası,tayfun,starlink,nasa,güneş,küre,tsunami,volkan,yangın`
-
-**Açıklama:**
-
-Bütün gezegeni canlı gör — astronotların gördüğü gibi.
-
-Kármán sinematik, gerçek zamanlı bir Dünya çizer: gece tarafında şehir ışıkları, parlayan bir atmosfer, gerçek rölyef ve bulutlar, ufkun ardından doğan Güneş. Ve üzerinde şu an olan her şey: gerçekleştiği anda nabız gibi atan depremler, tüm rotalarıyla kasırgalar ve tayfunlar, orman yangınları, volkanlar, NOAA'nın canlı modeliyle aurora, roket fırlatmaları ve gerçek yörüngelerinde 11.000'den fazla uydu.
-
-GEZEGEN BRİFİNGİ — HER GÜN SANA ÖZEL BELGESEL
-Oynat'a bas, Kármán seni dünyanın etrafında uçursun. Yapay zekâ en güncel verilerden kısa bir belgesel yazar — en güçlü deprem, takip edilmesi gereken fırtına, bu geceki aurora, sıradaki fırlatma — ve kamera olayların üzerine süzülürken sana okur. Altyazılar kelime kelime, üretken bir ambiyans müziği eşliğinde yanar.
-
-HER DEPREMİ HİSSET
-Bir depreme dokun; yer kabuğunun canlı kesitinde derinliğini, açığa çıkan enerjiyi ve yakın artçıları gör — "Hisset"e basıp elinde titreşen bir sismogram tut.
-
-GÜNEŞ, BİRKAÇ DAKİKA ÖNCE
-GOES-19 uydusundan canlı Güneş görüntüleri, güneş rüzgârının hızı ve manyetik alanı, X-ışını patlamaları, Kp endeksi ve 3 günlük tahmin. Kutup haritasındaki aurora ovali, kuzey ve güney ışıklarının şu an nerede parladığını — ve senin görme şansını — gösterir.
-
-BU GECE GÖKYÜZÜ
-Tam bulunduğun yer için uzay istasyonu geçişleri gök kubbesinde çizilir; ay doğuşu, Ay'ın evresi, altın saat ve mavi saat de cabası. İstasyon tependen geçmeden önce hatırlatma al.
-
-DÜNKÜ DÜNYA, YÖRÜNGEDEN
-NASA'nın günlük uydu mozaiğini aç ve küreyi dünün gerçek bulutları, tayfunları ve dumanlarıyla kapla.
-
-GEZEGENE SOR
-Her şeyi sor — "Japonya yakınında neden deprem oldu?", "Bu gece aurorayı görebilir miyim?" — ve USGS, NOAA ve NASA'nın canlı verilerine dayanan net yanıtlar al.
-
-ANA EKRANINDA
-Şu An Dünya, Aurora ve Kp, Uzay İstasyonu widget'ları; kilit ekranı widget'ları dahil. Roket fırlatma geri sayımları kilit ekranında ve Dynamic Island'da canlı. Yakın depremler, aurora, jeomanyetik fırtınalar ve fırlatmalar için isteğe bağlı uyarılar. Brifingini Siri ve Kestirmeler ile başlat.
-
-ANI PAYLAŞ
-Gezegenin şu anını güzel bir kartpostala dönüştür — canlı küre, tarih ve günün sayıları — ve dilediğin yerde paylaş.
-
-TEK SATIN ALMA. HER ŞEY, SONSUZA DEK.
-Abonelik yok. Reklam yok. Hesap yok. Takip yok. Hassas konumun iPhone'undan asla çıkmaz.
-
-Veriler: USGS, NOAA Uzay Havası Tahmin Merkezi, NASA (EONET, GIBS, Visible Earth, NeoWs), CelesTrak, The Space Devs.
-
-**Yenilikler (1.0):**
-Yaşayan gezegen, canlı. Kármán'a hoş geldin.
+Removed: the app ships in English only. App Store Connect will show the English listing in every storefront, including Turkey.
 
 ---
 

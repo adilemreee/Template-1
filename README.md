@@ -4,7 +4,7 @@
 
 **Kármán**, gezegende şu an olan her şeyi sinematik bir 3D Dünya üzerinde canlı gösteren, yapay zekâ ile her gün seslendirmeli bir "belgesel turu" hazırlayan premium (tek seferlik ücretli) bir iOS uygulamasıdır. Adını, uzayın başladığı kabul edilen 100 km'lik **Kármán çizgisinden** alır — uygulamanın bakış açısı tam olarak orası.
 
-![Kármán](marketing/appstore/tr/01_hero.png)
+![Kármán](marketing/appstore/en/01_hero.png)
 
 ---
 
@@ -38,15 +38,20 @@
 | **Uzay Havası** | GOES-19 SUVI'den birkaç dakika önceki canlı Güneş görüntüsü (3 dalga boyu), Kp göstergesi, konumuna göre aurora görme ihtimali, gerçek kıtalar üzerinde kutup aurora haritası, güneş rüzgârı/Bz, X-ışını grafiği ve patlamalar, 3 günlük Kp tahmini, NOAA uyarıları. |
 | **Bu Gece Gökyüzü** | Ay evresi (NASA LRO dokusuyla render), ay doğuşu/batışı, 24 saatlik ışık zaman çizelgesi (altın/mavi saat), görünür ISS/Tiangong geçişleri + gök kubbesi çizimi ve hatırlatıcı, fırlatma geri sayımları, asteroit geçişleri. |
 | **Dünkü gerçek Dünya** | NASA GIBS VIIRS günlük mozaiği ile küre dünün gerçek bulut/tayfun/duman görüntüsüyle kaplanır. |
+| **ISS ile uç** | Kamera Uluslararası Uzay İstasyonu'nu arkasından takip eder: 400 km yükseklikte, 28.000 km/sa; altında şehir ışıkları, aurora ve ince yeşil hava ışıması (airglow) kayar. Hız, irtifa, altındaki bölge ve bir sonraki yörünge gün doğumu/batımı geri sayımı. Siri: "Ride with the ISS in Kármán". |
+| **Son 24 saati oynat** | Son günü 36 saniyede yeniden oynatır: gündüz küre üzerinde döner, yıldızlar yıldız zamanıyla döner, her deprem olduğu yerde ve anda dalgalanır; M5+ depremler dokunsal titreşim ve bildirimle. |
+| **Yakın plan netliği** | Yaklaştıkça NASA GIBS'ten 500 m çözünürlüklü karolar akar: gündüz gölgeli kabartmalı Blue Marble, gece Black Marble şehir ışıkları. Karolar diskte önbelleğe alınır. |
+| **Canlı Güneş** | GOES-19 SUVI'den son 6 saatin 24 karelik time-lapse'i, parıltılı (bloom) ve kenarı yumuşak kompozisyonla. |
+| **Fırtına sarmalları** | Kasırga ve tayfunlar rüzgâr hızına göre boyutlanan, kuzeyde saat yönünün tersine, güneyde saat yönünde dönen prosedürel bulut sarmalları olarak çizilir. |
+| **Denetim Merkezi kontrolü** | "Planet Briefing" kontrolü Denetim Merkezi'ne, Kilit Ekranı'na veya Eylem Düğmesi'ne eklenebilir. |
 | **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci sohbet asistanı. İlk sorudan önce Anthropic'i adıyla anan açık izin ekranı (App Store Kural 5.1.2(i)); izin Ayarlar'dan geri alınabilir. |
 | **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu (ISS + Tiangong); kilit ekranı widget'ları. |
 | **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım; fırlatma ertelenirse hatırlatıcı ve geri sayım kendini günceller. |
 | **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
 | **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü" — Eylem Düğmesi'ne de atanabilir. |
-| **Denetim Merkezi kontrolü** | "Gezegen Brifingi" kontrolü Denetim Merkezi'ne, Kilit Ekranı'na veya Eylem Düğmesi'ne eklenir; dokununca uygulama doğrudan brifingle açılır. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
 | **Gizlilik** | Hesap yok, reklam yok, takip yok. Hassas konum cihazdan çıkmaz (sunucuya ~50 km yuvarlanmış gider). |
-| **Dil** | İngilizce + tam Türkçe yerelleştirme. |
+| **Dil** | Yalnızca İngilizce (arayüz, Siri, widget'lar, brifing ve yanıtlar). Bölge biçimi farklı cihazlarda sayı ve tarih biçimi de İngilizceye sabitlenir. |
 
 ## Mimari
 
@@ -75,7 +80,7 @@ Karman/                 iOS uygulaması
   Render/               Metal renderer, kamera, shader'lar (Shaders/Globe.metal)
   Features/             Globe HUD, Briefing, SpaceWeather, Sky, Ask, Events, Settings
   Core/                 servisler (veri, konum, uydu motoru, bildirim, haptik, AI)
-  Resources/            NASA dokuları, yıldız kataloğu, tr.lproj, ikon
+  Resources/            NASA dokuları, yıldız kataloğu, ikon
 KarmanWidgets/          WidgetKit eklentisi
 Shared/                 uygulama + widget ortak kod (modeller, API istemcisi, SGP4, astronomi)
 KarmanTests/            birim testleri
@@ -191,8 +196,8 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] App Store Connect'te uygulamayı oluştur: ad **Kármán: Live Earth**, bundle `com.adilemre.karman`.
 - [ ] Fiyat: **9,99 USD** (ücretli; abonelik yok). Gerekçe `marketing/AppStore-Metadata.md` içinde.
 - [ ] Meta veriler (EN + TR, karakter sınırları kontrol edildi): `marketing/AppStore-Metadata.md`.
-- [ ] Ekran görüntüleri (6.9", 1320×2868): `marketing/appstore/en/` ve `marketing/appstore/tr/`.
-- [ ] Uygulama önizlemeleri (886×1920, 28,6 sn): `marketing/app-preview/karman-preview-en-886x1920.mp4` ve `karman-preview-tr-886x1920.mp4`.
+- [ ] Ekran görüntüleri (6.9", 1320×2868, 10 adet): `marketing/appstore/en/`.
+- [ ] Uygulama önizlemesi (886×1920): `marketing/app-preview/karman-preview-en-886x1920.mp4`.
 - [ ] Gizlilik politikası ve Destek URL'leri: `/privacy` ve `/support` sayfalarını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages). İstersen `KARMAN_SUPPORT_EMAIL` ile destek sayfasına iletişim adresi ekle.
 - [ ] Yapay zekâ veri paylaşımı (Kural 5.1.2(i)): "Kármán'a Sor" ilk sorudan önce Anthropic'i adıyla anan tek seferlik bir izin ekranı gösterir; izin Ayarlar → Kármán'a Sor'dan geri alınabilir. İnceleme notu `marketing/AppStore-Metadata.md` içinde hazır.
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
