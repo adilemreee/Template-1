@@ -157,7 +157,11 @@ struct SunViewer: View {
         }
         guard loop?.band != b else { return }
         // Only one band's time-lapse stays decoded at a time (about 25 MB).
-        guard let list = try? await APIClient.shared.sunFrames(band: b), list.frames.count > 1 else { return }
+        guard let all = try? await APIClient.shared.sunFrames(band: b), all.frames.count > 1 else { return }
+        // Devices with less memory keep every other frame (half-hourly): ~28 MB instead of ~57 MB.
+        let stride = GlobeRenderer.isHighEnd ? 1 : 2
+        let frames = all.frames.enumerated().filter { $0.offset % stride == 0 || $0.offset == all.frames.count - 1 }.map(\.element)
+        let list = APIClient.SunFrames(frames: frames)
         var images = [UIImage?](repeating: nil, count: list.frames.count)
         await withTaskGroup(of: (Int, UIImage?).self) { group in
             for (i, f) in list.frames.enumerated() {
