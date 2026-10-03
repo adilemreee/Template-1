@@ -107,6 +107,17 @@ nonisolated enum SkyLensMath {
         return out
     }
 
+    /// Device orientation for looking toward an altitude and azimuth with the phone upright
+    /// (drag-to-look planetarium mode).
+    static func lookRotation(altitude: Double, azimuth: Double) -> Mat3 {
+        let f = local(altitude: max(-89, min(89, altitude)), azimuth: azimuth)
+        let up = SIMD3<Double>(0, 0, 1)
+        var r = SIMD3(f.y * up.z - f.z * up.y, f.z * up.x - f.x * up.z, f.x * up.y - f.y * up.x)
+        r /= (r * r).sum().squareRoot()
+        let u = SIMD3(r.y * f.z - r.z * f.y, r.z * f.x - r.x * f.z, r.x * f.y - r.y * f.x)
+        return Mat3(r0: r, r1: u, r2: -f)
+    }
+
     /// Angle in degrees between two directions.
     static func angle(_ a: SIMD3<Double>, _ b: SIMD3<Double>) -> Double {
         let la = (a * a).sum().squareRoot(), lb = (b * b).sum().squareRoot()

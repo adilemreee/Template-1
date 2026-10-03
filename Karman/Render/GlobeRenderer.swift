@@ -31,8 +31,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var stormPSO: MTLRenderPipelineState!
     private var satellitePSO: MTLRenderPipelineState!
     private var pathPSO: MTLRenderPipelineState!
-    private var windPSO: MTLRenderPipelineState!
-    private var windStepPSO: MTLComputePipelineState!
+    /// Optional: if either fails to build, the globe simply goes without wind.
+    private var windPSO: MTLRenderPipelineState?
+    private var windStepPSO: MTLComputePipelineState?
     private var prefilterPSO: MTLRenderPipelineState!
     private var downsamplePSO: MTLRenderPipelineState!
     private var upsamplePSO: MTLRenderPipelineState!
@@ -136,7 +137,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             print("Pipeline error: \(error)")
             return nil
         }
-        weatherLayer = WeatherLayer(device: device, stepPSO: windStepPSO, drawPSO: windPSO)
+        if let windStepPSO, let windPSO {
+            weatherLayer = WeatherLayer(device: device, stepPSO: windStepPSO, drawPSO: windPSO)
+        }
         weatherPlaceholder = makeWeatherPlaceholder()
         buildPlateBuffers()
         earthMesh = MetalResources.sphere(device: device, segments: 256, rings: 128)
@@ -235,9 +238,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         stormPSO = try pipeline("storm_vertex", "storm_fragment", blend: .premultiplied)
         satellitePSO = try pipeline("satellite_vertex", "satellite_fragment", blend: .additive)
         pathPSO = try pipeline("path_vertex", "path_fragment", blend: .additive)
-        windPSO = try pipeline("wind_vertex", "wind_fragment", blend: .additive)
-        guard let step = fn("wind_step") else { throw NSError(domain: "Karman", code: 2) }
-        windStepPSO = try device.makeComputePipelineState(function: step)
+        windPSO = try? pipeline("wind_vertex", "wind_fragment", blend: .additive)
+        windStepPSO = fn("wind_step").flatMap { try? device.makeComputePipelineState(function: $0) }
         prefilterPSO = try pipeline("fullscreen_vertex", "bloom_prefilter", blend: .opaque, depth: false, samples: 1)
         downsamplePSO = try pipeline("fullscreen_vertex", "bloom_downsample", blend: .opaque, depth: false, samples: 1)
         upsamplePSO = try pipeline("fullscreen_vertex", "bloom_upsample", blend: .additive, depth: false, samples: 1)

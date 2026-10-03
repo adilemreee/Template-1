@@ -161,7 +161,6 @@ final class GlobeController {
     func playForecast(span: Double) {
         let start = forecastHours >= span - 0.25 ? 0 : forecastHours
         forecastPlayback = (CACurrentMediaTime(), start, span)
-        autoRotate = false
     }
 
     func pauseForecast() {

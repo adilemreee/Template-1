@@ -221,6 +221,7 @@ private struct PanelDetents: ViewModifier {
             content
                 .presentationDetents([.medium, .large], selection: $model.askDetent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .onAppear { model.askDetent = .large }
         case .pulse:
             content.presentationDetents([.medium, .large])
         default:

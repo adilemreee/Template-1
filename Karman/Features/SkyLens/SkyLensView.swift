@@ -112,9 +112,22 @@ final class SkyLensEngine {
 /// Point the phone at the sky: stars, constellations, planets, the Moon and the space stations,
 /// labelled where they really are, with a finder that guides you to any of them.
 struct SkyLensView: View {
+    /// Built once per presentation (it owns the sensors and parses the star catalogue).
+    @State private var engine: SkyLensEngine?
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            if let engine { SkyLensScreen(engine: engine) }
+        }
+        .onAppear { if engine == nil { engine = SkyLensEngine() } }
+    }
+}
+
+private struct SkyLensScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
-    @State private var engine = SkyLensEngine()
+    let engine: SkyLensEngine
     @State private var cameraOn = false
     @State private var nightMode = false
     @State private var fov = 66.0
@@ -124,6 +137,18 @@ struct SkyLensView: View {
     @State private var showPicker = false
     @State private var cameraDenied = false
     @State private var canvasSize: CGSize = .zero
+    /// Drag-to-look planetarium mode (always on without motion sensors, e.g. in the simulator).
+    @State private var manual = false
+    @State private var lookAzimuth = 180.0
+    @State private var lookAltitude = 35.0
+    @State private var dragStart: (az: Double, alt: Double)?
+
+    private var usesManual: Bool { manual || !engine.motion.isAvailable }
+
+    /// Where the phone is looking: from Core Motion, or from dragging in planetarium mode.
+    private func currentOrientation() -> Mat3? {
+        usesManual ? SkyLensMath.lookRotation(altitude: lookAltitude, azimuth: lookAzimuth) : engine.motion.deviceFromLocal
+    }
 
     var body: some View {
         ZStack {
@@ -190,13 +215,23 @@ struct SkyLensView: View {
             Canvas { ctx, size in
                 engine.motion.update()
                 engine.update(observer: observer, now: timeline.date, satellites: model.satellites)
-                guard let deviceFromLocal = engine.motion.deviceFromLocal else { return }
+                guard let deviceFromLocal = currentOrientation() else { return }
                 draw(&ctx, size: size, deviceFromLocal: deviceFromLocal)
             }
         }
         .contentShape(Rectangle())
         .onGeometryChange(for: CGSize.self) { $0.size } action: { canvasSize = $0 }
         .onTapGesture { point in focus(at: point) }
+        .simultaneousGesture(DragGesture(minimumDistance: 8)
+            .onChanged { value in
+                guard usesManual, canvasSize.height > 0 else { return }
+                let start = dragStart ?? (lookAzimuth, lookAltitude)
+                dragStart = start
+                let degreesPerPoint = verticalFOV / Double(canvasSize.height)
+                lookAzimuth = (start.az - Double(value.translation.width) * degreesPerPoint + 360).truncatingRemainder(dividingBy: 360)
+                lookAltitude = max(-30, min(89, start.alt + Double(value.translation.height) * degreesPerPoint))
+            }
+            .onEnded { _ in dragStart = nil })
         .accessibilityElement()
         .accessibilityLabel(Text("Sky Lens. Point your phone at the sky."))
         .accessibilityValue(Text(focused.map { "\($0.name). \($0.detail)" } ?? ""))
@@ -374,7 +409,7 @@ struct SkyLensView: View {
     }
 
     private func focus(at point: CGPoint) {
-        guard let dfl = engine.motion.deviceFromLocal else { return }
+        guard let dfl = currentOrientation() else { return }
         let size = canvasSize
         guard size.height > 0 else { return }
         let center = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -404,13 +439,26 @@ struct SkyLensView: View {
                     Text(statusLine).font(.system(size: 11, weight: .medium)).foregroundStyle(Theme.textSecondary).lineLimit(1)
                 }
                 Spacer()
-                Button {
-                    toggleCamera()
-                } label: {
-                    Image(systemName: cameraOn ? "camera.fill" : "camera").font(.system(size: 15, weight: .semibold)).frame(width: 40, height: 40)
+                if engine.motion.isAvailable {
+                    Button {
+                        Haptics.shared.select()
+                        manual.toggle()
+                        if manual && cameraOn { toggleCamera() }
+                    } label: {
+                        Image(systemName: manual ? "hand.draw.fill" : "iphone.gen3.motion").font(.system(size: 15, weight: .semibold)).frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.glass)
+                    .accessibilityLabel(Text(manual ? "Use the motion sensors" : "Drag to look around"))
                 }
-                .buttonStyle(.glass)
-                .accessibilityLabel(Text(cameraOn ? "Hide the camera" : "Show the camera"))
+                if !usesManual {
+                    Button {
+                        toggleCamera()
+                    } label: {
+                        Image(systemName: cameraOn ? "camera.fill" : "camera").font(.system(size: 15, weight: .semibold)).frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.glass)
+                    .accessibilityLabel(Text(cameraOn ? "Hide the camera" : "Show the camera"))
+                }
                 Button {
                     Haptics.shared.select()
                     nightMode.toggle()
@@ -423,7 +471,7 @@ struct SkyLensView: View {
             }
             .padding(.horizontal, 16)
             .padding(.top, 6)
-            if engine.motion.calibration == .uncalibrated || engine.motion.calibration == .low {
+            if !usesManual && (engine.motion.calibration == .uncalibrated || engine.motion.calibration == .low) {
                 Label("Wave your phone in a figure eight to calibrate the compass", systemImage: "infinity")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.white)
@@ -454,6 +502,7 @@ struct SkyLensView: View {
         if let target = model.skyLensTarget, let (_, name) = engine.direction(of: target) {
             return foundTarget ? String(localized: "Found \(name)") : String(localized: "Follow the arrow to \(name)")
         }
+        if usesManual { return String(localized: "Drag to look around · pinch to zoom") }
         return cameraOn ? String(localized: "Live view · pinch is off with the camera") : String(localized: "Pinch to zoom · tap a light to name it")
     }
 

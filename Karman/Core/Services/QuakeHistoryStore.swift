@@ -11,7 +11,7 @@ final class QuakeHistoryStore {
     private(set) var failed = false
     @ObservationIgnored private var loadedAt: Date?
 
-    private static var cacheURL: URL {
+    nonisolated private static var cacheURL: URL {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appending(path: "quakes-year.json")
     }
 
@@ -25,7 +25,7 @@ final class QuakeHistoryStore {
     /// The year, fresh enough to replay (cached for 12 hours; stale data beats none when offline).
     func load() async -> APIClient.QuakeYear? {
         if let year, let loadedAt, Date().timeIntervalSince(loadedAt) < 12 * 3600 { return year }
-        if year == nil, let (cached, savedAt) = Self.readCache() {
+        if year == nil, let (cached, savedAt) = await Task.detached(priority: .userInitiated, operation: { Self.readCache() }).value {
             year = cached
             loadedAt = savedAt
             if Date().timeIntervalSince(savedAt) < 12 * 3600 { return cached }
@@ -61,13 +61,13 @@ final class QuakeHistoryStore {
         return t
     }
 
-    private static func sorted(_ y: APIClient.QuakeYear) -> APIClient.QuakeYear {
+    nonisolated private static func sorted(_ y: APIClient.QuakeYear) -> APIClient.QuakeYear {
         var y = y
         y.quakes.sort { $0.time < $1.time }
         return y
     }
 
-    private static func readCache() -> (APIClient.QuakeYear, Date)? {
+    nonisolated private static func readCache() -> (APIClient.QuakeYear, Date)? {
         guard let data = try? Data(contentsOf: cacheURL),
               let y = try? KarmanJSON.decoder().decode(APIClient.QuakeYear.self, from: data),
               let attrs = try? FileManager.default.attributesOfItem(atPath: cacheURL.path()),

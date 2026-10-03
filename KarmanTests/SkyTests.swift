@@ -54,3 +54,16 @@ final class SkyTests: XCTestCase {
         XCTAssertEqual(sky.stars.first?.name, "Sirius")
     }
 }
+
+final class SkyLensLookTests: XCTestCase {
+    /// Drag-to-look: the chosen direction sits at the screen centre, higher is up, clockwise is right.
+    func testLookRotation() {
+        for (alt, az) in [(0.0, 0.0), (35, 180), (60, 75), (-20, 300)] {
+            let m = SkyLensMath.lookRotation(altitude: alt, azimuth: az)
+            let d = m.apply(SkyLensMath.local(altitude: alt, azimuth: az))
+            XCTAssertEqual(d.z, -1, accuracy: 1e-9)
+            XCTAssertGreaterThan(m.apply(SkyLensMath.local(altitude: alt + 5, azimuth: az)).y, 0)
+            XCTAssertGreaterThan(m.apply(SkyLensMath.local(altitude: alt, azimuth: az + 5)).x, 0)
+        }
+    }
+}

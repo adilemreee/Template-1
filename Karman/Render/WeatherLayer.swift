@@ -87,8 +87,9 @@ final class WeatherLayer {
 
     private static var particleBudget: Int {
         let info = ProcessInfo.processInfo
-        if info.isLowPowerModeEnabled || info.thermalState == .serious || info.thermalState == .critical { return 3500 }
-        return GlobeRenderer.isHighEnd ? 9000 : 6000
+        // About one particle per 20 pt² of visible globe: streaks, not a veil.
+        if info.isLowPowerModeEnabled || info.thermalState == .serious || info.thermalState == .critical { return 2500 }
+        return GlobeRenderer.isHighEnd ? 5000 : 3500
     }
 
     private func ensureBuffers(count: Int) -> Bool {
@@ -146,9 +147,9 @@ final class WeatherLayer {
         params.head = head
         params.record = record
         params.seed = seed
-        params.maxAge = 4.2
-        params.intensity = visibility
-        params.widthPx = 1.25
+        params.maxAge = 3.2
+        params.intensity = visibility * 0.8
+        params.widthPx = 1.1
 
         guard let enc = cmd.makeComputeCommandEncoder() else { return }
         enc.setComputePipelineState(stepPSO)
