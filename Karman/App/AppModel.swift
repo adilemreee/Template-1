@@ -188,7 +188,25 @@ final class AppModel {
         if layers.liveImagery {
             Task { await LiveImagery.shared.ensureLoaded(into: globe) }
         }
-        if layers.anyWeather { weather.refreshIfNeeded() } else if forecastHours != 0 || forecastPlaying { resetForecast() }
+        if layers.anyWeather { watchWeather() } else if forecastHours != 0 || forecastPlaying { resetForecast() }
+    }
+
+    @ObservationIgnored private var weatherWatch: Task<Void, Never>?
+
+    /// Keeps asking for the GFS frames every few seconds until the whole day is in (a freshly
+    /// started server publishes them one by one), for as long as weather is on screen.
+    func watchWeather() {
+        weather.refreshIfNeeded()
+        guard weatherWatch == nil else { return }
+        weatherWatch = Task { [weak self] in
+            for _ in 0..<90 {
+                try? await Task.sleep(for: .seconds(10))
+                guard let self, !Task.isCancelled else { return }
+                guard self.settings.layers.anyWeather || self.selection.isSpot, !self.weather.isComplete else { break }
+                self.weather.refreshIfNeeded()
+            }
+            self?.weatherWatch = nil
+        }
     }
 
     /// Pushes new GFS frames into the renderer.

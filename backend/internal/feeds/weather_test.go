@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -101,38 +102,120 @@ func TestPartialWeatherFramesAreDropped(t *testing.T) {
 	}
 }
 
-func TestPollWeatherAsksForSixHourlyStepsAndFallsBack(t *testing.T) {
-	var requests atomic.Int32
-	var query string
-	good := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requests.Add(1)
-		query = r.URL.RawQuery
-		now := time.Now().UTC().Truncate(3 * time.Hour)
-		_, _ = io.WriteString(w, gfsCSV([]time.Time{now, now.Add(6 * time.Hour)}, func(time.Time, float64, float64) (float64, float64, float64, float64) {
+func TestPollWeatherFetchesEachStepAndFallsBack(t *testing.T) {
+	var good, bad atomic.Int32
+	var mu sync.Mutex
+	var queries []string
+	goodSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		good.Add(1)
+		mu.Lock()
+		queries = append(queries, r.URL.RawQuery)
+		mu.Unlock()
+		// Answer with the single time step that was asked for.
+		q := r.URL.RawQuery
+		i := strings.Index(q, "%5B(") + len("%5B(")
+		j := strings.Index(q[i:], ")")
+		step, err := time.Parse(time.RFC3339, q[i:i+j])
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_, _ = io.WriteString(w, gfsCSV([]time.Time{step}, func(time.Time, float64, float64) (float64, float64, float64, float64) {
 			return 3, -2, 290, 0
 		}))
 	}))
-	defer good.Close()
-	broken := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusInternalServerError) }))
+	defer goodSrv.Close()
+	broken := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bad.Add(1)
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
 	defer broken.Close()
 	old := weatherSources
-	weatherSources = []string{broken.URL + "/a.csv0", good.URL + "/b.csv0"}
+	weatherSources = []string{broken.URL + "/a.csv0", goodSrv.URL + "/b.csv0"}
+	defer func() { weatherSources = old }()
+
+	var published atomic.Int32
+	h := quietHub(t)
+	h.OnChange(func(c Change) {
+		if c == ChangeWeather {
+			published.Add(1)
+		}
+	})
+	if err := h.pollWeather(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	frames := h.WeatherFrames()
+	if good.Load() != 5 || bad.Load() != 5 || len(frames) != 5 {
+		t.Fatalf("good %d, broken %d, frames %d", good.Load(), bad.Load(), len(frames))
+	}
+	for i := 1; i < len(frames); i++ {
+		if frames[i].Valid.Sub(frames[i-1].Valid) != 6*time.Hour {
+			t.Fatalf("steps %v", frames)
+		}
+	}
+	for _, q := range queries {
+		if strings.Contains(q, "Z):2:(") || !strings.Contains(q, "%5B(90):2:(-90)%5D") || !strings.Contains(q, ",pratesfc%5B") {
+			t.Fatalf("query %q is not a single-step 1° request", q)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(h.weatherDir(), "index.json")); err != nil {
+		t.Fatal("index not persisted")
+	}
+	// Each step is published as it lands.
+	deadline := time.Now().Add(2 * time.Second)
+	for published.Load() < 5 && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if published.Load() < 5 {
+		t.Fatalf("published %d times", published.Load())
+	}
+}
+
+func TestWeatherKeepsStoredStepsWhenOneFails(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		n := calls.Add(1)
+		q := r.URL.RawQuery
+		i := strings.Index(q, "%5B(") + len("%5B(")
+		j := strings.Index(q[i:], ")")
+		step, _ := time.Parse(time.RFC3339, q[i:i+j])
+		if n == 3 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		_, _ = io.WriteString(w, gfsCSV([]time.Time{step}, func(time.Time, float64, float64) (float64, float64, float64, float64) {
+			return float64(n), 0, 290, 0
+		}))
+	}))
+	defer srv.Close()
+	old := weatherSources
+	weatherSources = []string{srv.URL + "/a.csv0"}
 	defer func() { weatherSources = old }()
 
 	h := quietHub(t)
 	if err := h.pollWeather(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if requests.Load() != 1 || len(h.WeatherFrames()) != 2 {
-		t.Fatalf("requests %d, frames %d", requests.Load(), len(h.WeatherFrames()))
+	if got := len(h.WeatherFrames()); got != 4 {
+		t.Fatalf("frames after a failed step: %d", got)
 	}
-	for _, want := range []string{"ugrd10m%5B(", "):2:(", "%5B(90):2:(-90)%5D", ",pratesfc%5B"} {
-		if !strings.Contains(query, want) {
-			t.Fatalf("query %q lacks %q", query, want)
-		}
+	// The next run fills the gap and keeps the others.
+	if err := h.pollWeather(context.Background()); err != nil {
+		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(h.weatherDir(), "index.json")); err != nil {
-		t.Fatal("index not persisted")
+	if got := len(h.WeatherFrames()); got != 5 {
+		t.Fatalf("frames after the retry: %d", got)
+	}
+}
+
+func TestWeatherURLSingleStep(t *testing.T) {
+	ts := time.Date(2026, 10, 3, 12, 0, 0, 0, time.UTC)
+	u := weatherURL("https://x/ncep_global.csv0", ts, ts)
+	if !strings.Contains(u, "ugrd10m%5B(2026-10-03T12:00:00Z)%5D%5B(90):2:(-90)%5D%5B(0):2:(359.5)%5D") {
+		t.Fatalf("url %s", u)
+	}
+	if r := weatherURL("https://x/ncep_global.csv0", ts, ts.Add(24*time.Hour)); !strings.Contains(r, "):2:(2026-10-04T12:00:00Z)%5D") {
+		t.Fatalf("range url %s", r)
 	}
 }
 

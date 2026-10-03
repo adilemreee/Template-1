@@ -49,7 +49,8 @@ struct WeatherBar: View {
             } else if model.weather.isLoading || !model.weather.hasData {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.mini)
-                    Text(model.weather.failed ? "Live weather is unavailable right now" : "Loading live weather…")
+                    Text(model.weather.warmingUp ? "Fetching NOAA's latest forecast run…"
+                         : (model.weather.failed ? "Live weather is unavailable right now. Retrying…" : "Loading live weather…"))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Theme.textSecondary)
                 }

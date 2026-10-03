@@ -84,7 +84,8 @@ struct SpotSummary: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Theme.textSecondary)
                     } else {
-                        Text(model.weather.failed ? "Live weather is unavailable right now" : "Loading live weather…")
+                        Text(model.weather.warmingUp ? "Fetching NOAA's latest forecast run…"
+                             : (model.weather.failed ? "Live weather is unavailable right now" : "Loading live weather…"))
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.white.opacity(0.85))
                     }
@@ -113,7 +114,7 @@ struct SpotSummary: View {
             }
         }
         .task(id: point) {
-            model.weather.refreshIfNeeded()
+            model.watchWeather()
             info = nil
             info = await SpotNamer.info(for: point)
         }

@@ -78,28 +78,90 @@ func (h *Hub) StartWeather(ctx context.Context) {
 
 func (h *Hub) weatherDir() string { return filepath.Join(h.cacheDir, "weather") }
 
+// pollWeather fetches the next day one time step at a time. ERDDAP answers a single step in
+// about ten seconds but takes minutes over a strided time range, so steps arrive quickly and
+// each is published as soon as it lands: after a cold start, wind is up within seconds.
 func (h *Hub) pollWeather(ctx context.Context) error {
 	start := time.Now().UTC().Truncate(3 * time.Hour)
+	var fresh []weatherFrame
 	var lastErr error
-	for _, base := range weatherSources {
-		frames, err := h.fetchWeather(ctx, weatherURL(base, start, start.Add(weatherSpan)))
+	for t := start; !t.After(start.Add(weatherSpan)); t = t.Add(weatherStep) {
+		f, err := h.fetchWeatherStep(ctx, t)
 		if err != nil {
 			lastErr = err
+			if ctx.Err() != nil {
+				break
+			}
 			continue
 		}
-		h.storeWeather(frames)
-		h.log.Info("weather updated", "frames", len(frames), "from", frames[0].Valid, "to", frames[len(frames)-1].Valid)
-		return nil
+		fresh = append(fresh, f)
+		h.storeWeather(h.mergeWeather(fresh, start))
 	}
-	return lastErr
+	if len(fresh) == 0 {
+		if lastErr == nil {
+			lastErr = errNoData
+		}
+		return lastErr
+	}
+	h.log.Info("weather updated", "frames", len(fresh), "from", fresh[0].Valid, "to", fresh[len(fresh)-1].Valid)
+	if len(fresh) < 3 {
+		return fmt.Errorf("only %d of the day's GFS steps arrived: %w", len(fresh), lastErr)
+	}
+	return nil
 }
 
-// weatherURL asks ERDDAP for every 6-hour step between start and end on a 1° grid. Brackets
-// are percent-encoded: ERDDAP runs on Tomcat, which rejects them raw.
+// fetchWeatherStep gets one time step, trying each source in turn.
+func (h *Hub) fetchWeatherStep(ctx context.Context, t time.Time) (weatherFrame, error) {
+	var lastErr error
+	for _, base := range weatherSources {
+		sctx, cancel := context.WithTimeout(ctx, 100*time.Second)
+		frames, err := h.fetchWeather(sctx, weatherURL(base, t, t))
+		cancel()
+		if err == nil && len(frames) > 0 {
+			return frames[0], nil
+		}
+		if err == nil {
+			err = errNoData
+		}
+		lastErr = err
+		if ctx.Err() != nil {
+			break
+		}
+	}
+	return weatherFrame{}, lastErr
+}
+
+// mergeWeather overlays fresh steps on the stored ones that are still inside the window.
+func (h *Hub) mergeWeather(fresh []weatherFrame, start time.Time) []weatherFrame {
+	end := start.Add(weatherSpan)
+	byTime := map[int64]weatherFrame{}
+	h.mu.RLock()
+	for _, f := range h.weather {
+		if !f.Valid.Before(start) && !f.Valid.After(end) {
+			byTime[f.Valid.Unix()] = f
+		}
+	}
+	h.mu.RUnlock()
+	for _, f := range fresh {
+		byTime[f.Valid.Unix()] = f
+	}
+	out := make([]weatherFrame, 0, len(byTime))
+	for _, f := range byTime {
+		out = append(out, f)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Valid.Before(out[j].Valid) })
+	return out
+}
+
+// weatherURL asks ERDDAP for one time step (start == end) or every 6-hour step between start
+// and end, on a 1° grid. Brackets are percent-encoded: ERDDAP runs on Tomcat, which rejects them raw.
 func weatherURL(base string, start, end time.Time) string {
 	stride := int(weatherStep / (3 * time.Hour)) // the dataset is 3-hourly
-	sel := fmt.Sprintf("%%5B(%s):%d:(%s)%%5D%%5B(90):2:(-90)%%5D%%5B(0):2:(359.5)%%5D",
-		start.Format(time.RFC3339), stride, end.Format(time.RFC3339))
+	timeSel := fmt.Sprintf("%%5B(%s)%%5D", start.Format(time.RFC3339))
+	if !end.Equal(start) {
+		timeSel = fmt.Sprintf("%%5B(%s):%d:(%s)%%5D", start.Format(time.RFC3339), stride, end.Format(time.RFC3339))
+	}
+	sel := timeSel + "%5B(90):2:(-90)%5D%5B(0):2:(359.5)%5D"
 	vars := []string{"ugrd10m", "vgrd10m", "tmp2m", "pratesfc"}
 	for i, v := range vars {
 		vars[i] = v + sel

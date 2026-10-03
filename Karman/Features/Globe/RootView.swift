@@ -144,7 +144,7 @@ struct RootView: View {
         .onChange(of: model.planet.version) {
             model.syncScene()
             model.refreshDerived()
-            if model.settings.layers.anyWeather || model.selection.isSpot { model.weather.refreshIfNeeded() }
+            if model.settings.layers.anyWeather || model.selection.isSpot { model.watchWeather() }
         }
         .onChange(of: model.weather.version) { model.syncWeather() }
         .onChange(of: model.location.point) {
@@ -158,7 +158,7 @@ struct RootView: View {
                 ReviewPrompter.noteActiveDay()
                 model.planet.start()
                 model.satellites.start()
-                if model.settings.layers.anyWeather { model.weather.refreshIfNeeded() }
+                if model.settings.layers.anyWeather { model.watchWeather() }
                 Task { await NotificationService.shared.refreshStatus() }
             case .background:
                 model.planet.stop()

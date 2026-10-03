@@ -10,10 +10,14 @@ final class WeatherStore {
     private(set) var version = 0
     private(set) var isLoading = false
     private(set) var failed = false
+    /// The server is still fetching NOAA's run (it answers 503 until the first step lands).
+    private(set) var warmingUp = false
     /// Hottest, coldest, windiest and wettest places in the current frame.
     private(set) var extremes: [WeatherExtreme] = []
 
+    /// Set once a complete day of frames is in; nil keeps quick retries going.
     @ObservationIgnored private var fetchedAt: Date?
+    @ObservationIgnored private var lastAttempt: Date = .distantPast
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private let api = APIClient.shared
 
@@ -30,10 +34,16 @@ final class WeatherStore {
     /// Model time the frames were computed from (the first frame's valid time).
     var modelTime: Date? { grids.first?.valid }
 
-    /// Fetches the frame list when the last check is older than 30 minutes.
+    /// True once the whole next day is in.
+    var isComplete: Bool { !grids.isEmpty && fetchedAt != nil }
+
+    /// Fetches the frame list when the last complete check is older than 30 minutes, or every
+    /// few seconds while the day is still incomplete.
     func refreshIfNeeded() {
         guard task == nil else { return }
         if let fetchedAt, Date().timeIntervalSince(fetchedAt) < 1800, !grids.isEmpty { return }
+        guard Date().timeIntervalSince(lastAttempt) > 8 else { return }
+        lastAttempt = Date()
         task = Task { [weak self] in
             await self?.refresh()
             self?.task = nil
@@ -58,27 +68,34 @@ final class WeatherStore {
         do {
             let index = try await api.weatherIndex()
             var next: [WeatherGrid] = []
+            var missing = 0
             for f in index.frames {
                 if let have = grids.first(where: { $0.id == f.id }) {
                     next.append(have)
                 } else if let cached = Self.loadFrame(id: f.id, valid: f.valid) {
                     next.append(cached)
-                } else {
-                    let data = try await api.weatherFrame(id: f.id)
-                    guard data.count == WeatherGrid.byteCount else { throw APIClient.APIError.invalidResponse }
+                } else if let data = try? await api.weatherFrame(id: f.id), data.count == WeatherGrid.byteCount {
                     Self.saveFrame(id: f.id, data: data)
                     next.append(WeatherGrid(id: f.id, valid: f.valid, bytes: data))
+                } else {
+                    missing += 1
                 }
             }
             next.sort { $0.valid < $1.valid }
-            fetchedAt = Date()
-            failed = false
-            if next.map(\.id) != grids.map(\.id) {
+            // The server publishes a cold start's steps one by one: keep polling until the day is in.
+            fetchedAt = missing == 0 && index.frames.count >= 5 ? Date() : nil
+            failed = next.isEmpty && grids.isEmpty
+            warmingUp = false
+            if !next.isEmpty, next.map(\.id) != grids.map(\.id) {
                 apply(next)
                 Self.saveIndex(next)
                 Self.prune(keeping: Set(next.map(\.id)))
             }
+        } catch APIClient.APIError.http(let code, _) where code == 503 {
+            warmingUp = grids.isEmpty
+            failed = false
         } catch {
+            warmingUp = false
             failed = grids.isEmpty
         }
     }

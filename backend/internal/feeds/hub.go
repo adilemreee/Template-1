@@ -146,7 +146,10 @@ func (h *Hub) every(ctx context.Context, name string, interval time.Duration, fn
 		}
 		// Slow feeds move big files (model grids, global mosaics) and get longer to finish.
 		timeout := time.Minute
-		if interval >= time.Hour {
+		switch {
+		case interval >= 3*time.Hour:
+			timeout = 10 * time.Minute // a day of GFS steps or a year of earthquakes
+		case interval >= time.Hour:
 			timeout = 4 * time.Minute
 		}
 		failures := 0
