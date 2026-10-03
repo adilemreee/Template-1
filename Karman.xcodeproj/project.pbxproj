@@ -18,6 +18,7 @@
 		1B01F1815E2A9B181B58C63C /* Globe.metal in Sources */ = {isa = PBXBuildFile; fileRef = D10B8D4B18C3158B2D2F7E34 /* Globe.metal */; };
 		1BEA8F19FF0F50CF169EB274 /* SkyConditionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D88C1803006F26F08321547 /* SkyConditionsStore.swift */; };
 		2044E6A65BE930A8FA61931B /* sky.json in Resources */ = {isa = PBXBuildFile; fileRef = 132386CDE19956016B809793 /* sky.json */; };
+		27663B8D2030FF8AB464DEDC /* AmbientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE314BD930BBAE940C6FCBE /* AmbientView.swift */; };
 		278EC6ABB937C0ED32A4D582 /* KarmanIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8169620C6268CB1D45D0FA /* KarmanIntents.swift */; };
 		2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */; };
 		2DB847AEF6279A31663DB036 /* SkyCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = B572A77300946719B1479AAF /* SkyCards.swift */; };
@@ -241,6 +242,7 @@
 		D7C1AB8EA2F632760C46EB57 /* SeismicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeismicTests.swift; sourceTree = "<group>"; };
 		DAE0BF88D4021D901D7A2EB3 /* widget_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = widget_day.jpg; sourceTree = "<group>"; };
 		DD8908C6555008B50D5852F4 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		DEE314BD930BBAE940C6FCBE /* AmbientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientView.swift; sourceTree = "<group>"; };
 		E0AF33512858A71F827DDF3A /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		E4DBEE47944CF3B8CA9305A0 /* SkyTonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyTonightView.swift; sourceTree = "<group>"; };
 		E5FE025ED1462125BD7C87C2 /* ControlIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlIntents.swift; sourceTree = "<group>"; };
@@ -338,6 +340,7 @@
 		43B4B7D9BEDDE5A9790AE952 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				FE72912D8982FEFA3EE619A2 /* Ambient */,
 				518F49B96793BE4BBAB8C6C9 /* Ask */,
 				CE87C9ADD41336B6739A4705 /* Briefing */,
 				5B58E8F6A13A79A2CB1E8ECC /* Events */,
@@ -663,6 +666,14 @@
 			path = RideAlong;
 			sourceTree = "<group>";
 		};
+		FE72912D8982FEFA3EE619A2 /* Ambient */ = {
+			isa = PBXGroup;
+			children = (
+				DEE314BD930BBAE940C6FCBE /* AmbientView.swift */,
+			);
+			path = Ambient;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -816,6 +827,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9CC7D8410DCFF4576A166FF8 /* APIClient.swift in Sources */,
+				27663B8D2030FF8AB464DEDC /* AmbientView.swift in Sources */,
 				C01E01792D1959FEEF33EEC5 /* AppDelegate.swift in Sources */,
 				607F3BB69C42128F3D33F238 /* AppLocale.swift in Sources */,
 				83F956BC30C9EF1CB785E1DE /* AppModel.swift in Sources */,

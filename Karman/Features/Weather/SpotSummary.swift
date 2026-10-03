@@ -49,9 +49,15 @@ struct SpotSummary: View {
             HStack(alignment: .top, spacing: 14) {
                 EventGlyph(icon: Self.symbol(sample, sunAltitude: sunAlt), tint: Self.tint(sample), size: 54)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text((info?.name ?? String(localized: "This spot")).uppercased())
-                        .eyebrow(Theme.ice)
-                        .lineLimit(1)
+                    if let watched = model.settings.place(near: point) {
+                        Text("\(watched.name.uppercased()) · \((info?.name ?? "").uppercased())")
+                            .eyebrow(Theme.place)
+                            .lineLimit(1)
+                    } else {
+                        Text((info?.name ?? String(localized: "This spot")).uppercased())
+                            .eyebrow(Theme.ice)
+                            .lineLimit(1)
+                    }
                     if let s = sample {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text(Fmt.temperature(s.tempC, units: units))

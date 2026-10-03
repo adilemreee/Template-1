@@ -948,6 +948,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             rings.append(RingInstance(position: user.unitVectorF, size: 0.016, color: Palette.user, phase: 0, speed: 0.5, kind: 2, intensity: 1.2))
             picks.append(Pickable(item: .user, position: user.unitVectorF * 1.002, weight: 2))
         }
+        for place in scene.places where !controller.isYearReplay {
+            rings.append(RingInstance(position: place.unitVectorF, size: 0.012, color: Palette.place, phase: 0.5, speed: 0.35, kind: 2, intensity: 1.0))
+            picks.append(Pickable(item: .spot(place), position: place.unitVectorF * 1.002, weight: 2))
+        }
 
         if let sel = selected, let p = position(of: sel, in: scene) {
             rings.append(RingInstance(position: p, size: 0.03, color: SIMD4(1, 1, 1, 1), phase: 0, speed: 0, kind: 3, intensity: 0.9))
@@ -1126,6 +1130,7 @@ enum Palette {
     static let storm = linear(0xC9A8FF)
     static let launch = linear(0xFFE2A8)
     static let user = linear(0x5AC8FF) * SIMD4(1.8, 1.8, 1.8, 1)
+    static let place = linear(0xFF8CB3) * SIMD4(1.6, 1.6, 1.6, 1)
     static func color(for kind: EventKind) -> SIMD4<Float> {
         switch kind {
         case .volcano: linear(0xFF5A4A)

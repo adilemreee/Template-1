@@ -14,6 +14,8 @@ enum Theme {
     static let volcano = Color(red: 1.0, green: 0.35, blue: 0.29)
     static let launch = Color(red: 1.0, green: 0.86, blue: 0.62)
     static let sun = Color(red: 1.0, green: 0.80, blue: 0.40)
+    /// Watched places (family, second homes).
+    static let place = Color(red: 1.0, green: 0.55, blue: 0.70)
     static let textPrimary = Color.white
     static let textSecondary = Color.white.opacity(0.62)
     static let textTertiary = Color.white.opacity(0.38)

@@ -90,9 +90,29 @@ struct SeismicWavesOverlay: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.textSecondary)
             }
+            ForEach(model.settings.places.prefix(3)) { place in
+                placeRow(place, t: t)
+            }
         }
         .padding(16)
         .glassPanel(cornerRadius: 26)
+    }
+
+    private func placeRow(_ place: WatchedPlace, t: Double) -> some View {
+        let km = place.point.distanceKm(to: quake.coordinate)
+        let degrees = km / Seismology.kmPerDegree
+        let arrival = Seismology.travelTime(.p, degrees: degrees, depthKm: quake.depthKm)
+        let mmi = Seismology.intensity(magnitude: quake.mag, distanceKm: km, depthKm: quake.depthKm)
+        return HStack(spacing: 6) {
+            Image(systemName: "mappin.circle.fill").font(.system(size: 11)).foregroundStyle(Theme.place)
+            Text(place.name).font(.system(size: 12, weight: .semibold)).foregroundStyle(.white).lineLimit(1)
+            Spacer(minLength: 4)
+            Text(t >= arrival ? String(localized: "reached \(Seismology.clock(arrival))") : String(localized: "in \(String(Seismology.clock(arrival - t).dropFirst()))"))
+                .font(.mono(11, weight: .semibold)).foregroundStyle(t >= arrival ? Theme.place : Theme.textSecondary)
+            Text(mmi < 1.5 ? "—" : Seismology.intensityRoman(mmi))
+                .font(.system(size: 11, weight: .bold)).foregroundStyle(Theme.textTertiary)
+                .frame(minWidth: 26, alignment: .trailing)
+        }
     }
 
     private func waveRow(_ wave: Seismology.Wave, title: LocalizedStringKey, detail: String, tint: Color, t: Double, degrees: Double?) -> some View {

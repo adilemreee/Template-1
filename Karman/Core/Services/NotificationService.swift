@@ -51,7 +51,11 @@ final class NotificationService {
             tzOffsetMinutes: TimeZone.current.secondsFromGMT() / 60,
             prefs: .init(quakeMinMag: prefs.quakesNearby ? prefs.quakeMinMag : 0, quakeRadiusKm: prefs.quakeRadiusKm,
                          globalMajor: prefs.majorQuakes, aurora: prefs.aurora, auroraMinChance: prefs.auroraMinChance,
-                         launches: prefs.launches, spaceStorms: prefs.spaceStorms))
+                         launches: prefs.launches, spaceStorms: prefs.spaceStorms),
+            // Watched places leave the phone rounded to half a degree (about 50 km).
+            places: model.settings.places.map {
+                APIClient.WatchedPlaceBody(name: String($0.name.prefix(40)), lat: ($0.lat * 2).rounded() / 2, lon: ($0.lon * 2).rounded() / 2)
+            })
         try? await APIClient.shared.register(device: reg)
     }
 

@@ -154,6 +154,7 @@ final class AppModel {
         scene.aurora = planet.auroraGrid
         scene.user = settings.showUserLocation ? user : nil
         scene.yearQuakes = globe.scene.yearQuakes
+        scene.places = settings.places.map(\.point)
         globe.update(scene: scene)
     }
 
@@ -346,6 +347,30 @@ final class AppModel {
         withAnimation(.easeInOut(duration: 0.5)) { replaying = false }
     }
 
+    // MARK: Ambient globe
+
+    private(set) var ambientActive = false
+
+    func startAmbient() {
+        if briefingActive { BriefingDirector.shared.stop() }
+        if ridingISS { stopRideAlong() }
+        if replaying { stopReplay() }
+        if yearReplaying { stopYearReplay() }
+        stopSeismicWaves()
+        resetForecast()
+        panel = nil
+        detailItem = nil
+        withAnimation(.easeInOut(duration: 0.4)) { selection = nil }
+        withAnimation(.easeInOut(duration: 0.8)) { ambientActive = true }
+    }
+
+    func stopAmbient() {
+        guard ambientActive else { return }
+        globe.drift = (0, 0)
+        globe.fly(to: globe.homePose, duration: 2.2)
+        withAnimation(.easeInOut(duration: 0.6)) { ambientActive = false }
+    }
+
     // MARK: Sky Lens
 
     func openSkyLens(target: SkyTarget?) {
@@ -409,6 +434,7 @@ final class AppModel {
 
     func startSeismicWaves(_ quake: Quake) {
         if briefingActive { BriefingDirector.shared.stop() }
+        if ambientActive { stopAmbient() }
         if ridingISS { stopRideAlong() }
         if replaying { stopReplay() }
         if yearReplaying { stopYearReplay() }

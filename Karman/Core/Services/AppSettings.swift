@@ -5,6 +5,18 @@ enum UnitSystem: String, Codable, CaseIterable, Sendable {
     case metric, imperial
 }
 
+/// A place the user watches for earthquakes (family, a second home), kept on the device and
+/// sent to the server rounded to about 50 km.
+struct WatchedPlace: Codable, Identifiable, Hashable, Sendable {
+    var id = UUID()
+    var name: String
+    var lat: Double
+    var lon: Double
+    var point: GeoPoint { GeoPoint(lat: lat, lon: lon) }
+
+    static let limit = 5
+}
+
 /// User preferences persisted in UserDefaults.
 @MainActor
 @Observable
@@ -21,6 +33,8 @@ final class AppSettings {
     var alerts: AlertPreferences { didSet { save(alerts, "alerts") } }
     /// Explicit permission to send questions (and a ~50 km location) to Anthropic's Claude.
     var askConsent: Bool { didSet { defaults.set(askConsent, forKey: "askConsent") } }
+    /// Up to five other places to watch for earthquakes.
+    var places: [WatchedPlace] { didSet { save(places, "watchedPlaces") } }
 
     struct AlertPreferences: Codable, Equatable, Sendable {
         var quakesNearby = true
@@ -44,6 +58,12 @@ final class AppSettings {
         narration = defaults.object(forKey: "narration") as? Bool ?? true
         alerts = Self.load("alerts", from: defaults) ?? AlertPreferences()
         askConsent = defaults.bool(forKey: "askConsent")
+        places = Self.load("watchedPlaces", from: defaults) ?? []
+    }
+
+    /// The watched place within `km` of a point, if any.
+    func place(near p: GeoPoint, within km: Double = 2) -> WatchedPlace? {
+        places.first { $0.point.distanceKm(to: p) <= km }
     }
 
     private func save<T: Encodable>(_ value: T, _ key: String) {

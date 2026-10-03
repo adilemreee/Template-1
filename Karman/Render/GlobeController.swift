@@ -63,6 +63,8 @@ struct GlobeSceneData {
     var launches: [Launch] = []
     var aurora: [UInt8]?
     var user: GeoPoint?
+    /// Watched places (family, second homes).
+    var places: [GeoPoint] = []
     var now = Date()
 }
 

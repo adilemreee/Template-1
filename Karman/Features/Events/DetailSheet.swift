@@ -70,6 +70,13 @@ struct QuakeDetail: View {
                           systemImage: "house.fill")
                         .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.ice)
                 }
+                ForEach(model.settings.places.filter { $0.point.distanceKm(to: quake.coordinate) < 2500 }) { place in
+                    let km = place.point.distanceKm(to: quake.coordinate)
+                    let mmi = Seismology.intensity(magnitude: quake.mag, distanceKm: km, depthKm: quake.depthKm)
+                    Label("\(place.name): \(Fmt.distance(km, units: model.settings.units)) away · \(mmi < 1.5 ? String(localized: "not felt") : String(localized: "\(Seismology.shakingWord(mmi).lowercased()) shaking (\(Seismology.intensityRoman(mmi)))"))",
+                          systemImage: "mappin.circle.fill")
+                        .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.place)
+                }
                 if quake.isTsunamiFlagged {
                     Label("USGS tsunami flag set. This is informational — follow your local tsunami warning center for official guidance.", systemImage: "water.waves")
                         .font(.system(size: 12, weight: .medium)).foregroundStyle(.orange)

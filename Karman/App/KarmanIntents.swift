@@ -98,6 +98,18 @@ struct WeatherForecastIntent: AppIntent {
     }
 }
 
+struct AmbientGlobeIntent: AppIntent {
+    static let title: LocalizedStringResource = "Start the Ambient Globe"
+    static let description = IntentDescription("A slowly turning, dimmed globe with a clock, for your nightstand.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://ambient")!)
+        return .result()
+    }
+}
+
 struct KarmanShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: PlayBriefingIntent(),
@@ -124,5 +136,8 @@ struct KarmanShortcuts: AppShortcutsProvider {
         AppShortcut(intent: WeatherForecastIntent(),
                     phrases: ["Play the wind forecast in \(.applicationName)", "Show the weather on the globe in \(.applicationName)"],
                     shortTitle: "Wind Forecast", systemImageName: "wind")
+        AppShortcut(intent: AmbientGlobeIntent(),
+                    phrases: ["Start the ambient globe in \(.applicationName)", "Nightstand mode in \(.applicationName)"],
+                    shortTitle: "Ambient Globe", systemImageName: "moon.zzz.fill")
     }
 }

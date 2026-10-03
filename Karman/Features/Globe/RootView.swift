@@ -34,7 +34,7 @@ struct RootView: View {
                     .transition(.opacity)
             }
 
-            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil {
+            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil && !model.ambientActive {
                 HomeHUD()
                     .transition(.opacity)
             }
@@ -52,6 +52,11 @@ struct RootView: View {
             if let quake = model.wavesQuake {
                 SeismicWavesOverlay(quake: quake)
                     .id(quake.id)
+                    .transition(.opacity)
+            }
+
+            if model.ambientActive {
+                AmbientView()
                     .transition(.opacity)
             }
 
@@ -110,6 +115,9 @@ struct RootView: View {
             case "lens":
                 model.skipIntro()
                 model.openSkyLens(target: nil)
+            case "ambient":
+                model.skipIntro()
+                model.startAmbient()
             case "weather":
                 model.skipIntro()
                 var l = model.settings.layers
