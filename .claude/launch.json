@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "karman-site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8090", "--bind", "127.0.0.1", "--directory", "marketing/site"],
+      "port": 8090
+    }
+  ]
+}

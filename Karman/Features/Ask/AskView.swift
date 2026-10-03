@@ -211,8 +211,13 @@ private struct AskConsentCard: View {
         }
         .scrollIndicators(.hidden)
         .sheet(isPresented: $showPrivacy) {
-            NavigationStack { PrivacyView() }
-                .presentationDetents([.medium, .large])
+            NavigationStack {
+                PrivacyView()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { showPrivacy = false } }
+                    }
+            }
+            .presentationDetents([.medium, .large])
         }
     }
 

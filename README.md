@@ -136,6 +136,10 @@ Yerelde çalıştırma:
 cd backend && go run ./cmd/karman
 ```
 
+## Tanıtım sitesi
+
+`marketing/site/` tek başına yayınlanabilen statik bir sitedir: `index.html` (EN/TR, tarayıcı diline göre otomatik; `?lang=tr` ile zorlanabilir), uygulama önizleme videosu (2 MB), sıkıştırılmış ekran görüntüleri, `privacy.html` ve `support.html`. App Store Connect'teki **Marketing URL** alanına bu sitenin adresini yazabilirsin. Yerelde önizleme: `python3 -m http.server 8090 --directory marketing/site`.
+
 ## Gizlilik ve Destek sayfaları (App Store için)
 
 App Store Connect, **Privacy Policy URL** ve **Support URL** için güvenilir sertifikalı herkese açık HTTPS adresleri ister. Sayfalar hazır (EN + TR): sunucuda `/privacy` ve `/support`, statik kopyaları `marketing/site/` içinde. İki kolay yol:
@@ -179,7 +183,7 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Yapay zekâ veri paylaşımı (Kural 5.1.2(i)): "Kármán'a Sor" ilk sorudan önce Anthropic'i adıyla anan tek seferlik bir izin ekranı gösterir; izin Ayarlar → Kármán'a Sor'dan geri alınabilir. İnceleme notu `marketing/AppStore-Metadata.md` içinde hazır.
 - [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
 - [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://SUNUCU:8443/healthz` → `"ai": true, "push": true`.
-- [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`).
+- [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`) ve aynısını tanıtım sayfasındaki `APP_STORE_URL` sabitinde yap (`marketing/site/index.html`).
 - [ ] Xcode → Product → Archive → Distribute (App Store Connect).
 
 ## Testler
