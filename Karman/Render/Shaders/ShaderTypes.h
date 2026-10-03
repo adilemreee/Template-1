@@ -32,6 +32,10 @@ typedef struct {
     simd_float4 detailBounds;     // regional 500 m imagery: west lon, north lat, lon span, lat span (deg)
     float detailBlend;            // 0 = base texture only
     float detailNight;            // 1 when the detail texture's alpha carries city lights
+    float weatherSlice;           // fractional index into the GFS frames (time-interpolated)
+    float weatherSlices;          // number of GFS frames bound (0 = none yet)
+    float temperatureOverlay;     // 0..1 opacity of the 2 m temperature map
+    float rainOverlay;            // 0..1 opacity of the precipitation map
 } FrameUniforms;
 
 typedef struct {
@@ -81,6 +85,32 @@ typedef struct {
     float dash;                   // 0 = solid
     float pad;
 } PathStyle;
+
+// Wind particles: a GPU-advected swarm, each with a ring of recent positions drawn as a ribbon.
+typedef struct {
+    simd_float4 cap;              // xyz: centre of the visible region (unit vector), w: cos of its angular radius
+    float dt;                     // seconds since the previous step
+    float speedScale;             // radians travelled per (m/s · s)
+    float slice;                  // fractional index into the GFS frames
+    float slices;                 // number of frames
+    unsigned int count;           // particles
+    unsigned int trailLength;     // recorded positions per particle
+    unsigned int head;            // ring slot holding the newest recorded position
+    unsigned int record;          // 1 when this step writes the ring
+    unsigned int seed;            // changes every step
+    float maxAge;                 // seconds
+    float intensity;              // overall brightness (0 hides)
+    float widthPx;                // ribbon width at the head, in points
+} WindParams;
+
+typedef struct {
+    simd_float3 position;         // unit vector (render frame)
+    float age;                    // seconds
+    float life;                   // seconds
+    float speed;                  // m/s at the head
+    float pad0;
+    float pad1;
+} WindParticle;
 
 typedef struct {
     simd_float2 sunScreen;        // normalized device coordinates

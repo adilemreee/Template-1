@@ -10,8 +10,18 @@ extension GlobeItem: Identifiable {
         case .satellite(let n): "s:\(n)"
         case .aurora(let north): "a:\(north)"
         case .user: "user"
+        case .spot(let p): String(format: "p:%.3f,%.3f", p.lat, p.lon)
         }
     }
+
+    var isSpotItem: Bool {
+        if case .spot = self { return true }
+        return false
+    }
+}
+
+extension Optional where Wrapped == GlobeItem {
+    var isSpot: Bool { self?.isSpotItem ?? false }
 }
 
 /// Leader line from the selected marker on the globe to the inspector card.
@@ -57,17 +67,33 @@ struct InspectorCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay(alignment: .topTrailing) {
-            Button {
-                Haptics.shared.select()
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) { model.selection = nil }
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(Theme.textSecondary)
-                    .frame(width: 28, height: 28)
-                    .background(Circle().fill(.white.opacity(0.08)))
+            HStack(spacing: 8) {
+                if let sel = model.selection, let context = model.askContext(for: sel) {
+                    Button {
+                        model.ask(about: context)
+                    } label: {
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(Theme.aurora)
+                            .frame(width: 28, height: 28)
+                            .background(Circle().fill(Theme.aurora.opacity(0.14)))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("Ask Kármán about this"))
+                }
+                Button {
+                    Haptics.shared.select()
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) { model.selection = nil }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 28, height: 28)
+                        .background(Circle().fill(.white.opacity(0.08)))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Close"))
             }
-            .buttonStyle(.plain)
             .padding(12)
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { model.inspectorFrame = $0 }
@@ -89,6 +115,8 @@ struct InspectorCard: View {
             auroraSummary(north: north)
         case .user:
             userSummary
+        case .spot(let p):
+            SpotSummary(point: p)
         }
     }
 

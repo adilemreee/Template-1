@@ -14,13 +14,23 @@ final class AskService {
         var text: String
         var streaming = false
         var failed = false
+        /// Places the answer is about, shown as chips that fly the globe there.
+        var focus: [APIClient.GlobeFocus] = []
     }
 
     private(set) var messages: [Message] = []
     private(set) var isStreaming = false
     private(set) var remaining: Int?
     private(set) var enabled = true
+    /// What the user was looking at when they tapped "Ask about this"; sent with every question
+    /// until cleared or the conversation is reset.
+    private(set) var context: APIClient.AskAbout?
     @ObservationIgnored private var task: Task<Void, Never>?
+
+    func setContext(_ about: APIClient.AskAbout?) {
+        if about != context, !messages.isEmpty { reset() }
+        context = about
+    }
 
     func send(_ question: String, model: AppModel) {
         let q = question.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -31,7 +41,8 @@ final class AskService {
         let history = messages.dropLast(2).filter { !$0.failed }.suffix(6).map { APIClient.AskTurn(role: $0.role == .user ? "user" : "assistant", text: $0.text) }
         let loc = model.location.point
         let body = APIClient.AskBody(question: q, language: "en",
-                                     lat: loc.map { ($0.lat * 2).rounded() / 2 }, lon: loc.map { ($0.lon * 2).rounded() / 2 }, history: Array(history))
+                                     lat: loc.map { ($0.lat * 2).rounded() / 2 }, lon: loc.map { ($0.lon * 2).rounded() / 2 },
+                                     history: Array(history), about: context)
         task = Task {
             defer { isStreaming = false; finishLast() }
             do {
@@ -39,6 +50,9 @@ final class AskService {
                 for try await event in APIClient.shared.ask(body, token: token) {
                     switch event {
                     case .delta(let t): appendToLast(t)
+                    case .focus(let items):
+                        setFocusOnLast(items)
+                        model.showAskFocus(items)
                     case .done(let left): remaining = left
                     case .failure(let msg): fail(msg)
                     }
@@ -68,6 +82,7 @@ final class AskService {
     func reset() {
         stop()
         messages.removeAll()
+        context = nil
     }
 
     func refreshQuota() async {
@@ -75,6 +90,11 @@ final class AskService {
               let q = try? await APIClient.shared.askQuota(token: token) else { return }
         remaining = q.remaining
         enabled = q.enabled
+    }
+
+    private func setFocusOnLast(_ items: [APIClient.GlobeFocus]) {
+        guard let i = messages.indices.last, messages[i].role == .assistant else { return }
+        messages[i].focus = items
     }
 
     private func appendToLast(_ t: String) {

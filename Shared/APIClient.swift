@@ -176,15 +176,32 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
     }
 
     struct AskTurn: Codable, Sendable { var role: String; var text: String }
+    /// What the user was looking at when they asked ("Ask about this").
+    struct AskAbout: Codable, Sendable, Hashable {
+        var refId: String
+        var kind: String
+        var title: String
+        var details: String?
+    }
     struct AskBody: Codable, Sendable {
         var question: String
         var language: String
         var lat: Double?
         var lon: Double?
         var history: [AskTurn]
+        var about: AskAbout?
     }
 
-    enum AskEvent: Sendable { case delta(String), done(remaining: Int), failure(String) }
+    /// A place the answer is about; the app flies the globe there while the text streams.
+    struct GlobeFocus: Codable, Sendable, Hashable {
+        var refId: String
+        var kind: String
+        var title: String
+        var lat: Double
+        var lon: Double
+    }
+
+    enum AskEvent: Sendable { case delta(String), focus([GlobeFocus]), done(remaining: Int), failure(String) }
 
     /// Streams an answer as server-sent events.
     func ask(_ body: AskBody, token: String?) -> AsyncThrowingStream<AskEvent, Error> {
@@ -211,6 +228,11 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
                             let obj = (try? JSONSerialization.jsonObject(with: payload)) as? [String: Any] ?? [:]
                             switch event {
                             case "delta": continuation.yield(.delta(obj["text"] as? String ?? ""))
+                            case "focus":
+                                struct Items: Decodable { var items: [GlobeFocus] }
+                                if let items = try? JSONDecoder().decode(Items.self, from: payload).items, !items.isEmpty {
+                                    continuation.yield(.focus(items))
+                                }
                             case "done": continuation.yield(.done(remaining: obj["remaining"] as? Int ?? 0))
                             case "error": continuation.yield(.failure(obj["message"] as? String ?? ""))
                             default: break
@@ -243,6 +265,65 @@ nonisolated final class APIClient: NSObject, URLSessionDelegate, @unchecked Send
         var language: String
         var tzOffsetMinutes: Int
         var prefs: Prefs
+        var places: [WatchedPlaceBody]?
+    }
+
+    /// A watched place as the server stores it (rounded to about 50 km before it leaves the phone).
+    struct WatchedPlaceBody: Codable, Sendable, Hashable {
+        var name: String
+        var lat: Double
+        var lon: Double
+    }
+
+    // MARK: Weather, history, plates, clouds
+
+    struct WeatherIndex: Decodable, Sendable {
+        struct Frame: Decodable, Sendable, Hashable { var id: String; var valid: Date }
+        var frames: [Frame]
+        var width: Int
+        var height: Int
+        var attribution: String?
+    }
+
+    func weatherIndex() async throws -> WeatherIndex {
+        let (data, _) = try await data(for: request("v1/weather"))
+        return try KarmanJSON.decoder().decode(WeatherIndex.self, from: data)
+    }
+
+    /// One packed GFS time step (360×181 RGBA8; see WeatherGrid). Frames are immutable per id.
+    func weatherFrame(id: String) async throws -> Data {
+        try await data(for: request("v1/weather/\(id)")).0
+    }
+
+    struct QuakeYear: Decodable, Sendable {
+        var from: Date
+        var to: Date
+        var minMag: Double
+        var quakes: [Quake]
+    }
+
+    func quakeYear() async throws -> (QuakeYear, Data) {
+        let (data, _) = try await data(for: request("v1/quakes/year"))
+        return (try KarmanJSON.decoder().decode(QuakeYear.self, from: data), data)
+    }
+
+    func plates() async throws -> Data {
+        try await data(for: request("v1/plates")).0
+    }
+
+    struct CloudForecast: Decodable, Sendable {
+        struct Point: Decodable, Sendable { var t: Date; var cloud: Double; var humidity: Double; var tempC: Double }
+        var lat: Double
+        var lon: Double
+        var points: [Point]
+        var attribution: String?
+    }
+
+    /// Hourly cloud cover for stargazing (MET Norway, via the Kármán API; ~50 km precision).
+    func clouds(lat: Double, lon: Double) async throws -> CloudForecast {
+        let q = [URLQueryItem(name: "lat", value: String(format: "%.1f", lat)), URLQueryItem(name: "lon", value: String(format: "%.1f", lon))]
+        let (data, _) = try await data(for: request("v1/sky/clouds", query: q))
+        return try KarmanJSON.decoder().decode(CloudForecast.self, from: data)
     }
 
     func register(device: DeviceRegistration) async throws {

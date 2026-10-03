@@ -18,6 +18,11 @@ final class AppModel {
     let globe = GlobeController()
     let satellites: SatelliteEngine
     let planet = PlanetStore()
+    let weather = WeatherStore()
+    /// The Ask Kármán conversation (kept while the panel is closed).
+    let askService = AskService()
+    /// Height of the Ask sheet; it drops to half height while the globe flies to an answer.
+    var askDetent: PresentationDetent = .large
     let location = LocationService()
     let settings = AppSettings()
 
@@ -54,6 +59,7 @@ final class AppModel {
         satellites = SatelliteEngine(device: MTLCreateSystemDefaultDeviceSafe())
         globe.satellites = satellites
         globe.layers = settings.layers
+        globe.setWeather(weather.grids)
         globe.onTap = { [weak self] item in self?.handleTap(item) }
         globe.onFollowEnded = { [weak self] in
             withAnimation(.easeInOut(duration: 0.5)) { self?.ridingISS = false }
@@ -175,6 +181,52 @@ final class AppModel {
         if layers.liveImagery {
             Task { await LiveImagery.shared.ensureLoaded(into: globe) }
         }
+        if layers.anyWeather { weather.refreshIfNeeded() } else if forecastHours != 0 || forecastPlaying { resetForecast() }
+    }
+
+    /// Pushes new GFS frames into the renderer.
+    func syncWeather() {
+        globe.setWeather(weather.grids)
+    }
+
+    // MARK: Forecast scrubber
+
+    /// Hours ahead the weather layers show while paused (0 = now).
+    private(set) var forecastHours: Double = 0
+    private(set) var forecastPlaying = false
+
+    /// Hours from now to the last GFS frame.
+    var forecastSpan: Double {
+        guard let last = weather.grids.last?.valid else { return 0 }
+        return max(0, last.timeIntervalSinceNow / 3600)
+    }
+
+    func scrubForecast(to hours: Double) {
+        if forecastPlaying {
+            globe.pauseForecast()
+            forecastPlaying = false
+        }
+        forecastHours = max(0, min(forecastSpan, hours))
+        globe.forecastHours = forecastHours
+    }
+
+    func toggleForecastPlayback() {
+        Haptics.shared.select()
+        if forecastPlaying {
+            globe.pauseForecast()
+            forecastHours = globe.forecastHours
+            forecastPlaying = false
+        } else if forecastSpan > 1 {
+            globe.playForecast(span: forecastSpan)
+            forecastPlaying = true
+        }
+    }
+
+    func resetForecast() {
+        globe.pauseForecast()
+        globe.forecastHours = 0
+        forecastHours = 0
+        forecastPlaying = false
     }
 
     private func loadSatellites() async {
@@ -268,6 +320,7 @@ final class AppModel {
 
     func startReplay() {
         if briefingActive { BriefingDirector.shared.stop() }
+        resetForecast()
         if ridingISS { stopRideAlong() }
         panel = nil
         detailItem = nil
@@ -328,8 +381,93 @@ final class AppModel {
         case .satellite: 2.6
         case .aurora: 3.4
         case .user: 2.4
+        case .spot: max(2.0, min(globe.pose.distance, 3.0))
         }
         globe.focus(on: p, distance: distance)
+    }
+
+    // MARK: Ask Kármán on the globe
+
+    /// Opens Ask with what the user is looking at as context.
+    func ask(about context: APIClient.AskAbout) {
+        askService.setContext(context)
+        askDetent = .large
+        Haptics.shared.tap()
+        if detailItem != nil || panel != nil {
+            detailItem = nil
+            panel = nil
+            // Let the open sheet finish dismissing before presenting Ask.
+            Task {
+                try? await Task.sleep(for: .milliseconds(450))
+                panel = .ask
+            }
+        } else {
+            panel = .ask
+        }
+    }
+
+    /// Context for "Ask about this" on a globe item.
+    func askContext(for item: GlobeItem) -> APIClient.AskAbout? {
+        switch item {
+        case .quake(let id):
+            guard let q = planet.quake(id: id) else { return nil }
+            return .init(refId: q.id, kind: "quake", title: q.place,
+                         details: "M\(Fmt.magnitude(q.mag)), \(Int(q.depthKm)) km deep, \(Fmt.relative(q.time)) ago" + (q.isTsunamiFlagged ? ", tsunami flag" : ""))
+        case .event(let id):
+            guard let e = planet.event(id: id) else { return nil }
+            return .init(refId: e.id, kind: e.kind.rawValue, title: e.title, details: e.valueText.isEmpty ? nil : e.valueText)
+        case .launch(let id):
+            guard let l = planet.launch(id: id) else { return nil }
+            return .init(refId: l.id, kind: "launch", title: "\(l.missionName) on \(l.rocket)", details: "\(l.location), NET \(l.net.formatted(.iso8601))")
+        case .aurora(let north):
+            return .init(refId: north ? "aurora-north" : "aurora-south", kind: "aurora", title: north ? "Northern auroral oval" : "Southern auroral oval", details: nil)
+        case .satellite(let id):
+            let name = satellites.propagator(id: id)?.name ?? "satellite \(id)"
+            return .init(refId: "sat-\(id)", kind: "satellite", title: name.capitalized, details: "NORAD \(id)")
+        case .user, .spot:
+            return nil
+        }
+    }
+
+    /// The globe item an Ask answer points at, if it is on the globe.
+    func globeItem(for f: APIClient.GlobeFocus) -> GlobeItem? {
+        switch f.kind {
+        case "quake": return planet.quake(id: f.refId) != nil ? .quake(f.refId) : .spot(GeoPoint(lat: f.lat, lon: f.lon))
+        case "launch": return planet.launch(id: f.refId) != nil ? .launch(f.refId) : nil
+        case "aurora": return .aurora(north: f.refId != "aurora-south")
+        case "sun", "asteroid", "satellite": return nil
+        default:
+            if planet.event(id: f.refId) != nil { return .event(f.refId) }
+            return .spot(GeoPoint(lat: f.lat, lon: f.lon))
+        }
+    }
+
+    /// Flies the globe to what an answer is about while it streams, at half sheet height.
+    func showAskFocus(_ items: [APIClient.GlobeFocus]) {
+        guard let first = items.first else { return }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.86)) { askDetent = .medium }
+        fly(toFocus: first)
+    }
+
+    func fly(toFocus f: APIClient.GlobeFocus) {
+        let point = GeoPoint(lat: f.lat, lon: f.lon)
+        if let item = globeItem(for: f) {
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { selection = item }
+        }
+        if ridingISS { stopRideAlong() }
+        if replaying { stopReplay() }
+        let distance = f.kind == "aurora" ? 3.6 : (f.kind == "sun" ? 6.0 : 2.5)
+        focusAbovePanel(point, distance: distance)
+    }
+
+    /// Frames a point in the upper half of the screen, above a half-height sheet.
+    func focusAbovePanel(_ point: GeoPoint, distance: Double) {
+        // Seen from `distance` radii, a point this far south of the target sits about halfway up the upper half.
+        let tanBeta = 0.5 * tan(GlobeRenderer.fovY / 2)
+        var shift = 0.0
+        for _ in 0..<8 { shift = asin(min(1, tanBeta * (distance - cos(shift)))) }
+        let target = point.destination(bearing: 180, angle: min(shift, 0.6))
+        globe.fly(to: CameraPose(lat: target.lat, lon: target.lon, distance: distance), duration: 2.2)
     }
 
     func coordinate(of item: GlobeItem) -> GeoPoint? {
@@ -338,6 +476,7 @@ final class AppModel {
         case .event(let id): planet.event(id: id)?.coordinate
         case .launch(let id): planet.launch(id: id)?.coordinate
         case .user: location.point
+        case .spot(let p): p
         case .aurora(let north): GeoPoint(lat: north ? 68 : -68, lon: Geo.normalizeLon(Astro.subsolarPoint(Date()).lon + 180))
         case .satellite(let id):
             satellites.propagator(id: id).flatMap { try? $0.ecef(at: Date()) }.map { SatGeo.subpoint(ecef: $0).point }

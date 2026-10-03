@@ -15,6 +15,33 @@ struct GlobeLayers: Equatable, Codable, Sendable {
     var clouds = true
     var cityLights = true
     var liveImagery = false
+    // Live weather (NOAA GFS)
+    var wind = true
+    var temperature = false
+    var rain = false
+    var plates = false
+
+    var anyWeather: Bool { wind || temperature || rain }
+
+    enum CodingKeys: String, CodingKey {
+        case quakes, storms, fires, otherEvents, aurora, satellites, starlink, launches, clouds, cityLights, liveImagery
+        case wind, temperature, rain, plates
+    }
+}
+
+extension GlobeLayers {
+    /// Tolerates layer sets saved by older versions (missing keys keep their defaults).
+    init(from decoder: Decoder) throws {
+        self.init()
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        func read(_ key: CodingKeys, _ value: inout Bool) {
+            if let v = try? c.decodeIfPresent(Bool.self, forKey: key) { value = v }
+        }
+        read(.quakes, &quakes); read(.storms, &storms); read(.fires, &fires); read(.otherEvents, &otherEvents)
+        read(.aurora, &aurora); read(.satellites, &satellites); read(.starlink, &starlink); read(.launches, &launches)
+        read(.clouds, &clouds); read(.cityLights, &cityLights); read(.liveImagery, &liveImagery)
+        read(.wind, &wind); read(.temperature, &temperature); read(.rain, &rain); read(.plates, &plates)
+    }
 }
 
 enum GlobeItem: Hashable, Sendable {
@@ -24,6 +51,8 @@ enum GlobeItem: Hashable, Sendable {
     case satellite(Int)
     case aurora(north: Bool)
     case user
+    /// Any point on Earth the user tapped: its weather, daylight and distance.
+    case spot(GeoPoint)
 }
 
 struct GlobeSceneData {
@@ -76,6 +105,46 @@ final class GlobeController {
     var captureRequest: ((CGImage?) -> Void)?
 
     weak var satellites: SatelliteEngine?
+
+    // Live weather (GFS frames, oldest first)
+    private(set) var weather: [WeatherGrid] = []
+    private(set) var weatherVersion = 0
+    /// Hours ahead of now that the weather (and daylight) show while the forecast is paused.
+    var forecastHours: Double = 0
+    /// A full day of forecast plays in this many seconds.
+    static let forecastSecondsPerDay = 16.0
+    private var forecastPlayback: (startedAt: CFTimeInterval, from: Double, span: Double)?
+    var isPlayingForecast: Bool { forecastPlayback != nil }
+
+    func setWeather(_ grids: [WeatherGrid]) {
+        weather = grids
+        weatherVersion &+= 1
+    }
+
+    /// Forecast hours shown at a moment: the paused value, or the playhead looping through the span
+    /// (with a short hold on the last frame).
+    func forecastHours(at now: CFTimeInterval = CACurrentMediaTime()) -> Double {
+        guard let p = forecastPlayback, p.span > 0 else { return forecastHours }
+        let hold = 3.0
+        let h = p.from + (now - p.startedAt) / Self.forecastSecondsPerDay * 24
+        return min(p.span, h.truncatingRemainder(dividingBy: p.span + hold))
+    }
+
+    func playForecast(span: Double) {
+        let start = forecastHours >= span - 0.25 ? 0 : forecastHours
+        forecastPlayback = (CACurrentMediaTime(), start, span)
+        autoRotate = false
+    }
+
+    func pauseForecast() {
+        forecastHours = forecastHours(at: CACurrentMediaTime())
+        forecastPlayback = nil
+    }
+
+    /// The instant whose sunlight and weather are drawn: the render date plus the forecast offset.
+    func lightingDate(at now: CFTimeInterval = CACurrentMediaTime()) -> Date {
+        renderDate(at: now).addingTimeInterval(forecastHours(at: now) * 3600)
+    }
 
     // Follow mode (ride along with the ISS)
     private var follow: (@MainActor (Date) -> RideAlongMath.Frame?)?

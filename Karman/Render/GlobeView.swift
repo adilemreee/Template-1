@@ -95,7 +95,12 @@ struct GlobeView: UIViewRepresentable {
 
         @objc func handleTap(_ g: UITapGestureRecognizer) {
             guard controller.introStart == nil, let renderer, let view = g.view else { return }
-            let item = renderer.pick(at: g.location(in: view))
+            let location = g.location(in: view)
+            var item = renderer.pick(at: location)
+            // Nothing there: with nothing selected, the tap asks about that spot on Earth.
+            if item == nil, controller.selection == nil, let hit = renderer.globeHit(at: location) {
+                item = .spot(hit)
+            }
             controller.onTap?(item)
         }
 

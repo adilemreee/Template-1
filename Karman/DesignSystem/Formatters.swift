@@ -59,4 +59,51 @@ enum Fmt {
     }
 
     static func magnitude(_ m: Double) -> String { m.formatted(.number.precision(.fractionLength(1))) }
+
+    // MARK: Weather
+
+    static func temperature(_ celsius: Double, units: UnitSystem) -> String {
+        let v = units == .metric ? celsius : celsius * 9 / 5 + 32
+        return "\(Int(v.rounded()))°"
+    }
+
+    static func windSpeed(_ metresPerSecond: Double, units: UnitSystem) -> String {
+        units == .metric ? "\(Int((metresPerSecond * 3.6).rounded())) km/h" : "\(Int((metresPerSecond * 2.23694).rounded())) mph"
+    }
+
+    static func rainRate(_ mmPerHour: Double, units: UnitSystem) -> String {
+        if mmPerHour < 0.1 { return String(localized: "dry") }
+        if units == .imperial { return "\((mmPerHour / 25.4).formatted(.number.precision(.fractionLength(2)))) in/h" }
+        return "\(mmPerHour.formatted(.number.precision(.fractionLength(mmPerHour < 10 ? 1 : 0)))) mm/h"
+    }
+
+    static func rainWord(_ mmPerHour: Double, tempC: Double) -> String {
+        let snow = tempC < 0.5
+        switch mmPerHour {
+        case ..<0.1: return String(localized: "Dry")
+        case ..<0.5: return snow ? String(localized: "Light snow") : String(localized: "Drizzle")
+        case ..<2.5: return snow ? String(localized: "Snow") : String(localized: "Light rain")
+        case ..<8: return snow ? String(localized: "Heavy snow") : String(localized: "Rain")
+        case ..<30: return snow ? String(localized: "Blizzard-force snow") : String(localized: "Heavy rain")
+        default: return String(localized: "Torrential rain")
+        }
+    }
+
+    /// Beaufort-style word for a wind speed.
+    static func windWord(_ metresPerSecond: Double) -> String {
+        switch metresPerSecond {
+        case ..<1.5: return String(localized: "Calm")
+        case ..<5.5: return String(localized: "Light breeze")
+        case ..<10.8: return String(localized: "Breezy")
+        case ..<17.2: return String(localized: "Strong wind")
+        case ..<24.5: return String(localized: "Gale")
+        case ..<32.7: return String(localized: "Storm-force wind")
+        default: return String(localized: "Hurricane-force wind")
+        }
+    }
+
+    /// "+6 h" style offset label for the forecast scrubber.
+    static func forecastOffset(hours: Double) -> String {
+        hours < 0.5 ? String(localized: "Now") : "+\(Int(hours.rounded())) h"
+    }
 }

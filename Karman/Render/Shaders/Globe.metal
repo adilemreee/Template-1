@@ -43,6 +43,55 @@ static float3 tangentEast(float3 n) {
 }
 
 // ---------------------------------------------------------------------------------------
+// Live weather (NOAA GFS) — frames packed by the Kármán API as RGBA8: eastward and northward
+// 10 m wind in 0.5 m/s steps around 128, 2 m temperature in 0.5 °C steps from −80 °C, and
+// precipitation as sqrt(mm/h ÷ 50). Rows run from 90° N, columns from 0° E.
+// ---------------------------------------------------------------------------------------
+
+static float2 weatherUV(float latDeg, float lonDeg) {
+    float lonE = lonDeg < 0.0 ? lonDeg + 360.0 : lonDeg;
+    return float2((lonE + 0.5) / 360.0, (90.5 - latDeg) / 181.0);
+}
+
+static float2 weatherUVAt(float3 P) {
+    return weatherUV(asin(clamp(P.y, -1.0, 1.0)) * 57.2957795, atan2(P.x, P.z) * 57.2957795);
+}
+
+/// Samples the frames at a fractional time index, blending the two that bracket it.
+static float4 sampleWeather(texture2d_array<float> wx, sampler s, float2 wuv, float slice, float slices) {
+    float last = max(slices - 1.0, 0.0);
+    float t = clamp(slice, 0.0, last);
+    float i0 = floor(t);
+    float i1 = min(i0 + 1.0, last);
+    float4 a = wx.sample(s, wuv, uint(i0), level(0.0));
+    float4 b = wx.sample(s, wuv, uint(i1), level(0.0));
+    return mix(a, b, t - i0);
+}
+
+static float2 decodeWind(float4 c) { return (c.rg * 255.0 - 128.0) * 0.5; }
+
+static float3 temperatureRamp(float c) {
+    // Violet (−40 °C), blue (−20), cyan (0), green (10), yellow (20), orange (30), crimson (42+).
+    const float stops[7] = { -40.0, -20.0, 0.0, 10.0, 20.0, 30.0, 42.0 };
+    const float3 cols[7] = { float3(0.22, 0.07, 0.48), float3(0.05, 0.18, 0.78), float3(0.06, 0.60, 0.82),
+                             float3(0.12, 0.62, 0.20), float3(0.92, 0.80, 0.12), float3(0.96, 0.38, 0.05),
+                             float3(0.78, 0.04, 0.12) };
+    if (c <= stops[0]) return cols[0];
+    for (int i = 1; i < 7; i++) {
+        if (c < stops[i]) return mix(cols[i - 1], cols[i], (c - stops[i - 1]) / (stops[i] - stops[i - 1]));
+    }
+    return cols[6];
+}
+
+static float3 rainRamp(float mmh) {
+    // Radar-style: drizzle teal → light green → yellow (4 mm/h) → orange (10) → magenta (25+).
+    float3 c = mix(float3(0.06, 0.48, 0.58), float3(0.12, 0.78, 0.28), smoothstep(0.1, 1.0, mmh));
+    c = mix(c, float3(0.96, 0.86, 0.12), smoothstep(1.0, 4.0, mmh));
+    c = mix(c, float3(1.0, 0.42, 0.06), smoothstep(4.0, 10.0, mmh));
+    return mix(c, float3(0.88, 0.12, 0.68), smoothstep(10.0, 25.0, mmh));
+}
+
+// ---------------------------------------------------------------------------------------
 // Sphere (Earth, atmosphere, aurora shells)
 // ---------------------------------------------------------------------------------------
 
@@ -80,8 +129,10 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
                                texture2d<float> liveTex [[texture(5)]],
                                texture2d<float> detailTex [[texture(6)]],
                                texture2d<float> detailMask [[texture(7)]],
+                               texture2d_array<float> weatherTex [[texture(8)]],
                                sampler s [[sampler(0)]],
-                               sampler cs [[sampler(1)]]) {
+                               sampler cs [[sampler(1)]],
+                               sampler ws [[sampler(2)]]) {
     float3 N = normalize(in.world);
     float3 V = normalize(u.cameraPos - in.world);
     float3 L = normalize(u.sunDir);
@@ -160,6 +211,28 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     color += sodium * lights * lights * lightsGain * night * (1.0 - cloud * 0.8) * u.cityLights * shimmer;
     // Faint moonlit ambient so continents stay readable on the night side.
     color += albedo * float3(0.30, 0.42, 0.65) * 0.045 * night * (1.0 - cloud * 0.5);
+
+    // Live weather maps over the surface and clouds: 2 m temperature with isotherms every
+    // 10 °C (the freezing line brighter), and precipitation in radar colours.
+    if (u.weatherSlices > 0.5 && (u.temperatureOverlay > 0.001 || u.rainOverlay > 0.001)) {
+        float4 wx = sampleWeather(weatherTex, ws, weatherUV(90.0 - uv.y * 180.0, uv.x * 360.0 - 180.0), u.weatherSlice, u.weatherSlices);
+        float lightFactor = mix(0.16, 1.0, smoothstep(-0.25, 0.2, NdotL));
+        if (u.temperatureOverlay > 0.001) {
+            float tempC = wx.b * 127.5 - 80.0;
+            color = mix(color, temperatureRamp(tempC) * lightFactor * 1.15, 0.62 * u.temperatureOverlay);
+            float t10 = tempC / 10.0;
+            float fw = max(fwidth(t10), 1e-4);
+            float iso = 1.0 - smoothstep(0.0, fw * 1.3, abs(fract(t10 + 0.5) - 0.5));
+            float freezing = 1.0 - smoothstep(0.0, fw * 1.8, abs(t10));
+            color += (float3(0.10) * iso + float3(0.20, 0.32, 0.36) * freezing) * mix(0.5, 1.0, lightFactor) * u.temperatureOverlay;
+        }
+        if (u.rainOverlay > 0.001) {
+            float rate = wx.a * wx.a * 50.0;
+            float streaks = fbm(float2(uv.x * 300.0, uv.y * 150.0) + float2(u.time * 0.04, -u.time * 0.07));
+            float a = smoothstep(0.06, 0.9, rate) * (0.62 + 0.38 * streaks) * 0.82 * u.rainOverlay;
+            color = mix(color, rainRamp(rate) * mix(0.28, 1.0, lightFactor) * 1.2, a);
+        }
+    }
 
     // Warm twilight band along the terminator.
     float twilight = exp(-pow((NdotL - 0.03) / 0.085, 2.0));
@@ -648,6 +721,140 @@ fragment float4 path_fragment(PathOut in [[stage_in]],
     float dash = style.dash > 0.0 ? step(0.5, fract(in.along / style.dash - u.time * 0.6)) * 0.7 + 0.3 : 1.0;
     float a = (core + glow * 0.6) * in.alpha * dash * style.color.a;
     return float4(style.color.rgb * a * u.markerFade * u.sceneFade, 0.0);
+}
+
+// ---------------------------------------------------------------------------------------
+// Wind: a particle swarm advected through the GFS 10 m wind on the GPU, each particle
+// trailing a ribbon of its recent positions (recorded 30 times a second).
+// ---------------------------------------------------------------------------------------
+
+static uint pcgHash(uint v) {
+    uint state = v * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
+static float rand01(uint a, uint b) {
+    return float(pcgHash(a ^ pcgHash(b)) & 0x00FFFFFFu) / 16777216.0;
+}
+
+static float2 windAt(texture2d_array<float> wx, sampler s, float3 P, constant WindParams& p) {
+    return decodeWind(sampleWeather(wx, s, weatherUVAt(P), p.slice, p.slices));
+}
+
+kernel void wind_step(uint id [[thread_position_in_grid]],
+                      device WindParticle* particles [[buffer(0)]],
+                      device float4* trail [[buffer(1)]],
+                      constant WindParams& p [[buffer(2)]],
+                      texture2d_array<float> wx [[texture(0)]],
+                      sampler ws [[sampler(0)]]) {
+    if (id >= p.count) return;
+    WindParticle pt = particles[id];
+    float3 P = pt.position;
+    uint base = id * p.trailLength;
+    bool spawn = pt.age >= pt.life || length_squared(P) < 0.25 || dot(P, p.cap.xyz) < p.cap.w - 0.03;
+    if (spawn) {
+        // Uniform over the visible cap: cos(angle from its centre) uniform down to the edge.
+        uint key = id * 3u + p.seed * 7919u;
+        float cosT = mix(1.0, p.cap.w, rand01(key, 1u));
+        float sinT = sqrt(max(0.0, 1.0 - cosT * cosT));
+        float phi = rand01(key, 2u) * 6.2831853;
+        float3 c = p.cap.xyz;
+        float3 e = tangentEast(c);
+        float3 n = cross(c, e);
+        P = normalize(c * cosT + (e * cos(phi) + n * sin(phi)) * sinT);
+        pt.age = 0.0;
+        pt.life = p.maxAge * (0.45 + 0.9 * rand01(key, 3u));
+        pt.speed = length(windAt(wx, ws, P, p));
+        for (uint k = 0u; k < p.trailLength; k++) trail[base + k] = float4(P, pt.speed);
+    } else {
+        // Midpoint (RK2) step along the flow on the sphere.
+        float k = p.speedScale * p.dt;
+        float2 w1 = windAt(wx, ws, P, p);
+        float3 e1 = tangentEast(P);
+        float3 mid = normalize(P + (e1 * w1.x + cross(P, e1) * w1.y) * (0.5 * k));
+        float2 w2 = windAt(wx, ws, mid, p);
+        float3 e2 = tangentEast(mid);
+        P = normalize(P + (e2 * w2.x + cross(mid, e2) * w2.y) * k);
+        pt.speed = length(w2);
+        // Calm air recycles sooner, so the swarm gathers where the wind blows.
+        pt.age += p.dt * (pt.speed < 1.0 ? 3.0 : 1.0);
+    }
+    pt.position = P;
+    particles[id] = pt;
+    if (p.record != 0u) trail[base + p.head] = float4(P, pt.speed);
+}
+
+struct WindOut {
+    float4 position [[position]];
+    float across;
+    float alpha;
+    float speed;
+};
+
+/// Point k of a particle's trail: 0 is the live head, then the recorded ring, newest first.
+static float4 windTrailPoint(const device WindParticle* particles, const device float4* trail,
+                             constant WindParams& p, uint iid, uint k) {
+    if (k == 0u) return float4(particles[iid].position, particles[iid].speed);
+    uint K = p.trailLength;
+    return trail[iid * K + (p.head + K - (k - 1u)) % K];
+}
+
+vertex WindOut wind_vertex(uint vid [[vertex_id]], uint iid [[instance_id]],
+                           const device WindParticle* particles [[buffer(0)]],
+                           const device float4* trail [[buffer(1)]],
+                           constant FrameUniforms& u [[buffer(2)]],
+                           constant WindParams& p [[buffer(3)]]) {
+    uint last = p.trailLength;               // points 0…trailLength
+    uint k = vid >> 1;
+    float side = (vid & 1u) != 0u ? 1.0 : -1.0;
+    float4 here = windTrailPoint(particles, trail, p, iid, k);
+    float4 ahead = windTrailPoint(particles, trail, p, iid, k > 0u ? k - 1u : 0u);
+    float4 behind = windTrailPoint(particles, trail, p, iid, min(k + 1u, last));
+    const float lift = 1.003;
+    float4 cp = u.viewProj * float4(here.xyz * lift, 1.0);
+    float4 ca = u.viewProj * float4(ahead.xyz * lift, 1.0);
+    float4 cb = u.viewProj * float4(behind.xyz * lift, 1.0);
+    WindOut o;
+    if (cp.w < 0.01 || ca.w < 0.01 || cb.w < 0.01) {
+        o.position = float4(0.0, 0.0, -2.0, 1.0);
+        o.across = 0.0; o.alpha = 0.0; o.speed = 0.0;
+        return o;
+    }
+    float2 halfVP = u.viewport * 0.5;
+    float2 d = ca.xy / ca.w * halfVP - cb.xy / cb.w * halfVP;
+    float len = length(d);
+    float2 dir = len > 1e-3 ? d / len : float2(1.0, 0.0);
+    float2 nrm = float2(-dir.y, dir.x);
+    float f = float(k) / float(last);         // 0 head … 1 tail
+    float width = p.widthPx * u.pixelScale * mix(1.0, 0.35, f);
+    cp.xy += nrm * side * width * 0.5 / halfVP * cp.w;
+    WindParticle pt = particles[iid];
+    float life = smoothstep(0.0, 0.5, pt.age) * (1.0 - smoothstep(pt.life - 0.9, pt.life, pt.age));
+    float3 N = normalize(here.xyz);
+    float facing = dot(N, normalize(u.cameraPos - N));
+    float calm = 0.22 + 0.78 * smoothstep(0.6, 5.0, here.w);
+    float night = 1.0 - smoothstep(-0.15, 0.25, dot(N, u.sunDir));
+    o.position = cp;
+    o.across = side;
+    o.alpha = pow(1.0 - f, 1.5) * life * calm * smoothstep(0.0, 0.22, facing) * mix(0.85, 1.2, night);
+    o.speed = here.w;
+    return o;
+}
+
+static float3 windColor(float ms) {
+    float3 c = mix(float3(0.30, 0.52, 1.0), float3(0.80, 0.93, 1.0), smoothstep(1.0, 7.0, ms));
+    c = mix(c, float3(1.0, 0.92, 0.62), smoothstep(8.0, 14.0, ms));
+    c = mix(c, float3(1.0, 0.58, 0.22) * 1.25, smoothstep(14.0, 20.0, ms));
+    return mix(c, float3(1.0, 0.28, 0.58) * 1.5, smoothstep(20.0, 30.0, ms));
+}
+
+fragment float4 wind_fragment(WindOut in [[stage_in]],
+                              constant FrameUniforms& u [[buffer(0)]],
+                              constant WindParams& p [[buffer(1)]]) {
+    float edge = 1.0 - smoothstep(0.35, 1.0, abs(in.across));
+    float a = in.alpha * edge * p.intensity * u.markerFade * u.sceneFade;
+    return float4(windColor(in.speed) * a, 0.0);
 }
 
 // ---------------------------------------------------------------------------------------

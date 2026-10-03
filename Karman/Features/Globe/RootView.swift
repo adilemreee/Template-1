@@ -97,7 +97,12 @@ struct RootView: View {
             default: break
             }
         }
-        .onChange(of: model.planet.version) { model.syncScene(); model.refreshDerived() }
+        .onChange(of: model.planet.version) {
+            model.syncScene()
+            model.refreshDerived()
+            if model.settings.layers.anyWeather || model.selection.isSpot { model.weather.refreshIfNeeded() }
+        }
+        .onChange(of: model.weather.version) { model.syncWeather() }
         .onChange(of: model.location.point) {
             model.syncScene()
             model.refreshDerived()
@@ -109,6 +114,7 @@ struct RootView: View {
                 ReviewPrompter.noteActiveDay()
                 model.planet.start()
                 model.satellites.start()
+                if model.settings.layers.anyWeather { model.weather.refreshIfNeeded() }
                 Task { await NotificationService.shared.refreshStatus() }
             case .background:
                 model.planet.stop()
@@ -153,8 +159,28 @@ struct PanelHost: View {
                 .accessibilityLabel(Text("Close"))
             }
         }
-        .presentationDetents(panel == .pulse ? [.medium, .large] : [.large])
+        .modifier(PanelDetents(panel: panel))
         .presentationDragIndicator(.visible)
         .presentationCornerRadius(34)
+    }
+}
+
+/// Pulse and Ask open at two heights; Ask drops to half height while the globe flies to an answer.
+private struct PanelDetents: ViewModifier {
+    @Environment(AppModel.self) private var model
+    let panel: AppModel.Panel
+
+    func body(content: Content) -> some View {
+        @Bindable var model = model
+        switch panel {
+        case .ask:
+            content
+                .presentationDetents([.medium, .large], selection: $model.askDetent)
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+        case .pulse:
+            content.presentationDetents([.medium, .large])
+        default:
+            content.presentationDetents([.large])
+        }
     }
 }

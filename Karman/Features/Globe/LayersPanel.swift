@@ -26,6 +26,17 @@ struct LayersPanel: View {
     ]
 
     var body: some View {
+        // Small phones scroll; everything else shows the whole panel.
+        ViewThatFits(in: .vertical) {
+            content
+            ScrollView { content }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
+        }
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("LAYERS").eyebrow()
@@ -35,6 +46,7 @@ struct LayersPanel: View {
                     .foregroundStyle(Theme.textTertiary)
             }
             LiveImageryToggle()
+            WeatherLayersSection(isPresented: $isPresented)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
                 ForEach(items) { item in
                     let on = model.settings.layers[keyPath: item.keyPath]
@@ -73,7 +85,118 @@ struct LayersPanel: View {
             }
         }
         .padding(16)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
+}
+
+/// Wind, temperature and rain from NOAA's GFS model, plus the planet's extremes right now.
+private struct WeatherLayersSection: View {
+    @Environment(AppModel.self) private var model
+    @Binding var isPresented: Bool
+
+    static let rainTint = Color(red: 0.36, green: 0.80, blue: 0.85)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("LIVE WEATHER").eyebrow(Theme.ice)
+                Spacer()
+                Text(status)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            HStack(spacing: 8) {
+                tile("Wind", subtitle: "10 m flow", icon: "wind", tint: Theme.ice, keyPath: \.wind)
+                tile("Temperature", subtitle: "2 m air", icon: "thermometer.medium", tint: Theme.quakeWarm, keyPath: \.temperature)
+                tile("Rain & snow", subtitle: "radar-style", icon: "cloud.rain.fill", tint: Self.rainTint, keyPath: \.rain)
+            }
+            if !model.weather.extremes.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(model.weather.extremes) { x in extremeButton(x) }
+                    }
+                }
+                .scrollClipDisabled()
+            }
+        }
+    }
+
+    private var status: String {
+        if model.weather.isLoading && !model.weather.hasData { return String(localized: "loading…") }
+        guard let run = model.weather.modelTime else { return "NOAA GFS" }
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        return String(localized: "NOAA GFS · \(String(format: "%02d", cal.component(.hour, from: run)))Z")
+    }
+
+    private func tile(_ title: LocalizedStringKey, subtitle: LocalizedStringKey, icon: String, tint: Color, keyPath: WritableKeyPath<GlobeLayers, Bool>) -> some View {
+        let on = model.settings.layers[keyPath: keyPath]
+        return Button {
+            Haptics.shared.select()
+            var l = model.settings.layers
+            l[keyPath: keyPath].toggle()
+            withAnimation(.snappy) { model.applyLayers(l) }
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(on ? tint : Theme.textTertiary)
+                    .symbolEffect(.bounce, value: on)
+                    .frame(height: 20)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(on ? .white : Theme.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                    Text(subtitle)
+                        .font(.system(size: 10.5, weight: .medium))
+                        .foregroundStyle(Theme.textTertiary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 11)
+            .padding(.vertical, 10)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(on ? tint.opacity(0.16) : Color.white.opacity(0.04)))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(on ? tint.opacity(0.45) : Theme.hairline, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityValue(Text(on ? "On" : "Off"))
+    }
+
+    private func extremeButton(_ x: WeatherExtreme) -> some View {
+        let units = model.settings.units
+        let (icon, tint, label, value): (String, Color, String, String) = switch x.kind {
+        case .hottest: ("thermometer.sun.fill", Theme.quakeWarm, String(localized: "Hottest"), Fmt.temperature(x.value, units: units))
+        case .coldest: ("snowflake", Theme.ice, String(localized: "Coldest"), Fmt.temperature(x.value, units: units))
+        case .windiest: ("wind", Color.white, String(localized: "Windiest"), Fmt.windSpeed(x.value, units: units))
+        case .wettest: ("cloud.heavyrain.fill", Self.rainTint, String(localized: "Wettest"), Fmt.rainRate(x.value, units: units))
+        }
+        return Button {
+            Haptics.shared.tap()
+            var l = model.settings.layers
+            switch x.kind {
+            case .hottest, .coldest: l.temperature = true
+            case .windiest: l.wind = true
+            case .wettest: l.rain = true
+            }
+            model.applyLayers(l)
+            isPresented = false
+            model.select(.spot(x.point))
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 10, weight: .bold)).foregroundStyle(tint)
+                Text(label).font(.system(size: 11, weight: .medium)).foregroundStyle(Theme.textSecondary)
+                Text(value).font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.white)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Capsule().fill(Color.white.opacity(0.06)))
+            .overlay(Capsule().strokeBorder(Theme.hairline))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("\(label) place on Earth right now: \(value). Show it."))
     }
 }
 
@@ -127,6 +250,7 @@ private struct LiveImageryToggle: View {
 
 extension GlobeLayers {
     var activeCount: Int {
-        [quakes, storms, fires, otherEvents, aurora, satellites, starlink, launches, clouds, cityLights, liveImagery].filter { $0 }.count
+        [quakes, storms, fires, otherEvents, aurora, satellites, starlink, launches, clouds, cityLights, liveImagery,
+         wind, temperature, rain, plates].filter { $0 }.count
     }
 }

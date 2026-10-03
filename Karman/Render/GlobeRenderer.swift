@@ -31,6 +31,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var stormPSO: MTLRenderPipelineState!
     private var satellitePSO: MTLRenderPipelineState!
     private var pathPSO: MTLRenderPipelineState!
+    private var windPSO: MTLRenderPipelineState!
+    private var windStepPSO: MTLComputePipelineState!
     private var prefilterPSO: MTLRenderPipelineState!
     private var downsamplePSO: MTLRenderPipelineState!
     private var upsamplePSO: MTLRenderPipelineState!
@@ -44,6 +46,12 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var detailSampler: MTLSamplerState!
     /// Regional NASA GIBS imagery for close-ups (nil if the device can't spare the memory).
     private var detail: DetailImagery?
+    /// Live GFS weather: texture array for the temperature and rain maps, and the wind swarm.
+    private var weatherLayer: WeatherLayer?
+    private var weatherPlaceholder: MTLTexture?
+    private var temperatureFade: Float = 0
+    private var rainFade: Float = 0
+    private var lastFadeStep: CFTimeInterval = 0
 
     // Geometry
     private var earthMesh: (vertices: MTLBuffer, indices: MTLBuffer, indexCount: Int)?
@@ -125,6 +133,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             print("Pipeline error: \(error)")
             return nil
         }
+        weatherLayer = WeatherLayer(device: device, stepPSO: windStepPSO, drawPSO: windPSO)
+        weatherPlaceholder = makeWeatherPlaceholder()
         earthMesh = MetalResources.sphere(device: device, segments: 256, rings: 128)
         shellMesh = MetalResources.sphere(device: device, segments: 128, rings: 64)
         blackTex = MetalResources.solidTexture(device: device, gray: 0)
@@ -135,6 +145,21 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         auroraDesc.storageMode = .shared
         auroraTex = device.makeTexture(descriptor: auroraDesc)
         loadTexturesAsync()
+    }
+
+    /// One calm, dry 1×1 frame so the Earth shader always has a weather array bound.
+    private func makeWeatherPlaceholder() -> MTLTexture? {
+        let desc = MTLTextureDescriptor()
+        desc.textureType = .type2DArray
+        desc.pixelFormat = .rgba8Unorm
+        desc.width = 1
+        desc.height = 1
+        desc.arrayLength = 1
+        desc.usage = .shaderRead
+        guard let t = device.makeTexture(descriptor: desc) else { return nil }
+        var px: [UInt8] = [128, 128, 200, 0]
+        t.replace(region: MTLRegionMake2D(0, 0, 1, 1), mipmapLevel: 0, slice: 0, withBytes: &px, bytesPerRow: 4, bytesPerImage: 4)
+        return t
     }
 
     private func makeFlatNormal() -> MTLTexture? {
@@ -192,6 +217,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         stormPSO = try pipeline("storm_vertex", "storm_fragment", blend: .premultiplied)
         satellitePSO = try pipeline("satellite_vertex", "satellite_fragment", blend: .additive)
         pathPSO = try pipeline("path_vertex", "path_fragment", blend: .additive)
+        windPSO = try pipeline("wind_vertex", "wind_fragment", blend: .additive)
+        guard let step = fn("wind_step") else { throw NSError(domain: "Karman", code: 2) }
+        windStepPSO = try device.makeComputePipelineState(function: step)
         prefilterPSO = try pipeline("fullscreen_vertex", "bloom_prefilter", blend: .opaque, depth: false, samples: 1)
         downsamplePSO = try pipeline("fullscreen_vertex", "bloom_downsample", blend: .opaque, depth: false, samples: 1)
         upsamplePSO = try pipeline("fullscreen_vertex", "bloom_upsample", blend: .additive, depth: false, samples: 1)
@@ -331,7 +359,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         var pose = controller.step(now: now)
         var starIntensity: Float = 1
-        let date = controller.renderDate(at: now)
+        let date = controller.lightingDate(at: now)
         let sunDir = Astro.sunDirection(date)
         if let introStart = controller.introStart {
             let t = now - introStart
@@ -390,6 +418,21 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.atmosphereIntensity = 1
         u.reliefStrength = 1.0
 
+        // Live weather maps fade in and out with their layers.
+        let layers = controller.layers
+        weatherLayer?.sync(controller.weather, version: controller.weatherVersion)
+        let hasWeather = weatherLayer?.hasData ?? false
+        let fadeStep = Float(min(1, max(0, now - lastFadeStep) * 4))
+        lastFadeStep = now
+        temperatureFade += ((layers.temperature && hasWeather ? 1 : 0) - temperatureFade) * fadeStep
+        rainFade += ((layers.rain && hasWeather ? 1 : 0) - rainFade) * fadeStep
+        if let weatherLayer, hasWeather {
+            u.weatherSlice = weatherLayer.slice(at: date)
+            u.weatherSlices = weatherLayer.sliceCount
+        }
+        u.temperatureOverlay = temperatureFade < 0.003 ? 0 : temperatureFade
+        u.rainOverlay = rainFade < 0.003 ? 0 : rainFade
+
         if detail == nil, texturesReady { detail = DetailImagery(device: device, queue: queue, grid: Self.isHighEnd ? 6 : 4) }
         if let detail, controller.introStart == nil {
             let moving = controller.isFlying || now - controller.lastInteractionTime < 0.35
@@ -405,6 +448,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         guard let drawable = view.currentDrawable, let cmd = queue.makeCommandBuffer() else { return }
+
+        // ---- Wind particles step on the GPU before the scene that draws them
+        weatherLayer?.encodeWind(cmd, enabled: layers.wind && controller.introStart == nil, now: now, date: date,
+                                 pose: pose, eye: eye, aspect: aspect)
 
         // ---- Scene pass
         let rp = MTLRenderPassDescriptor()
@@ -446,8 +493,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             enc.setFragmentTexture(controller.liveImageryTexture?.texture ?? blackTex, index: 5)
             enc.setFragmentTexture(detail?.texture ?? blackTex, index: 6)
             enc.setFragmentTexture(detail?.mask ?? blackTex, index: 7)
+            enc.setFragmentTexture(weatherLayer?.texture ?? weatherPlaceholder, index: 8)
             enc.setFragmentSamplerState(surfaceSampler, index: 0)
             enc.setFragmentSamplerState(detailSampler, index: 1)
+            enc.setFragmentSamplerState(weatherLayer?.sampler ?? clampSampler, index: 2)
             enc.drawIndexedPrimitives(type: .triangle, indexCount: mesh.indexCount, indexType: .uint32, indexBuffer: mesh.indices, indexBufferOffset: 0)
         }
 
@@ -457,6 +506,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
         enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
         enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+
+        // Wind ribbons skim the surface, under the cyclones' cloud tops.
+        weatherLayer?.drawWind(enc, uniforms: &u, depth: depthTest)
 
         // Tropical cyclones as cloud spirals on the surface (under the atmosphere's haze).
         if let stormBuffer, stormCount > 0 {
@@ -672,7 +724,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         // Full rate while something moves; a calm 30 fps when the planet is just breathing.
         let busy = controller.isFlying || controller.introStart != nil || now - controller.lastInteractionTime < 3
             || controller.drift.heading != 0 || controller.autoRotateActive(now: now)
-        let target = busy ? (Self.isHighEnd ? 120 : 60) : 30
+        // Flowing wind needs a steady 60 fps to read as motion; Low Power Mode keeps the calm 30.
+        let flowing = (weatherLayer?.isAnimating ?? false) && !ProcessInfo.processInfo.isLowPowerModeEnabled
+        let target = busy ? (Self.isHighEnd ? 120 : 60) : (flowing ? 60 : 30)
         #endif
         if view.preferredFramesPerSecond != target {
             view.preferredFramesPerSecond = target
@@ -844,6 +898,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         case .event(let id): return scene.events.first { $0.id == id }?.coordinate.unitVectorF
         case .launch(let id): return scene.launches.first { $0.id == id }?.coordinate.unitVectorF
         case .user: return scene.user?.unitVectorF
+        case .spot(let p): return p.unitVectorF
         case .satellite, .aurora: return nil
         }
     }

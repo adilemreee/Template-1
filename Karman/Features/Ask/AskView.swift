@@ -2,9 +2,10 @@ import SwiftUI
 
 struct AskView: View {
     @Environment(AppModel.self) private var model
-    @State private var service = AskService()
     @State private var draft = ""
     @FocusState private var focused: Bool
+
+    private var service: AskService { model.askService }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,7 +35,7 @@ struct AskView: View {
                         emptyState
                     }
                     ForEach(service.messages) { m in
-                        MessageView(message: m)
+                        MessageView(message: m) { model.fly(toFocus: $0) }
                             .id(m.id)
                             .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
                     }
@@ -115,6 +116,7 @@ struct AskView: View {
     }
 
     private var suggestions: [String] {
+        if let c = service.context { return Self.suggestions(for: c) }
         var out: [String] = []
         if let q = model.planet.strongestRecentQuake, q.mag >= 5 {
             out.append(String(localized: "Why did a magnitude \(Fmt.magnitude(q.mag)) earthquake happen near \(q.place.components(separatedBy: " of ").last ?? q.place)?"))
@@ -128,7 +130,66 @@ struct AskView: View {
         return Array(out.prefix(4))
     }
 
+    static func suggestions(for c: APIClient.AskAbout) -> [String] {
+        switch c.kind {
+        case "quake": return [String(localized: "Why do earthquakes happen here?"),
+                              String(localized: "Should people nearby expect aftershocks?"),
+                              String(localized: "How does this compare with the biggest quakes in this region?")]
+        case "storm": return [String(localized: "Where is this storm heading, and how strong will it get?"),
+                              String(localized: "What makes a storm like this intensify?")]
+        case "wildfire": return [String(localized: "How is the weather affecting this fire?"),
+                                 String(localized: "How do satellites spot wildfires?")]
+        case "volcano": return [String(localized: "What kind of volcano is this and how dangerous is it?")]
+        case "launch": return [String(localized: "What is this mission going to do?"),
+                               String(localized: "Could I see this launch from where I am?")]
+        case "aurora": return [String(localized: "Could I see the aurora tonight from where I am?"),
+                               String(localized: "What drives the aurora right now?")]
+        case "spot": return [String(localized: "What is the weather doing here over the next day?"),
+                             String(localized: "What is this place like? Climate, geography and what's nearby."),
+                             String(localized: "Why is it this warm or cold here right now?")]
+        default: return [String(localized: "Tell me about this.")]
+        }
+    }
+
+    private var contextChip: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "scope")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Theme.aurora)
+            Text("About \(service.context?.title ?? "")")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.88))
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            Button {
+                Haptics.shared.select()
+                withAnimation(.snappy) { service.setContext(nil) }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(Theme.textSecondary)
+                    .frame(width: 20, height: 20)
+                    .background(Circle().fill(Color.white.opacity(0.1)))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text("Stop asking about this"))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(Capsule().fill(Theme.aurora.opacity(0.10)))
+        .overlay(Capsule().strokeBorder(Theme.aurora.opacity(0.3)))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 6)
+    }
+
     private var inputBar: some View {
+        VStack(spacing: 0) {
+            if service.context != nil { contextChip.transition(.move(edge: .bottom).combined(with: .opacity)) }
+            inputField
+        }
+    }
+
+    private var inputField: some View {
         HStack(spacing: 10) {
             TextField("Ask about the planet…", text: $draft, axis: .vertical)
                 .lineLimit(1...4)
@@ -237,6 +298,7 @@ private struct AskConsentCard: View {
 
 private struct MessageView: View {
     let message: AskService.Message
+    var onFocus: (APIClient.GlobeFocus) -> Void = { _ in }
 
     var body: some View {
         switch message.role {
@@ -253,17 +315,77 @@ private struct MessageView: View {
         case .assistant:
             HStack(alignment: .top, spacing: 10) {
                 AIOrb(small: true).frame(width: 22, height: 22).padding(.top, 2)
-                if message.text.isEmpty && message.streaming {
-                    TypingDots().padding(.top, 8)
-                } else {
-                    Text("\(Text(verbatim: message.text))\(Text(verbatim: message.streaming ? " ▍" : "").foregroundStyle(Theme.aurora))")
-                        .font(.system(size: 15))
-                        .foregroundStyle(message.failed ? Color.orange : .white.opacity(0.92))
-                        .lineSpacing(3)
-                        .textSelection(.enabled)
+                VStack(alignment: .leading, spacing: 10) {
+                    if !message.focus.isEmpty {
+                        FocusChips(items: message.focus, onTap: onFocus)
+                    }
+                    if message.text.isEmpty && message.streaming {
+                        TypingDots().padding(.top, 8)
+                    } else {
+                        Text("\(Text(verbatim: message.text))\(Text(verbatim: message.streaming ? " ▍" : "").foregroundStyle(Theme.aurora))")
+                            .font(.system(size: 15))
+                            .foregroundStyle(message.failed ? Color.orange : .white.opacity(0.92))
+                            .lineSpacing(3)
+                            .textSelection(.enabled)
+                    }
                 }
                 Spacer(minLength: 20)
             }
+        }
+    }
+}
+
+/// The places an answer is about; tapping one flies the globe there.
+private struct FocusChips: View {
+    let items: [APIClient.GlobeFocus]
+    let onTap: (APIClient.GlobeFocus) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(items, id: \.refId) { f in
+                    Button {
+                        Haptics.shared.select()
+                        onTap(f)
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: Self.icon(f.kind)).font(.system(size: 10, weight: .bold))
+                            Text(f.title).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                            Image(systemName: "location.fill").font(.system(size: 8, weight: .bold)).opacity(0.6)
+                        }
+                        .foregroundStyle(Self.tint(f.kind))
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Capsule().fill(Self.tint(f.kind).opacity(0.13)))
+                        .overlay(Capsule().strokeBorder(Self.tint(f.kind).opacity(0.3)))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("Show \(f.title) on the globe"))
+                }
+            }
+        }
+        .scrollClipDisabled()
+    }
+
+    static func icon(_ kind: String) -> String {
+        switch kind {
+        case "quake": "waveform.path.ecg"
+        case "launch": "airplane.departure"
+        case "aurora": "light.beacon.max.fill"
+        case "sun": "sun.max.fill"
+        case "weather": "thermometer.medium"
+        case "spot": "mappin"
+        default: EventKind(rawValue: kind)?.symbol ?? "mappin"
+        }
+    }
+
+    static func tint(_ kind: String) -> Color {
+        switch kind {
+        case "quake": Theme.quake
+        case "launch": Theme.launch
+        case "aurora": Theme.aurora
+        case "sun": Theme.sun
+        case "weather", "spot": Theme.ice
+        default: EventKind(rawValue: kind).map(Theme.color(for:)) ?? Theme.ice
         }
     }
 }

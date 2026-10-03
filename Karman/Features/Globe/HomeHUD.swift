@@ -21,6 +21,13 @@ struct HomeHUD: View {
                 .opacity(appeared ? 1 : 0)
                 .animation(.spring(response: 0.7, dampingFraction: 0.85).delay(0.08), value: appeared)
 
+            if showsWeatherBar {
+                WeatherBar()
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
@@ -59,10 +66,17 @@ struct HomeHUD: View {
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: model.selection)
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: showLayers)
+        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: showsWeatherBar)
         .animation(.spring(response: 0.5, dampingFraction: 0.86), value: model.onboardingDone)
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.85)) { appeared = true }
         }
+    }
+
+    /// The forecast bar shows with a weather map (its legend is needed) or once the forecast is in use.
+    private var showsWeatherBar: Bool {
+        let l = model.settings.layers
+        return l.temperature || l.rain || (l.wind && (model.forecastPlaying || model.forecastHours > 0))
     }
 }
 
@@ -167,6 +181,12 @@ private struct StatusChips: View {
                     if !model.planet.wildfires.isEmpty {
                         Chip(icon: "flame.fill", tint: Theme.fire, title: "\(model.planet.wildfires.count)", subtitle: String(localized: "fires")) {
                             model.panel = .pulse
+                        }
+                    }
+                    if model.settings.layers.anyWeather, model.weather.hasData, model.forecastSpan > 1 {
+                        Chip(icon: model.forecastPlaying ? "pause.fill" : "play.fill", tint: Theme.ice, title: "24 h",
+                             subtitle: String(localized: "weather ahead")) {
+                            model.toggleForecastPlayback()
                         }
                     }
                     if let chance = model.planet.auroraChance(at: model.location.point), chance > 0 {
