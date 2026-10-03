@@ -136,6 +136,23 @@ Yerelde çalıştırma:
 cd backend && go run ./cmd/karman
 ```
 
+## Gizlilik ve Destek sayfaları (App Store için)
+
+App Store Connect, **Privacy Policy URL** ve **Support URL** için güvenilir sertifikalı herkese açık HTTPS adresleri ister. Sayfalar hazır (EN + TR): sunucuda `/privacy` ve `/support`, statik kopyaları `marketing/site/` içinde. İki kolay yol:
+
+1. **Kendi alan adın (önerilen):** Sunucundaki nginx'e (bunu sen eklersin; kurulum betiği nginx'e dokunmaz) mevcut HTTPS `server` bloğuna şunu ekle ve `nginx -s reload` yap:
+   ```nginx
+   location /karman/ {
+       proxy_pass https://127.0.0.1:8443/;
+       proxy_ssl_verify off;
+   }
+   ```
+   Adresler: `https://<alan-adın>/karman/privacy` ve `https://<alan-adın>/karman/support`.
+2. **Statik barındırma (GitHub Pages vb.):** `marketing/site/` klasörünü yayınla. İletişim adresiyle yeniden üretmek için:
+   ```bash
+   cd backend && go run ./cmd/karman site -out ../marketing/site -support-email destek@ornek.com
+   ```
+
 ## Yapay zekâ (Claude) ayarları ve maliyet
 
 - **Brifing:** dil başına 3 saatte bir **tek kez** üretilir ve tüm kullanıcılar paylaşır (structured outputs ile JSON şeması garantili; her sahne canlı veri öğesine bağlanır, uydurma olay olamaz). Maliyet kullanıcı sayısından bağımsızdır.

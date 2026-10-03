@@ -34,6 +34,14 @@ func renderSupport(email string) []byte {
 	return bytes.Replace(page, []byte("{{CONTACT_TR}}"), []byte(tr), 1)
 }
 
+// StaticPages returns the privacy and support pages as standalone files for hosting on any
+// static web host (App Store Connect needs both URLs behind a publicly trusted certificate).
+func StaticPages(supportEmail string) map[string][]byte {
+	support := bytes.ReplaceAll(renderSupport(supportEmail), []byte(`href="/privacy"`), []byte(`href="privacy.html"`))
+	privacy := bytes.ReplaceAll(privacyHTML, []byte(`href="/support"`), []byte(`href="support.html"`))
+	return map[string][]byte{"privacy.html": privacy, "support.html": support}
+}
+
 func writePage(w http.ResponseWriter, body []byte) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "public, max-age=3600")

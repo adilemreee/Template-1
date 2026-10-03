@@ -72,7 +72,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Alerts")
                 } footer: {
-                    Text("Alerts use your location rounded to about 50 km. Space Station reminders are computed on this device.")
+                    Text("Alerts use your location rounded to about 50 km. Space Station reminders are computed on this device. Kármán is not an emergency warning service: always follow your local authorities.")
                 }
                 .onChange(of: settings.alerts) {
                     Task {

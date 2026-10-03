@@ -48,7 +48,7 @@ APP = {
     "About": "Hakkında",
     "Above you": "Tepende",
     "Alerts": "Uyarılar",
-    "Alerts use your location rounded to about 50 km. Space Station reminders are computed on this device.": "Uyarılar konumunu yaklaşık 50 km hassasiyetle kullanır. Uzay İstasyonu hatırlatmaları bu cihazda hesaplanır.",
+    "Alerts use your location rounded to about 50 km. Space Station reminders are computed on this device. Kármán is not an emergency warning service: always follow your local authorities.": "Uyarılar konumunu yaklaşık 50 km hassasiyetle kullanır. Uzay İstasyonu hatırlatmaları bu cihazda hesaplanır. Kármán bir acil durum uyarı servisi değildir: her zaman yerel yetkilileri takip et.",
     "All": "Tümü",
     "Allow location to see your odds.": "Şansını görmek için konuma izin ver.",
     "Ambient soundscape": "Ambiyans müziği",

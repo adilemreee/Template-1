@@ -50,6 +50,10 @@ func main() {
 		genCert(os.Args[2:])
 		return
 	}
+	if len(os.Args) > 1 && os.Args[1] == "site" {
+		exportSite(os.Args[2:])
+		return
+	}
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	dataDir := env("KARMAN_DATA_DIR", "./data")
@@ -172,4 +176,21 @@ func genCert(args []string) {
 	sum := sha256.Sum256(spki)
 	fmt.Println("certificate written to", *out)
 	fmt.Println("SPKI SHA-256 pin:", base64.StdEncoding.EncodeToString(sum[:]))
+}
+
+// exportSite writes privacy.html and support.html for static hosting (GitHub Pages, your own domain).
+func exportSite(args []string) {
+	fs := flag.NewFlagSet("site", flag.ExitOnError)
+	out := fs.String("out", "site", "output directory")
+	email := fs.String("support-email", env("KARMAN_SUPPORT_EMAIL", ""), "contact address shown on the support page")
+	_ = fs.Parse(args)
+	if err := os.MkdirAll(*out, 0o755); err != nil {
+		panic(err)
+	}
+	for name, body := range httpapi.StaticPages(*email) {
+		if err := os.WriteFile(filepath.Join(*out, name), body, 0o644); err != nil {
+			panic(err)
+		}
+		fmt.Println("wrote", filepath.Join(*out, name))
+	}
 }
