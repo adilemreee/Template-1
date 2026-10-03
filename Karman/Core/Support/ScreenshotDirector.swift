@@ -64,6 +64,8 @@ enum ScreenshotDirector {
                 model.globe.fly(to: CameraPose(lat: v[0], lon: v[1], distance: v[2], tilt: v.count > 3 ? v[3] : 0,
                                                heading: v.count > 4 ? v[4] : 0), duration: 2.5)
             }
+        case "replay":
+            model.startReplay()
         case "ride":
             model.startRideAlong()
         case "iss":

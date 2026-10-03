@@ -33,11 +33,39 @@ struct PulseView: View {
         var significance: Double
     }
 
+    /// Replays the last day on the globe: the terminator sweeps round and quakes ripple in.
+    private var replayButton: some View {
+        Button {
+            dismiss()
+            model.startReplay()
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle().fill(Theme.ice.opacity(0.16))
+                    Image(systemName: "clock.arrow.circlepath").font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.ice)
+                }
+                .frame(width: 42, height: 42)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Replay the last 24 hours").font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
+                    Text("Watch the day sweep round the planet as every earthquake ripples in.")
+                        .font(.system(size: 12)).foregroundStyle(Theme.textSecondary).multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "play.fill").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.ice)
+            }
+            .padding(14)
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Theme.ice.opacity(0.07)))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Theme.ice.opacity(0.25)))
+        }
+        .buttonStyle(PressableStyle())
+    }
+
     var body: some View {
         let items = feed()
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 header
+                replayButton
                 filters
                 if filter == .all { summary }
                 LazyVStack(spacing: 8) {

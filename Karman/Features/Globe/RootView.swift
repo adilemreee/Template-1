@@ -28,8 +28,13 @@ struct RootView: View {
                     .ignoresSafeArea()
             }
 
-            if model.hudVisible && !model.briefingActive && !model.ridingISS {
+            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying {
                 HomeHUD()
+                    .transition(.opacity)
+            }
+
+            if model.replaying {
+                ReplayOverlay()
                     .transition(.opacity)
             }
 
@@ -76,6 +81,9 @@ struct RootView: View {
         .onOpenURL { url in
             guard let host = url.host() else { return }
             switch host {
+            case "replay":
+                model.skipIntro()
+                model.startReplay()
             case "ride":
                 model.skipIntro()
                 model.startRideAlong()

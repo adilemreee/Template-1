@@ -331,7 +331,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         var pose = controller.step(now: now)
         var starIntensity: Float = 1
-        let date = Date()
+        let date = controller.renderDate(at: now)
         let sunDir = Astro.sunDirection(date)
         if let introStart = controller.introStart {
             let t = now - introStart
@@ -511,7 +511,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         // ISS orbit
-        if controller.layers.satellites, !controller.isFollowing, let issPathBuffer, issPathCount > 1 {
+        if controller.layers.satellites, !controller.isFollowing, controller.replay == nil, let issPathBuffer, issPathCount > 1 {
             var style = PathStyle(color: SIMD4(0.45, 0.75, 1.0, 0.42), widthPx: 1.0, glow: 0.5, dash: 0, pad: 0)
             enc.setRenderPipelineState(pathPSO)
             enc.setDepthStencilState(depthTest)
@@ -532,8 +532,8 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: ringCount)
         }
 
-        // Satellites
-        if let sats = satellites {
+        // Satellites (live only: they would orbit at real speed while a replay races through the day)
+        if let sats = satellites, controller.replay == nil {
             enc.setRenderPipelineState(satellitePSO)
             enc.setDepthStencilState(depthTest)
             enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 2)
@@ -723,13 +723,15 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     // MARK: - Scene buffers
 
     private func rebuildSceneIfNeeded(now: CFTimeInterval) {
-        guard builtVersion != controller.sceneVersion || now - builtAt > 30 else { return }
+        // While replaying, quakes appear as the clock sweeps: rebuild a few times a second.
+        let maxAge: CFTimeInterval = controller.replay != nil ? 0.08 : 30
+        guard builtVersion != controller.sceneVersion || now - builtAt > maxAge else { return }
         builtVersion = controller.sceneVersion
         builtAt = now
         let scene = controller.scene
         let layers = controller.layers
         let selected = controller.selection
-        let nowDate = Date()
+        let nowDate = controller.renderDate(at: now)
 
         var rings: [RingInstance] = []
         var icons: [IconInstance] = []
@@ -741,7 +743,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         if layers.quakes {
             for q in scene.quakes {
                 let ageH = nowDate.timeIntervalSince(q.time) / 3600
-                guard ageH < 24 * 7.5 else { continue }
+                guard ageH >= 0, ageH < 24 * 7.5 else { continue } // not yet happened while replaying
                 let pos = q.coordinate.unitVectorF
                 let m = max(q.mag, 2.5)
                 let fresh = ageH < 1, day = ageH < 24

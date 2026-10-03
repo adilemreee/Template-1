@@ -262,6 +262,29 @@ final class AppModel {
         if item != nil { Haptics.shared.tap() }
     }
 
+    // MARK: Replay the last 24 hours
+
+    var replaying = false
+
+    func startReplay() {
+        if briefingActive { BriefingDirector.shared.stop() }
+        if ridingISS { stopRideAlong() }
+        panel = nil
+        detailItem = nil
+        withAnimation(.easeInOut(duration: 0.4)) { selection = nil }
+        Haptics.shared.tap()
+        let p = globe.pose
+        globe.fly(to: CameraPose(lat: max(-35, min(35, p.lat)), lon: p.lon, distance: max(p.distance, 5.2)), duration: 1.4)
+        globe.startReplay(hours: 24, duration: 36, delay: 1.4)
+        withAnimation(.easeInOut(duration: 0.5)) { replaying = true }
+    }
+
+    func stopReplay() {
+        guard replaying else { return }
+        globe.stopReplay()
+        withAnimation(.easeInOut(duration: 0.5)) { replaying = false }
+    }
+
     // MARK: Ride along with the ISS
 
     var canRideAlong: Bool { satellites.iss != nil }
@@ -269,6 +292,7 @@ final class AppModel {
     func startRideAlong() {
         guard let iss = satellites.iss else { return }
         if briefingActive { BriefingDirector.shared.stop() }
+        if replaying { stopReplay() }
         panel = nil
         detailItem = nil
         withAnimation(.easeInOut(duration: 0.4)) { selection = nil }

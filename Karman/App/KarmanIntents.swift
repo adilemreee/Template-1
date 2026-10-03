@@ -26,6 +26,18 @@ struct RideWithISSIntent: AppIntent {
     }
 }
 
+struct ReplayDayIntent: AppIntent {
+    static let title: LocalizedStringResource = "Replay the Last 24 Hours"
+    static let description = IntentDescription("Replays the last day on the globe, with every earthquake as it happened.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://replay")!)
+        return .result()
+    }
+}
+
 struct OpenSpaceWeatherIntent: AppIntent {
     static let title: LocalizedStringResource = "Show Space Weather"
     static let description = IntentDescription("Opens the live Sun, Kp index and your aurora chances.")
@@ -58,6 +70,9 @@ struct KarmanShortcuts: AppShortcutsProvider {
         AppShortcut(intent: OpenSpaceWeatherIntent(),
                     phrases: ["Show space weather in \(.applicationName)", "Aurora chances in \(.applicationName)"],
                     shortTitle: "Space Weather", systemImageName: "sun.max.fill")
+        AppShortcut(intent: ReplayDayIntent(),
+                    phrases: ["Replay the last day in \(.applicationName)", "Replay Earth's day in \(.applicationName)"],
+                    shortTitle: "Replay 24 Hours", systemImageName: "clock.arrow.circlepath")
         AppShortcut(intent: RideWithISSIntent(),
                     phrases: ["Ride with the ISS in \(.applicationName)", "Fly with the space station in \(.applicationName)"],
                     shortTitle: "Ride with the ISS", systemImageName: "airplane.departure")

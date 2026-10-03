@@ -88,6 +88,42 @@ final class GlobeController {
     /// Called when the user takes the camera back with a gesture.
     var onFollowEnded: (() -> Void)?
 
+    // MARK: Replay (time machine)
+
+    struct Replay: Equatable {
+        var from: Date
+        var to: Date
+        var startedAt: CFTimeInterval
+        var duration: CFTimeInterval
+    }
+
+    private(set) var replay: Replay?
+
+    /// The instant being rendered: now, or a moment inside the replayed window.
+    func renderDate(at now: CFTimeInterval = CACurrentMediaTime()) -> Date {
+        guard let r = replay else { return Date() }
+        let f = min(1, max(0, (now - r.startedAt) / r.duration))
+        return r.from.addingTimeInterval(f * r.to.timeIntervalSince(r.from))
+    }
+
+    /// 0…1 through the replay, nil when live.
+    func replayProgress(at now: CFTimeInterval = CACurrentMediaTime()) -> Double? {
+        replay.map { min(1, max(0, (now - $0.startedAt) / $0.duration)) }
+    }
+
+    func startReplay(hours: Double, duration: CFTimeInterval, delay: CFTimeInterval = 0) {
+        let end = Date()
+        replay = Replay(from: end.addingTimeInterval(-hours * 3600), to: end, startedAt: CACurrentMediaTime() + delay, duration: duration)
+        autoRotate = false
+        sceneVersion &+= 1
+    }
+
+    func stopReplay() {
+        replay = nil
+        autoRotate = true
+        sceneVersion &+= 1
+    }
+
     func startFollow(_ provider: @escaping @MainActor (Date) -> RideAlongMath.Frame?) {
         guard let first = provider(Date()) else { return }
         follow = provider

@@ -75,6 +75,7 @@
 		CDA4BCDB9834BD8737B530F6 /* SGP4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */; };
 		CF8D271B562ACE479EF0010B /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CACD28256510603D348A3843 /* AppSettings.swift */; };
 		CFABBD2E421ABCE2D485E917 /* widget_day.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DAE0BF88D4021D901D7A2EB3 /* widget_day.jpg */; };
+		D4035695DB2B230BDA078CEE /* ReplayOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCA4DD883D8F08FCD252F65F /* ReplayOverlay.swift */; };
 		D4F04F8E075D1FB92FD386DF /* ControlIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5FE025ED1462125BD7C87C2 /* ControlIntents.swift */; };
 		D50C0756BB820FCC69A5E4BC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7449C1D28C0E6A4635316A7F /* SwiftUI.framework */; };
 		DB06F41C400E2B649650DFB9 /* SGP4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEE3071A9A6D32B03FF1AD2 /* SGP4.swift */; };
@@ -185,6 +186,7 @@
 		CACD28256510603D348A3843 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		CB5F1AEAA24556517F686E1C /* WidgetState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetState.swift; sourceTree = "<group>"; };
 		CB9E665D1D497F49983BA306 /* PassPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassPredictor.swift; sourceTree = "<group>"; };
+		CCA4DD883D8F08FCD252F65F /* ReplayOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayOverlay.swift; sourceTree = "<group>"; };
 		CED461DF20500BA434F58C99 /* Soundscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Soundscape.swift; sourceTree = "<group>"; };
 		D10B8D4B18C3158B2D2F7E34 /* Globe.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Globe.metal; sourceTree = "<group>"; };
 		D29F923700AF1C3B0EC043F6 /* DetailImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailImagery.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				5B58E8F6A13A79A2CB1E8ECC /* Events */,
 				8C2D05172361B73461F172E0 /* Globe */,
 				D8C35B23C4146EB891C37031 /* Intro */,
+				E2CA7238057D504CBAB9A926 /* Replay */,
 				FBB12A4FEAC259A9A35C2193 /* RideAlong */,
 				B761AFC80324BDF862820FF0 /* Settings */,
 				87B6A7EEEBFBE6368FA12C37 /* Sky */,
@@ -516,6 +519,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E2CA7238057D504CBAB9A926 /* Replay */ = {
+			isa = PBXGroup;
+			children = (
+				CCA4DD883D8F08FCD252F65F /* ReplayOverlay.swift */,
+			);
+			path = Replay;
+			sourceTree = "<group>";
+		};
 		EE6826054175C314EDE29F2D /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -720,6 +731,7 @@
 				6068018BE6CA50F3139A256D /* PlanetModels.swift in Sources */,
 				6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */,
 				33ABD3864694C4BEC72380A5 /* PulseView.swift in Sources */,
+				D4035695DB2B230BDA078CEE /* ReplayOverlay.swift in Sources */,
 				FE2FF231AF337FCC216F33F7 /* ReviewPrompter.swift in Sources */,
 				BDC10F6218A7D80E3F22C07D /* RideAlong.swift in Sources */,
 				9907F01ABC07CD613F07101F /* RootView.swift in Sources */,
