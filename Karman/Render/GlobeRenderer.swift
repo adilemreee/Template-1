@@ -24,13 +24,14 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
     // Pipelines
     private var earthPSO: MTLRenderPipelineState!
-    /// The Inside the Earth variants: the surface with the wedge discarded, and the cut's faces.
-    private var earthCutPSO: MTLRenderPipelineState!
-    private var cutFacePSO: MTLRenderPipelineState!
-    private var moonPSO: MTLRenderPipelineState!
+    /// The newer passes are optional: if one fails to build, the globe goes on without it.
+    /// Inside the Earth: the surface with the wedge discarded, and the cut's faces.
+    private var earthCutPSO: MTLRenderPipelineState?
+    private var cutFacePSO: MTLRenderPipelineState?
+    private var moonPSO: MTLRenderPipelineState?
     private var atmospherePSO: MTLRenderPipelineState!
     private var auroraPSO: MTLRenderPipelineState!
-    private var cloudPSO: MTLRenderPipelineState!
+    private var cloudPSO: MTLRenderPipelineState?
     private var starPSO: MTLRenderPipelineState!
     /// Optional like the wind: without it the sky is simply stars on black.
     private var milkyWayPSO: MTLRenderPipelineState?
@@ -245,12 +246,12 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         earthPSO = try pipeline("sphere_vertex", "earth_fragment", blend: .opaque)
-        earthCutPSO = try pipeline("sphere_vertex", "earth_cutaway_fragment", blend: .opaque)
-        cutFacePSO = try pipeline("cutface_vertex", "cutface_fragment", blend: .opaque)
-        moonPSO = try pipeline("moon_vertex", "moon_fragment", blend: .opaque)
+        earthCutPSO = try? pipeline("sphere_vertex", "earth_cutaway_fragment", blend: .opaque)
+        cutFacePSO = try? pipeline("cutface_vertex", "cutface_fragment", blend: .opaque)
+        moonPSO = try? pipeline("moon_vertex", "moon_fragment", blend: .opaque)
         atmospherePSO = try pipeline("sphere_vertex", "atmosphere_fragment", blend: .additive)
         auroraPSO = try pipeline("sphere_vertex", "aurora_fragment", blend: .additive)
-        cloudPSO = try pipeline("sphere_vertex", "cloud_fragment", blend: .premultiplied)
+        cloudPSO = try? pipeline("sphere_vertex", "cloud_fragment", blend: .premultiplied)
         starPSO = try pipeline("star_vertex", "star_fragment", blend: .additive)
         milkyWayPSO = try? pipeline("milkyway_vertex", "milkyway_fragment", blend: .additive)
         sunPSO = try pipeline("sun_vertex", "sun_fragment", blend: .additive)
@@ -482,7 +483,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.cloudDrift = Float((date.timeIntervalSince1970 / 86400).truncatingRemainder(dividingBy: 1) * 0.012)
         u.starIntensity = starIntensity
         u.milkyWay = 0.10 * starIntensity
-        if let cut = controller.cutaway {
+        if let cut = controller.cutaway, earthCutPSO != nil, cutFacePSO != nil {
             let lon = cut.longitude * .pi / 180
             u.cutaway = SIMD4(Float(sin(lon)), 0, Float(cos(lon)), Float(GlobeController.Cutaway.halfAngle * controller.cutawayOpening(at: now)))
         }
@@ -558,7 +559,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         if let mesh = earthMesh {
             var radius: Float = 1
-            enc.setRenderPipelineState(u.cutaway.w > 0 ? earthCutPSO : earthPSO)
+            enc.setRenderPipelineState(u.cutaway.w > 0 ? (earthCutPSO ?? earthPSO) : earthPSO)
             enc.setDepthStencilState(depthWrite)
             enc.setCullMode(.back)
             enc.setFrontFacing(.counterClockwise)
@@ -583,7 +584,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         enc.setCullMode(.none)
         // Inside the Earth: the two faces of the cut (half-discs of 96 slivers each).
-        if u.cutaway.w > 0 {
+        if u.cutaway.w > 0, let cutFacePSO {
             enc.setRenderPipelineState(cutFacePSO)
             enc.setDepthStencilState(depthWrite)
             enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
@@ -592,7 +593,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         // The Moon, to scale at its real distance.
-        if let mesh = shellMesh, let moonTex {
+        if let mesh = shellMesh, let moonTex, let moonPSO {
             enc.setRenderPipelineState(moonPSO)
             enc.setDepthStencilState(depthWrite)
             enc.setCullMode(.back)
@@ -619,7 +620,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
 
         // Clouds on their own shell above the ground (wind, storms and markers still draw over them).
-        if let shell = shellMesh, u.cloudOpacity > 0 {
+        if let shell = shellMesh, let cloudPSO, u.cloudOpacity > 0 {
             enc.setCullMode(.back)
             var radius = Self.cloudShellRadius
             enc.setRenderPipelineState(cloudPSO)
