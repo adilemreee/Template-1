@@ -23,7 +23,10 @@ struct HomeHUD: View {
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
-                if showLayers {
+                if !model.onboardingDone {
+                    OnboardingCard()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if showLayers {
                     LayersPanel(isPresented: $showLayers)
                         .transition(.move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.96, anchor: .bottom)))
                 } else if model.selection != nil {
@@ -55,6 +58,7 @@ struct HomeHUD: View {
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: model.selection)
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: showLayers)
+        .animation(.spring(response: 0.5, dampingFraction: 0.86), value: model.onboardingDone)
         .onAppear {
             withAnimation(.spring(response: 0.7, dampingFraction: 0.85)) { appeared = true }
         }

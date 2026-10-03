@@ -34,6 +34,9 @@ final class AppModel {
     var showTitle = false
     var hudVisible = false
     var briefingActive = false
+    var onboardingDone = UserDefaults.standard.bool(forKey: "onboardingDone") {
+        didSet { UserDefaults.standard.set(onboardingDone, forKey: "onboardingDone") }
+    }
 
     /// Visible ISS / bright-satellite passes for the user's location.
     private(set) var passes: [PassPredictor.Pass] = []
@@ -54,11 +57,13 @@ final class AppModel {
         guard !started else { return }
         started = true
         planet.start()
-        location.requestIfNeeded()
+        // First launch asks for location after the intro, in context (OnboardingCard).
+        if onboardingDone { location.requestIfNeeded() }
         applyLayers(settings.layers)
         Task { await loadSatellites() }
         #if DEBUG
         screenshotScene = ProcessInfo.processInfo.environment["KARMAN_SCREEN"]
+        if screenshotScene != nil { onboardingDone = true }
         if screenshotScene == "preview" {
             // App Preview recording: full intro, then the briefing starts by itself.
             ScreenshotDirector.prepare(self)
@@ -76,6 +81,17 @@ final class AppModel {
             return
         }
         #endif
+        // The full cinematic plays on first launch and at most once every 12 hours; otherwise
+        // the globe simply fades in, so returning users get straight to the planet.
+        let lastIntro = UserDefaults.standard.double(forKey: "lastIntroAt")
+        let fullIntro = settings.playIntro && Date().timeIntervalSince1970 - lastIntro > 12 * 3600
+        if !fullIntro {
+            syncScene()
+            globe.set(pose: globe.homePose)
+            introFinished()
+            return
+        }
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "lastIntroAt")
         if settings.playIntro {
             globe.introStart = CACurrentMediaTime() + 0.25
             Task {

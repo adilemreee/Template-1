@@ -10,6 +10,7 @@
 "%@ Å" = "%@ Å";
 "%@ × Moon distance · %lld–%lld m · %@ km/s" = "Ay uzaklığının %1$@ katı · %2$lld–%3$lld m · %4$@ km/sn";
 "%@ → %@ · %lld min" = "%1$@ → %2$@ · %3$lld dk";
+"%lld earthquakes in the last 24 hours, %lld storms, Kp %@" = "Son 24 saatte %1$lld deprem, %2$lld fırtına, Kp %3$@";
 "%lld km" = "%lld km";
 "%lld km deep" = "%lld km derinlikte";
 "%lld km up · %@ km/h" = "%1$lld km yükseklikte · %2$@ km/sa";
@@ -31,6 +32,7 @@
 "A short tour of the latest data." = "En güncel verilerle kısa bir tur.";
 "A strong earthquake, capable of damage near the epicentre, especially where buildings are vulnerable." = "Güçlü bir deprem; özellikle dayanıksız yapıların bulunduğu yerlerde merkez üssü yakınında hasara yol açabilir.";
 "ACTIVE" = "AKTİF";
+"ALERTS" = "UYARILAR";
 "ASK KÁRMÁN" = "KÁRMÁN'A SOR";
 "ASTEROID FLYBYS" = "ASTEROİT GEÇİŞLERİ";
 "AURORA AUSTRALIS" = "GÜNEY IŞIKLARI";
@@ -80,6 +82,7 @@
 "Data sources & credits" = "Veri kaynakları ve emeği geçenler";
 "Data: NOAA Space Weather Prediction Center · GOES-19 · DSCOVR/ACE/IMAP" = "Veri: NOAA Uzay Havası Tahmin Merkezi · GOES-19 · DSCOVR/ACE/IMAP";
 "Details" = "Ayrıntılar";
+"Drag to rotate, pinch to zoom, tap a marker for details." = "Döndürmek için sürükle, yakınlaştırmak için iki parmakla sıkıştır, ayrıntılar için bir işarete dokun.";
 "Drought" = "Kuraklık";
 "Dust & haze" = "Toz ve pus";
 "E" = "D";
@@ -97,6 +100,7 @@
 "Flood" = "Sel";
 "Full Moon" = "Dolunay";
 "Geomagnetic storms (G3+)" = "Jeomanyetik fırtınalar (G3+)";
+"Get a heads-up for strong earthquakes nearby, aurora you can actually see and space station passes overhead. Fine-tune everything in Settings." = "Yakınındaki güçlü depremler, gerçekten görebileceğin auroralar ve tependen geçen uzay istasyonu için önceden haber al. Her şeyi Ayarlar'dan ince ayarlayabilirsin.";
 "Go outside and look poleward." = "Dışarı çık ve kutup yönüne bak.";
 "Golden hour" = "Altın saat";
 "Haptics" = "Dokunsal geri bildirim";
@@ -111,6 +115,7 @@
 "Kp INDEX" = "Kp ENDEKSİ";
 "KÁRMÁN" = "KÁRMÁN";
 "Kármán" = "Kármán";
+"Kármán can show earthquakes near you, your chance of seeing the aurora tonight and when the space station flies over. Your exact location never leaves your iPhone." = "Kármán yakınındaki depremleri, bu gece aurorayı görme şansını ve uzay istasyonunun ne zaman tependen geçeceğini gösterebilir. Tam konumun iPhone'undan asla çıkmaz.";
 "Kármán is built to know the planet, not you." = "Kármán gezegeni tanımak için yapıldı, seni değil.";
 "LAYERS" = "KATMANLAR";
 "LIFTOFF" = "KALKIŞ";
@@ -127,6 +132,7 @@
 "Launches" = "Fırlatmalar";
 "Layers" = "Katmanlar";
 "Live NOAA OVATION model · updates every 5 min" = "Canlı NOAA OVATION modeli · 5 dakikada bir güncellenir";
+"Live globe" = "Canlı küre";
 "Location" = "Konum";
 "Location needed" = "Konum gerekli";
 "Look %@ at %@. A bright, steady star moving fast with no blinking lights — that's seven people living in orbit." = "%2$@ sularında %1$@ yönüne bak. Yanıp sönmeden hızla ilerleyen parlak bir yıldız göreceksin — o, yörüngede yaşayan insanların evi.";
@@ -134,6 +140,7 @@
 "Look %@ in 10 minutes. It climbs to %lld° and sets in the %@." = "10 dakika sonra %1$@ yönüne bak. %2$lld° yüksekliğe çıkacak ve %3$@ yönünde batacak.";
 "M%@ · %@" = "M%1$@ · %2$@";
 "MAG" = "BÜY";
+"MAKE IT YOURS" = "SANA ÖZEL YAP";
 "MISSION" = "GÖREV";
 "Magnitude %@" = "%@ büyüklüğünde";
 "Magnitude %@ or stronger" = "%@ büyüklüğü veya üzeri";
@@ -150,21 +157,27 @@
 "NW" = "KB";
 "Narrated briefings" = "Seslendirmeli brifingler";
 "Narrated tour of what is happening right now" = "Şu an olanların seslendirmeli turu";
+"Never miss the sky" = "Gökyüzünü kaçırma";
 "New Moon" = "Yeni Ay";
 "Next visible ISS pass %@" = "Sıradaki görünür ISS geçişi %@";
 "No visible passes in the next few days. The station is only visible when it's lit by the Sun while your sky is dark." = "Önümüzdeki birkaç gün görünür geçiş yok. İstasyon yalnızca senin gökyüzün karanlıkken Güneş tarafından aydınlatıldığında görülebilir.";
 "North" = "Kuzey";
+"Not now" = "Şimdi değil";
 "Not set" = "Ayarlanmadı";
 "Nothing here right now" = "Şu an burada bir şey yok";
 "OFFLINE" = "ÇEVRİMDIŞI";
 "One purchase. Every feature, forever. No ads, no tracking, no subscriptions." = "Tek seferlik satın alma. Tüm özellikler, sonsuza dek. Reklam yok, takip yok, abonelik yok.";
 "Opening cinematic" = "Açılış sinematiği";
+"Opens space station passes, the Moon and twilight times for your location." = "Konumun için uzay istasyonu geçişlerini, Ay'ı ve alacakaranlık saatlerini açar.";
+"Opens the live Sun, Kp index and your aurora chances." = "Canlı Güneş'i, Kp endeksini ve aurora şansını açar.";
 "Orbit: %@" = "Yörünge: %@";
 "Oval peak %lld%% · Kp %@" = "Oval zirvesi %%%1$lld · Kp %2$@";
 "PHA" = "PHA";
 "PHA: potentially hazardous asteroid — a classification by size and orbit, not a threat. NASA JPL / CNEOS." = "PHA: potansiyel tehlikeli asteroit — boyut ve yörüngeye dayalı bir sınıflandırma, bir tehdit değil. NASA JPL / CNEOS.";
 "PLANET BRIEFING" = "GEZEGEN BRİFİNGİ";
 "PULSE" = "NABIZ";
+"Planet Briefing" = "Gezegen Brifingi";
+"Play Planet Briefing" = "Gezegen Brifingini Oynat";
 "Possible from dark skies." = "Karanlık gökyüzünden mümkün.";
 "Privacy" = "Gizlilik";
 "Pulse" = "Nabız";
@@ -185,9 +198,13 @@
 "SPACE WEATHER" = "UZAY HAVASI";
 "SW" = "GB";
 "Sea & lake ice" = "Deniz ve göl buzu";
+"See the planet from where you stand" = "Gezegeni bulunduğun yerden gör";
 "Settings" = "Ayarlar";
 "Share Kármán" = "Kármán'ı paylaş";
+"Show Space Weather" = "Uzay Havasını Göster";
+"Show Tonight's Sky" = "Bu Gece Gökyüzünü Göster";
 "Show me on the globe" = "Beni kürede göster";
+"Skip" = "Atla";
 "Sky" = "Gökyüzü";
 "Snow" = "Kar";
 "Source" = "Kaynak";
@@ -196,9 +213,11 @@
 "Space" = "Uzay";
 "Space Station" = "Uzay İstasyonu";
 "Space Station passes" = "Uzay İstasyonu geçişleri";
+"Space Weather" = "Uzay Havası";
 "Space weather" = "Uzay havası";
 "Space weather: the planetary K index stands at %@. Aurora circles both poles tonight." = "Uzay havası: gezegensel K endeksi %@. Bu gece aurora her iki kutbu da çevreliyor.";
 "Starlink swarm" = "Starlink sürüsü";
+"Starts Kármán's narrated tour of what is happening on Earth right now." = "Kármán'ın, şu an Dünya'da olanları anlatan seslendirmeli turunu başlatır.";
 "Storm" = "Fırtına";
 "Storms" = "Fırtınalar";
 "Sunrise" = "Gün doğumu";
@@ -225,6 +244,7 @@
 "Tomorrow %@" = "Yarın %@";
 "Tonight on Earth" = "Bu gece Dünya'da";
 "Tonight's Moon is %@, %lld percent lit." = "Bu gece Ay %1$@ evresinde, yüzde %2$lld aydınlık.";
+"Tonight's Sky" = "Bu Gece Gökyüzü";
 "Tonight's Sky predicts Space Station passes, moonrise and twilight for where you are. Your location stays on this device." = "Bu Gece Gökyüzü, bulunduğun yer için Uzay İstasyonu geçişlerini, ay doğuşunu ve alacakaranlığı hesaplar. Konumun bu cihazda kalır.";
 "Tonight's sky" = "Bu gece gökyüzü";
 "Tracked by NASA EONET" = "NASA EONET tarafından izleniyor";

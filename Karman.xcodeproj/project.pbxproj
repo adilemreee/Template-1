@@ -13,6 +13,7 @@
 		12A3ADAFD336E674B48D9D28 /* Soundscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED461DF20500BA434F58C99 /* Soundscape.swift */; };
 		1924418A80A7AE9FF872DFDC /* ScreenshotDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8680D3FC92CEFA2BA844A696 /* ScreenshotDirector.swift */; };
 		1B01F1815E2A9B181B58C63C /* Globe.metal in Sources */ = {isa = PBXBuildFile; fileRef = D10B8D4B18C3158B2D2F7E34 /* Globe.metal */; };
+		278EC6ABB937C0ED32A4D582 /* KarmanIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8169620C6268CB1D45D0FA /* KarmanIntents.swift */; };
 		2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */; };
 		30216CB9A7A778136D6861D2 /* moon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FF6B47423238D4C7B83FF18F /* moon.jpg */; };
 		33ABD3864694C4BEC72380A5 /* PulseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C592EB75A6989A6F51D48F /* PulseView.swift */; };
@@ -38,6 +39,7 @@
 		6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 15550FFB007FB9B1657980D0 /* earth_clouds.jpg */; };
 		6ECAAD250AD053865048E2BC /* DirectFeeds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AC97298659782BDDF939295 /* DirectFeeds.swift */; };
 		6FE9ADCFCF9904EC39407561 /* PlanetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */; };
+		7482055B226524E8CEE3599A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B511BF49E8529E984826CD0E /* PrivacyInfo.xcprivacy */; };
 		75CB82BD4A34133582DC642F /* KarmanWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 392BAC5508D9E973DEDD843F /* KarmanWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		795FD8C70BB522B77370A980 /* PlanetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */; };
 		7BA5A76AC82652ACED38DAEF /* HomeHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7D5E495D4825DD6E2546F3 /* HomeHUD.swift */; };
@@ -46,11 +48,13 @@
 		849A8089ECFE15456142B2BC /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D65CB3D9051C229459CBADB /* Formatters.swift */; };
 		874C9FBAA9279098BD0EDE34 /* earth_water.png in Resources */ = {isa = PBXBuildFile; fileRef = 2659D154FEE07FBFBB433FE0 /* earth_water.png */; };
 		8A5BB4F1924D69AED6DAB90B /* Geo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C142BA54B76F0976B55D22 /* Geo.swift */; };
+		8B5D2CDC0B77210D16792862 /* OnboardingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700B4A5218599F90EBDC59C3 /* OnboardingCard.swift */; };
 		8D865D8DF61E1BDCBDCD6CDC /* SatelliteEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA91F414B16F11189BD99DB /* SatelliteEngine.swift */; };
 		8DD2F916D634CF733EBA841A /* AstroMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */; };
 		984EDFCEF579BF3D022F2814 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475F9268862AEDC750CAB3E /* SettingsView.swift */; };
 		9907F01ABC07CD613F07101F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121CD7BAC7A23FEF05A275E4 /* RootView.swift */; };
 		9CC7D8410DCFF4576A166FF8 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0AF33512858A71F827DDF3A /* APIClient.swift */; };
+		9D7C0CA7809A50D7A2F27A0F /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = FB9453243501FCCC9859299F /* AppShortcuts.strings */; };
 		9DDBDCAA78A5C1D8276A9D2F /* MetalResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11FA09369C56B38581F18B4 /* MetalResources.swift */; };
 		A2C5457E804FBF76A3D788E1 /* IntroTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 294386B0031D6BB43B318966 /* IntroTitleView.swift */; };
 		A875274C65746AF99D1810D0 /* GlobeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD8667E02105767D47B4BFA /* GlobeRenderer.swift */; };
@@ -145,6 +149,7 @@
 		63C592EB75A6989A6F51D48F /* PulseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseView.swift; sourceTree = "<group>"; };
 		6AC97298659782BDDF939295 /* DirectFeeds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectFeeds.swift; sourceTree = "<group>"; };
 		6D73214AB73ED56539866317 /* earth_normal.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_normal.jpg; sourceTree = "<group>"; };
+		700B4A5218599F90EBDC59C3 /* OnboardingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCard.swift; sourceTree = "<group>"; };
 		7449C1D28C0E6A4635316A7F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		7D359214F18B022C04C45349 /* DetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailSheet.swift; sourceTree = "<group>"; };
 		80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveImagery.swift; sourceTree = "<group>"; };
@@ -153,6 +158,7 @@
 		87E7D0170506DF75EEE13B0B /* earth_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_day.jpg; sourceTree = "<group>"; };
 		892092C3A695F815B3B94900 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		8A09FE9EF57DEDB31320F999 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8A8169620C6268CB1D45D0FA /* KarmanIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KarmanIntents.swift; sourceTree = "<group>"; };
 		8C4144BE5828A19FC1DCF8BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D65CB3D9051C229459CBADB /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		92A81A753BF768849E62F73F /* KarmanWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KarmanWidgetsBundle.swift; sourceTree = "<group>"; };
@@ -165,6 +171,7 @@
 		ACCB9F6D96404AAD71977A33 /* SpaceWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceWeatherView.swift; sourceTree = "<group>"; };
 		B2523F799F11C706FBFEBFC7 /* earth_lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_lights.jpg; sourceTree = "<group>"; };
 		B465E6D786F725A9EA2E0A57 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B511BF49E8529E984826CD0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetStore.swift; sourceTree = "<group>"; };
 		C4B23DB921A2ECB8E0C625DA /* AstroTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTests.swift; sourceTree = "<group>"; };
 		C5E768E64CEC7155559D68CD /* Karman.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Karman.entitlements; sourceTree = "<group>"; };
@@ -188,6 +195,7 @@
 		F57B6EA883B3764F245490E0 /* BriefingPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingPlayerView.swift; sourceTree = "<group>"; };
 		F669B24228503A0F50BEFB5C /* BriefingDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingDirector.swift; sourceTree = "<group>"; };
 		F8CA31FFD96A184F2D16DCF5 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		FB9453243501FCCC9859299F /* AppShortcuts.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = AppShortcuts.strings; path = tr.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		FDD8667E02105767D47B4BFA /* GlobeRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeRenderer.swift; sourceTree = "<group>"; };
 		FE838C667256F1C0E4C71DD4 /* KarmanWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KarmanWidgets.entitlements; sourceTree = "<group>"; };
 		FF6B47423238D4C7B83FF18F /* moon.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = moon.jpg; sourceTree = "<group>"; };
@@ -238,6 +246,7 @@
 				1FB66E612BD5347E84CCE808 /* AppDelegate.swift */,
 				F15479F1AFC96D1700780E2E /* AppModel.swift */,
 				EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */,
+				8A8169620C6268CB1D45D0FA /* KarmanIntents.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -354,9 +363,11 @@
 			isa = PBXGroup;
 			children = (
 				A8C7CB33F9B3F3E86B90FD68 /* Textures */,
+				FB9453243501FCCC9859299F /* AppShortcuts.strings */,
 				1B37297F3AA3EFD93526695C /* Assets.xcassets */,
 				51E28943A3EA83BBFF414328 /* InfoPlist.strings */,
 				5742061F06457B2C4762AD75 /* Localizable.strings */,
+				B511BF49E8529E984826CD0E /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -480,6 +491,7 @@
 			isa = PBXGroup;
 			children = (
 				294386B0031D6BB43B318966 /* IntroTitleView.swift */,
+				700B4A5218599F90EBDC59C3 /* OnboardingCard.swift */,
 			);
 			path = Intro;
 			sourceTree = "<group>";
@@ -613,9 +625,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D7C0CA7809A50D7A2F27A0F /* AppShortcuts.strings in Resources */,
 				6A74DF09EAC19CB089BBFE90 /* Assets.xcassets in Resources */,
 				CC896871AA8CCCE56E9E32B9 /* InfoPlist.strings in Resources */,
 				FD2D1B95F4D4A9A3F73F6DEF /* Localizable.strings in Resources */,
+				7482055B226524E8CEE3599A /* PrivacyInfo.xcprivacy in Resources */,
 				6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */,
 				BF8798FC382D2B589496FE4C /* earth_day.jpg in Resources */,
 				03C3CBEDF6D9A1328CE39DB3 /* earth_lights.jpg in Resources */,
@@ -677,12 +691,14 @@
 				7BA5A76AC82652ACED38DAEF /* HomeHUD.swift in Sources */,
 				A2C5457E804FBF76A3D788E1 /* IntroTitleView.swift in Sources */,
 				2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */,
+				278EC6ABB937C0ED32A4D582 /* KarmanIntents.swift in Sources */,
 				3C27110AFC7D7C46A94DA08C /* LayersPanel.swift in Sources */,
 				EB75D107B73537FCD672533C /* LiveImagery.swift in Sources */,
 				DE9AC39E5D64853C73C192DE /* LocationService.swift in Sources */,
 				5C045FC7B2FADE8BE723C00D /* Log.swift in Sources */,
 				9DDBDCAA78A5C1D8276A9D2F /* MetalResources.swift in Sources */,
 				6074900B5058D05811269D1F /* NotificationService.swift in Sources */,
+				8B5D2CDC0B77210D16792862 /* OnboardingCard.swift in Sources */,
 				661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */,
 				E4CB9E267E7FA4EDE6181D95 /* PassPredictor.swift in Sources */,
 				6068018BE6CA50F3139A256D /* PlanetModels.swift in Sources */,

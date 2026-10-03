@@ -13,6 +13,10 @@ struct RootView: View {
                 model.introFinished()
             }
             .ignoresSafeArea()
+            .accessibilityElement()
+            .accessibilityLabel(Text("Live globe"))
+            .accessibilityValue(Text("\(model.planet.quakesLast24h.count) earthquakes in the last 24 hours, \(model.planet.activeStorms.count) storms, Kp \((model.planet.snapshot.space?.kpNow ?? 0).formatted(.number.precision(.fractionLength(1))))"))
+            .accessibilityHint(Text("Drag to rotate, pinch to zoom, tap a marker for details."))
 
             IntroTitleView(visible: model.showTitle)
                 .allowsHitTesting(false)
@@ -62,7 +66,9 @@ struct RootView: View {
             case "space": model.panel = .space
             case "sky": model.panel = .sky
             case "ask": model.panel = .ask
-            case "briefing": if !model.introPlaying { BriefingDirector.shared.start(model: model) }
+            case "briefing":
+                model.skipIntro()
+                if !model.briefingActive { BriefingDirector.shared.start(model: model) }
             default: break
             }
         }

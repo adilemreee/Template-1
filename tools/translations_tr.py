@@ -305,6 +305,27 @@ APP = {
     "• No accounts, no ads, no analytics or tracking SDKs.\n• Your precise location never leaves your device. Alerts and answers use it rounded to about 50 km.\n• Questions you ask are sent to our server and to Anthropic's Claude to generate an answer; they are not used to build a profile.\n• Notification tokens are stored only to deliver the alerts you chose, and are deleted when you turn alerts off.":
         "• Hesap yok, reklam yok, analiz ya da takip SDK'sı yok.\n• Hassas konumun cihazından asla çıkmaz. Uyarılar ve yanıtlar onu yaklaşık 50 km'ye yuvarlanmış olarak kullanır.\n• Sorduğun sorular yanıt üretmek için sunucumuza ve Anthropic'in Claude modeline gönderilir; profil oluşturmak için kullanılmaz.\n• Bildirim belirteçleri yalnızca seçtiğin uyarıları iletmek için saklanır ve uyarıları kapattığında silinir.",
     "…": "…",
+    "MAKE IT YOURS": "SANA ÖZEL YAP",
+    "Live globe": "Canlı küre",
+    "%lld earthquakes in the last 24 hours, %lld storms, Kp %@": "Son 24 saatte %1$lld deprem, %2$lld fırtına, Kp %3$@",
+    "Drag to rotate, pinch to zoom, tap a marker for details.": "Döndürmek için sürükle, yakınlaştırmak için iki parmakla sıkıştır, ayrıntılar için bir işarete dokun.",
+    "Play Planet Briefing": "Gezegen Brifingini Oynat",
+    "Starts Kármán's narrated tour of what is happening on Earth right now.": "Kármán'ın, şu an Dünya'da olanları anlatan seslendirmeli turunu başlatır.",
+    "Show Space Weather": "Uzay Havasını Göster",
+    "Opens the live Sun, Kp index and your aurora chances.": "Canlı Güneş'i, Kp endeksini ve aurora şansını açar.",
+    "Show Tonight's Sky": "Bu Gece Gökyüzünü Göster",
+    "Opens space station passes, the Moon and twilight times for your location.": "Konumun için uzay istasyonu geçişlerini, Ay'ı ve alacakaranlık saatlerini açar.",
+    "Planet Briefing": "Gezegen Brifingi",
+    "Space Weather": "Uzay Havası",
+    "Tonight's Sky": "Bu Gece Gökyüzü",
+    "See the planet from where you stand": "Gezegeni bulunduğun yerden gör",
+    "Kármán can show earthquakes near you, your chance of seeing the aurora tonight and when the space station flies over. Your exact location never leaves your iPhone.": "Kármán yakınındaki depremleri, bu gece aurorayı görme şansını ve uzay istasyonunun ne zaman tependen geçeceğini gösterebilir. Tam konumun iPhone'undan asla çıkmaz.",
+    "ALERTS": "UYARILAR",
+    "Never miss the sky": "Gökyüzünü kaçırma",
+    "Get a heads-up for strong earthquakes nearby, aurora you can actually see and space station passes overhead. Fine-tune everything in Settings.": "Yakınındaki güçlü depremler, gerçekten görebileceğin auroralar ve tependen geçen uzay istasyonu için önceden haber al. Her şeyi Ayarlar'dan ince ayarlayabilirsin.",
+    "Turn on alerts": "Uyarıları aç",
+    "Not now": "Şimdi değil",
+    "Skip": "Atla",
     # Compass points
     "N": "K", "NE": "KD", "E": "D", "SE": "GD", "S": "G", "SW": "GB", "W": "B", "NW": "KB",
 }
@@ -369,8 +390,18 @@ def write(path, table):
     print("wrote", path, len(table))
 
 
+APP_SHORTCUTS = {
+    "Play the planet briefing in ${applicationName}": "${applicationName} ile gezegen brifingini oynat",
+    "What's happening on Earth with ${applicationName}": "${applicationName} ile Dünya'da neler oluyor",
+    "Show space weather in ${applicationName}": "${applicationName} ile uzay havasını göster",
+    "Aurora chances in ${applicationName}": "${applicationName} ile aurora şansım",
+    "Show tonight's sky in ${applicationName}": "${applicationName} ile bu gece gökyüzünü göster",
+    "When is the space station visible in ${applicationName}": "${applicationName} ile uzay istasyonu ne zaman görünür",
+}
+
 root = sys.argv[1]
 write(f"{root}/Karman/Resources/tr.lproj/Localizable.strings", APP)
 write(f"{root}/Karman/Resources/tr.lproj/InfoPlist.strings", INFO_APP)
+write(f"{root}/Karman/Resources/tr.lproj/AppShortcuts.strings", APP_SHORTCUTS)
 write(f"{root}/KarmanWidgets/Resources/tr.lproj/Localizable.strings", WIDGETS)
 write(f"{root}/KarmanWidgets/Resources/tr.lproj/InfoPlist.strings", {"CFBundleDisplayName": "Kármán"})
