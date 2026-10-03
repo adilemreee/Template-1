@@ -57,6 +57,13 @@ enum ScreenshotDirector {
         case "realearth":
             let sun = Astro.subsolarPoint(Date())
             model.globe.fly(to: CameraPose(lat: max(-30, min(40, sun.lat + 12)), lon: Geo.normalizeLon(sun.lon - 35), distance: 4.6, tilt: 0, heading: 0), duration: 2.5)
+        case "pose":
+            // KARMAN_POSE="lat,lon,distance[,tilt,heading]" flies anywhere (close-up checks).
+            let v = (ProcessInfo.processInfo.environment["KARMAN_POSE"] ?? "").split(separator: ",").compactMap { Double($0) }
+            if v.count >= 3 {
+                model.globe.fly(to: CameraPose(lat: v[0], lon: v[1], distance: v[2], tilt: v.count > 3 ? v[3] : 0,
+                                               heading: v.count > 4 ? v[4] : 0), duration: 2.5)
+            }
         case "iss":
             model.select(.satellite(25544))
         case "liveactivity":

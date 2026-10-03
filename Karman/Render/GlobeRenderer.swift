@@ -41,6 +41,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var surfaceSampler: MTLSamplerState!
     private var clampSampler: MTLSamplerState!
     private var auroraSampler: MTLSamplerState!
+    private var detailSampler: MTLSamplerState!
+    /// Regional NASA GIBS imagery for close-ups (nil if the device can't spare the memory).
+    private var detail: DetailImagery?
 
     // Geometry
     private var earthMesh: (vertices: MTLBuffer, indices: MTLBuffer, indexCount: Int)?
@@ -228,6 +231,14 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         a.sAddressMode = .repeat
         a.tAddressMode = .clampToEdge
         auroraSampler = device.makeSamplerState(descriptor: a)
+        let d = MTLSamplerDescriptor()
+        d.minFilter = .linear
+        d.magFilter = .linear
+        d.mipFilter = .linear
+        d.sAddressMode = .clampToEdge
+        d.tAddressMode = .clampToEdge
+        d.maxAnisotropy = 8
+        detailSampler = device.makeSamplerState(descriptor: d)
     }
 
     private enum BlendMode { case opaque, additive, premultiplied }
@@ -379,6 +390,15 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.atmosphereIntensity = 1
         u.reliefStrength = 1.0
 
+        if detail == nil, texturesReady { detail = DetailImagery(device: device, queue: queue, grid: Self.isHighEnd ? 6 : 4) }
+        if let detail, controller.introStart == nil {
+            let moving = controller.isFlying || now - controller.lastInteractionTime < 0.35
+            detail.update(pose: pose, sunDir: sunDir, isMoving: moving, now: now)
+            u.detailBounds = detail.bounds
+            u.detailBlend = detail.blend
+            u.detailNight = detail.hasNight ? 1 : 0
+        }
+
         if let s = satellites, let k = s.keyframes(for: .visual) ?? s.keyframes(for: .stations) {
             let span = max(0.001, k.nextTime - k.prevTime)
             u.satelliteLerp = Float(min(1.5, max(0, (now - k.prevTime) / span)))
@@ -424,7 +444,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             enc.setFragmentTexture(waterTex ?? blackTex, index: 3)
             enc.setFragmentTexture(normalTex ?? flatNormalTex, index: 4)
             enc.setFragmentTexture(controller.liveImageryTexture?.texture ?? blackTex, index: 5)
+            enc.setFragmentTexture(detail?.texture ?? blackTex, index: 6)
+            enc.setFragmentTexture(detail?.mask ?? blackTex, index: 7)
             enc.setFragmentSamplerState(surfaceSampler, index: 0)
+            enc.setFragmentSamplerState(detailSampler, index: 1)
             enc.drawIndexedPrimitives(type: .triangle, indexCount: mesh.indexCount, indexType: .uint32, indexBuffer: mesh.indices, indexBufferOffset: 0)
         }
 

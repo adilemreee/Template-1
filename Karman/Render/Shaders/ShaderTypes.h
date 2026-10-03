@@ -29,6 +29,9 @@ typedef struct {
     float markerFade;             // fades all markers in/out
     float atmosphereIntensity;
     float reliefStrength;
+    simd_float4 detailBounds;     // regional 500 m imagery: west lon, north lat, lon span, lat span (deg)
+    float detailBlend;            // 0 = base texture only
+    float detailNight;            // 1 when the detail texture's alpha carries city lights
 } FrameUniforms;
 
 typedef struct {

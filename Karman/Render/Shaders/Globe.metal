@@ -78,17 +78,37 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
                                texture2d<float> waterTex [[texture(3)]],
                                texture2d<float> normalTex [[texture(4)]],
                                texture2d<float> liveTex [[texture(5)]],
-                               sampler s [[sampler(0)]]) {
+                               texture2d<float> detailTex [[texture(6)]],
+                               texture2d<float> detailMask [[texture(7)]],
+                               sampler s [[sampler(0)]],
+                               sampler cs [[sampler(1)]]) {
     float3 N = normalize(in.world);
     float3 V = normalize(u.cameraPos - in.world);
     float3 L = normalize(u.sunDir);
     float2 uv = in.uv;
 
+    // Regional 500 m imagery streamed for the area under the camera (NASA GIBS). It carries
+    // its own shaded relief, so the coarse relief map and static clouds step back where it shows.
+    float detailW = 0.0;
+    float4 detail = float4(0.0);
+    if (u.detailBlend > 0.001) {
+        float lonDeg = uv.x * 360.0 - 180.0;
+        float latDeg = 90.0 - uv.y * 180.0;
+        float dLon = lonDeg - u.detailBounds.x;
+        dLon -= 360.0 * floor(dLon / 360.0);
+        float2 duv = float2(dLon / u.detailBounds.z, (u.detailBounds.y - latDeg) / u.detailBounds.w);
+        if (duv.x >= 0.0 && duv.x <= 1.0 && duv.y >= 0.0 && duv.y <= 1.0) {
+            float2 edge = min(duv, 1.0 - duv);
+            detailW = detailMask.sample(cs, duv).r * smoothstep(0.0, 0.025, min(edge.x, edge.y)) * u.detailBlend;
+            detail = detailTex.sample(cs, duv);
+        }
+    }
+
     // Relief from the GEBCO-derived normal map (tangent space: x east, y north, z up).
     float3 east = tangentEast(N);
     float3 north = cross(N, east);
     float3 tn = normalTex.sample(s, uv).xyz * 2.0 - 1.0;
-    tn.xy *= u.reliefStrength;
+    tn.xy *= u.reliefStrength * (1.0 - detailW);
     float3 Nr = normalize(east * tn.x + north * tn.y + N * max(tn.z, 0.25));
 
     float NdotL = dot(N, L);
@@ -96,6 +116,8 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     float relief = saturate(dot(Nr, L));
 
     float3 albedo = dayTex.sample(s, uv).rgb;
+    albedo = mix(albedo, detail.rgb, detailW * (1.0 - u.liveImagery));
+
     if (u.liveImagery > 0.001) {
         float3 live = liveTex.sample(s, uv).rgb;
         float valid = smoothstep(0.010, 0.045, dot(live, float3(0.333)));
@@ -104,7 +126,7 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
     albedo = pow(max(albedo, 0.0), float3(1.06)) * 1.04;
 
     float2 cuv = float2(uv.x + u.cloudDrift, uv.y);
-    float cloudAmount = u.cloudOpacity * (1.0 - u.liveImagery * 0.9);
+    float cloudAmount = u.cloudOpacity * (1.0 - u.liveImagery * 0.9) * (1.0 - 0.75 * detailW);
     float cloud = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv).r) * cloudAmount;
     float2 shadowShift = float2(dot(L, east), -dot(L, north)) * 0.0022;
     float shadow = smoothstep(0.2, 0.9, cloudTex.sample(s, cuv + shadowShift).r) * cloudAmount;
@@ -129,10 +151,13 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
 
     // City lights, softened by clouds, with a slow shimmer.
     float lights = lightsTex.sample(s, uv).r;
+    lights = mix(lights, detail.a, detailW * u.detailNight);
     float night = 1.0 - smoothstep(-0.20, 0.05, NdotL);
     float shimmer = 0.93 + 0.07 * sin(u.time * 2.7 + uv.x * 1300.0 + uv.y * 900.0);
     float3 sodium = mix(float3(1.0, 0.52, 0.20), float3(1.0, 0.86, 0.64), smoothstep(0.35, 1.0, lights));
-    color += sodium * lights * lights * 2.4 * night * (1.0 - cloud * 0.8) * u.cityLights * shimmer;
+    // Sharp 500 m lights saturate whole metro areas, so they get a gentler gain than the soft base.
+    float lightsGain = mix(2.4, 1.05, detailW * u.detailNight);
+    color += sodium * lights * lights * lightsGain * night * (1.0 - cloud * 0.8) * u.cityLights * shimmer;
     // Faint moonlit ambient so continents stay readable on the night side.
     color += albedo * float3(0.30, 0.42, 0.65) * 0.045 * night * (1.0 - cloud * 0.5);
 
@@ -308,7 +333,14 @@ vertex RingOut ring_vertex(uint vid [[vertex_id]], uint iid [[instance_id]],
     float3 N = normalize(r.position);
     float3 east = tangentEast(N);
     float3 north = cross(N, east);
-    float3 world = N * 1.0018 + (east * c.x + north * c.y) * r.size;
+    float size = r.size;
+    if (r.kind > 1.5) {
+        // "You are here" and selection rings keep a fixed on-screen size in close-ups.
+        float dist = max(length(u.cameraPos - N), 0.05);
+        float pxPerUnit = 0.5 * u.viewport.y * u.proj[1][1] / dist;
+        size = min(size, (r.kind > 2.5 ? 34.0 : 22.0) * u.pixelScale / pxPerUnit);
+    }
+    float3 world = N * 1.0018 + (east * c.x + north * c.y) * size;
     RingOut o;
     o.position = u.viewProj * float4(world, 1.0);
     o.local = c;
