@@ -1,51 +1,52 @@
 import SwiftUI
 
 /// Wordmark that resolves letter by letter while the Sun rises over the limb.
+///
+/// Each letter is its own view so blur and glow follow the glyph shapes; filters drawn inside
+/// a TextRenderer are clipped to each glyph's box and showed up as a dark/light slab.
 struct IntroTitleView: View {
     let visible: Bool
 
+    private static let letters = Array("KÁRMÁN").map(String.init)
+
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 18) {
             Spacer()
-            Text("KÁRMÁN")
-                .font(.display(46, weight: .bold))
-                .tracking(visible ? 16 : 30)
-                .foregroundStyle(LinearGradient(colors: [.white, Color(red: 0.75, green: 0.9, blue: 1.0)], startPoint: .top, endPoint: .bottom))
-                .shadow(color: Theme.ice.opacity(0.55), radius: 22)
-                .textRenderer(StaggeredReveal(progress: visible ? 1 : 0))
+            ZStack {
+                // Glow: a blurred, ice-coloured copy of the wordmark, shaped like the letters.
+                wordmark(fill: AnyShapeStyle(Theme.ice))
+                    .blur(radius: 12)
+                    .opacity(visible ? 0.45 : 0)
+                    .animation(.easeOut(duration: 2.4).delay(0.5), value: visible)
+                wordmark(fill: AnyShapeStyle(LinearGradient(colors: [.white, Color(red: 0.75, green: 0.9, blue: 1.0)],
+                                                             startPoint: .top, endPoint: .bottom)))
+            }
             Text("THE LIVING PLANET · LIVE")
                 .font(.label(11, weight: .semibold))
-                .tracking(visible ? 5 : 1)
+                .tracking(5)
                 .foregroundStyle(Theme.textSecondary)
+                .fixedSize()
                 .opacity(visible ? 1 : 0)
-                .blur(radius: visible ? 0 : 6)
+                .offset(y: visible ? 0 : 8)
+                .animation(.easeOut(duration: 1.4).delay(visible ? 0.9 : 0), value: visible)
             Spacer().frame(height: 150)
         }
-        .animation(.easeOut(duration: 1.9), value: visible)
-    }
-}
-
-/// Reveals glyphs one after another with a blur-to-sharp rise.
-struct StaggeredReveal: TextRenderer, Animatable {
-    var progress: Double
-
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
+        .frame(maxWidth: .infinity)
     }
 
-    func draw(layout: Text.Layout, in ctx: inout GraphicsContext) {
-        let slices = layout.flatMap { line in line.flatMap { run in run.map { $0 } } }
-        let count = max(Double(slices.count), 1)
-        for (i, slice) in slices.enumerated() {
-            let start = Double(i) / count * 0.55
-            let t = min(1, max(0, (progress - start) / 0.45))
-            let eased = 1 - pow(1 - t, 3)
-            var c = ctx
-            c.opacity = eased
-            if eased < 1 { c.addFilter(.blur(radius: (1 - eased) * 14)) }
-            c.translateBy(x: 0, y: (1 - eased) * 18)
-            c.draw(slice)
+    private func wordmark(fill: AnyShapeStyle) -> some View {
+        HStack(spacing: visible ? 16 : 24) {
+            ForEach(Array(Self.letters.enumerated()), id: \.offset) { i, letter in
+                Text(letter)
+                    .font(.display(46, weight: .bold))
+                    .foregroundStyle(fill)
+                    .opacity(visible ? 1 : 0)
+                    .blur(radius: visible ? 0 : 10)
+                    .offset(y: visible ? 0 : 16)
+                    .animation(.easeOut(duration: 1.3).delay(visible ? Double(i) * 0.11 : 0), value: visible)
+            }
         }
+        .animation(.easeOut(duration: 1.9), value: visible)
+        .fixedSize()
     }
 }

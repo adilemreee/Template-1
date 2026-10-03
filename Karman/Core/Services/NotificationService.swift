@@ -47,7 +47,7 @@ final class NotificationService {
         let p = model.location.point
         let reg = APIClient.DeviceRegistration(
             token: token, env: env, lat: p?.lat, lon: p?.lon,
-            language: Locale.current.language.languageCode?.identifier ?? "en",
+            language: "en",
             tzOffsetMinutes: TimeZone.current.secondsFromGMT() / 60,
             prefs: .init(quakeMinMag: prefs.quakesNearby ? prefs.quakeMinMag : 0, quakeRadiusKm: prefs.quakeRadiusKm,
                          globalMajor: prefs.majorQuakes, aurora: prefs.aurora, auroraMinChance: prefs.auroraMinChance,

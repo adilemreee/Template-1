@@ -60,7 +60,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
         model.globe.fly(to: CameraPose(lat: model.globe.pose.lat, lon: model.globe.pose.lon, distance: 7.5), duration: 2.0)
 
         Task {
-            let lang = Locale.current.language.languageCode?.identifier ?? "en"
+            let lang = "en" // Kármán speaks English everywhere
             do {
                 let b = try await APIClient.shared.briefing(language: lang)
                 briefing = b
@@ -271,7 +271,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
             func score(_ v: AVSpeechSynthesisVoice) -> Int {
                 var s = v.quality.rawValue * 10
                 if v.voiceTraits.contains(.isNoveltyVoice) { s -= 100 }
-                if v.language == Locale.current.identifier.replacingOccurrences(of: "_", with: "-") { s += 3 }
+                if v.language == "en-US" { s += 3 }
                 return s
             }
             return score(a) > score(b)

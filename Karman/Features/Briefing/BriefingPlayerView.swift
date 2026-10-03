@@ -73,7 +73,6 @@ struct BriefingPlayerView: View {
                 Text(director.briefing?.title ?? "")
                     .font(.display(34, weight: .bold))
                     .foregroundStyle(.white)
-                    .textRenderer(StaggeredReveal(progress: 1))
                 Text(director.briefing?.dek ?? "")
                     .font(.system(size: 15))
                     .foregroundStyle(Theme.textSecondary)
