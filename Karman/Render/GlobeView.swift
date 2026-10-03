@@ -24,7 +24,7 @@ struct GlobeView: UIViewRepresentable {
         #if targetEnvironment(simulator)
         view.contentScaleFactor = 2.0
         #else
-        view.contentScaleFactor = min(context.environment.displayScale, 2.6)
+        view.contentScaleFactor = min(context.environment.displayScale, GlobeRenderer.isHighEnd ? 2.6 : 2.0)
         #endif
         if let renderer = GlobeRenderer(controller: controller, satellites: satellites) {
             renderer.onIntroFinished = onIntroFinished

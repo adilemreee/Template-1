@@ -11,7 +11,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     static let fovY: Double = 40 * .pi / 180
     static let sceneFormat: MTLPixelFormat = .rgba16Float
     static let depthFormat: MTLPixelFormat = .depth32Float
-    static let sampleCount = 4
+    /// Devices with less memory (iPhone 11–13) get 2× MSAA; everything newer gets 4×.
+    static let isHighEnd = ProcessInfo.processInfo.physicalMemory >= 5_500_000_000
+    static let sampleCount = isHighEnd ? 4 : 2
 
     let device: MTLDevice
     let queue: MTLCommandQueue
@@ -628,8 +630,10 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         #if targetEnvironment(simulator)
         let target = 30
         #else
+        // Full rate while something moves; a calm 30 fps when the planet is just breathing.
         let busy = controller.isFlying || controller.introStart != nil || now - controller.lastInteractionTime < 3
-        let target = busy ? 120 : 60
+            || controller.drift.heading != 0 || controller.autoRotateActive(now: now)
+        let target = busy ? (Self.isHighEnd ? 120 : 60) : 30
         #endif
         if view.preferredFramesPerSecond != target {
             view.preferredFramesPerSecond = target

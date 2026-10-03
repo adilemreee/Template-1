@@ -105,6 +105,11 @@ final class GlobeController {
     func markInteraction() { lastInteraction = CACurrentMediaTime() }
     var lastInteractionTime: CFTimeInterval { lastInteraction }
 
+    /// True while the idle auto-rotation is turning the globe (needs a smooth frame rate).
+    func autoRotateActive(now: CFTimeInterval) -> Bool {
+        autoRotate && flight == nil && now - lastInteraction > 25
+    }
+
     func pan(by delta: CGSize, viewHeight: CGFloat) {
         flight = nil
         markInteraction()
