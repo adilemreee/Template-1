@@ -1,4 +1,5 @@
 import SwiftUI
+import simd
 
 /// The heads-up display over the globe: live status, quick stats, briefing and the dock.
 struct HomeHUD: View {
@@ -33,7 +34,7 @@ struct HomeHUD: View {
                     InspectorCard()
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else {
-                    BriefingCard()
+                    ExperienceCarousel()
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 Dock(showLayers: $showLayers)
@@ -276,6 +277,99 @@ private struct BriefingCard: View {
         if let s = model.planet.activeStorms.first { return s.title }
         let hour = Calendar.current.component(.hour, from: Date())
         return hour < 12 ? String(localized: "This morning on Earth") : (hour < 18 ? String(localized: "This afternoon on Earth") : String(localized: "Tonight on Earth"))
+    }
+}
+
+// MARK: - Experiences
+
+/// The home screen's showcase: swipe between the Planet Briefing, riding with the ISS and the
+/// 24-hour replay. The next card peeks in so the extras are discoverable.
+private struct ExperienceCarousel: View {
+    @Environment(AppModel.self) private var model
+    @State private var page: Int? = 0
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 8) {
+                    BriefingCard().id(0)
+                        .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
+                    if model.canRideAlong {
+                        ExperienceCard(icon: "airplane.departure", tint: Theme.ice, eyebrow: "RIDE ALONG",
+                                       title: "Fly with the ISS", subtitle: rideLine) { model.startRideAlong() }
+                            .id(1)
+                            .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
+                    }
+                    ExperienceCard(icon: "clock.arrow.circlepath", tint: Theme.aurora, eyebrow: "TIME MACHINE",
+                                   title: "Replay the last 24 hours", subtitle: replayLine) { model.startReplay() }
+                        .id(2)
+                        .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
+                }
+                .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $page)
+            .scrollIndicators(.hidden)
+            .scrollClipDisabled()
+            .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 6) {
+                ForEach([0, 1, 2].filter { $0 != 1 || model.canRideAlong }, id: \.self) { i in
+                    Capsule()
+                        .fill(Color.white.opacity((page ?? 0) == i ? 0.9 : 0.25))
+                        .frame(width: (page ?? 0) == i ? 14 : 5, height: 5)
+                }
+            }
+            .animation(.snappy, value: page)
+        }
+        .onChange(of: page) { Haptics.shared.select() }
+    }
+
+    private var rideLine: String {
+        guard let iss = model.satellites.iss, let state = try? iss.propagate(to: Date()),
+              let ecef = try? iss.ecef(at: Date()) else { return String(localized: "400 km up, live") }
+        let alt = Int(SatGeo.subpoint(ecef: ecef).altitudeKm)
+        let speed = (simd_length(state.velocity) * 3600).formatted(.number.precision(.fractionLength(0)))
+        return String(localized: "Live · \(alt) km up · \(speed) km/h")
+    }
+
+    private var replayLine: String {
+        let n = model.planet.quakesLast24h.count
+        return n > 0 ? String(localized: "\(n) earthquakes and one sweep of daylight") : String(localized: "One sweep of daylight round the planet")
+    }
+}
+
+private struct ExperienceCard: View {
+    let icon: String
+    let tint: Color
+    let eyebrow: LocalizedStringKey
+    let title: LocalizedStringKey
+    let subtitle: String
+    let action: () -> Void
+
+    var body: some View {
+        Button {
+            Haptics.shared.thud()
+            action()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(tint.opacity(0.16)).frame(width: 46, height: 46)
+                    Circle().strokeBorder(tint.opacity(0.45), lineWidth: 1).frame(width: 46, height: 46)
+                    Image(systemName: icon).font(.system(size: 18, weight: .semibold)).foregroundStyle(tint)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(eyebrow).eyebrow(tint)
+                    Text(title).font(.system(size: 16, weight: .semibold)).foregroundStyle(.white).lineLimit(1)
+                    Text(subtitle).font(.system(size: 12)).foregroundStyle(Theme.textSecondary).lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.textTertiary)
+            }
+            .padding(14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 }
 

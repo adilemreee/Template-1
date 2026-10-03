@@ -34,6 +34,7 @@
 		5C70EEDCA4DC917577144BA6 /* AuroraPolarMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0580720767CA68600CBFCD95 /* AuroraPolarMap.swift */; };
 		6068018BE6CA50F3139A256D /* PlanetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7273DCE209C49FD9C791C9 /* PlanetModels.swift */; };
 		6074900B5058D05811269D1F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8908C6555008B50D5852F4 /* NotificationService.swift */; };
+		607F3BB69C42128F3D33F238 /* AppLocale.swift in Sources */ = {isa = PBXBuildFile; fileRef = C505249A633D5966570D4D96 /* AppLocale.swift */; };
 		637B7CD628AD1356F5058347 /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892092C3A695F815B3B94900 /* AskView.swift */; };
 		661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */; };
 		6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F669B24228503A0F50BEFB5C /* BriefingDirector.swift */; };
@@ -181,6 +182,7 @@
 		B511BF49E8529E984826CD0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C0B37C2645B3EDC9C018AE05 /* PlanetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetStore.swift; sourceTree = "<group>"; };
 		C4B23DB921A2ECB8E0C625DA /* AstroTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AstroTests.swift; sourceTree = "<group>"; };
+		C505249A633D5966570D4D96 /* AppLocale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocale.swift; sourceTree = "<group>"; };
 		C5E768E64CEC7155559D68CD /* Karman.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Karman.entitlements; sourceTree = "<group>"; };
 		CA49271D45CEFE574D1125B3 /* PlanetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanetProvider.swift; sourceTree = "<group>"; };
 		CACD28256510603D348A3843 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 			isa = PBXGroup;
 			children = (
 				1FB66E612BD5347E84CCE808 /* AppDelegate.swift */,
+				C505249A633D5966570D4D96 /* AppLocale.swift */,
 				F15479F1AFC96D1700780E2E /* AppModel.swift */,
 				EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */,
 				8A8169620C6268CB1D45D0FA /* KarmanIntents.swift */,
@@ -694,6 +697,7 @@
 			files = (
 				9CC7D8410DCFF4576A166FF8 /* APIClient.swift in Sources */,
 				C01E01792D1959FEEF33EEC5 /* AppDelegate.swift in Sources */,
+				607F3BB69C42128F3D33F238 /* AppLocale.swift in Sources */,
 				83F956BC30C9EF1CB785E1DE /* AppModel.swift in Sources */,
 				CF8D271B562ACE479EF0010B /* AppSettings.swift in Sources */,
 				C8A81F92C26C3C2738D2C157 /* AskService.swift in Sources */,

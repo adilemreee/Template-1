@@ -38,7 +38,7 @@ final class AppSettings {
         layers = Self.load("layers", from: defaults) ?? GlobeLayers()
         playIntro = defaults.object(forKey: "playIntro") as? Bool ?? true
         showUserLocation = defaults.object(forKey: "showUserLocation") as? Bool ?? true
-        units = UnitSystem(rawValue: defaults.string(forKey: "units") ?? "") ?? (Locale.current.measurementSystem == .us ? .imperial : .metric)
+        units = UnitSystem(rawValue: defaults.string(forKey: "units") ?? "") ?? (AppLocale.deviceUsesImperial ? .imperial : .metric)
         haptics = defaults.object(forKey: "haptics") as? Bool ?? true
         soundscape = defaults.object(forKey: "soundscape") as? Bool ?? true
         narration = defaults.object(forKey: "narration") as? Bool ?? true

@@ -287,7 +287,10 @@ final class AppModel {
 
     // MARK: Ride along with the ISS
 
-    var canRideAlong: Bool { satellites.iss != nil }
+    var canRideAlong: Bool {
+        _ = satellites.catalogs[.stations] // observed, so views update once the stations load
+        return satellites.iss != nil
+    }
 
     func startRideAlong() {
         guard let iss = satellites.iss else { return }
