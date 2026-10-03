@@ -139,9 +139,16 @@ struct InspectorCard: View {
                 .foregroundStyle(Theme.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                HStack(spacing: 8) {
-                    PillButton(title: "Feel it", icon: "hand.tap.fill", tint: Theme.quake) { Haptics.shared.seismic(magnitude: q.mag) }
-                    PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .quake(q.id) }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        PillButton(title: "Waves", icon: "dot.radiowaves.left.and.right", tint: Theme.quakeWarm) { model.startSeismicWaves(q) }
+                        PillButton(title: "Feel it", icon: "hand.tap.fill", tint: Theme.quake) { Haptics.shared.seismic(magnitude: q.mag) }
+                        PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .quake(q.id) }
+                    }
+                    HStack(spacing: 8) {
+                        PillButton(title: "Waves", icon: "dot.radiowaves.left.and.right", tint: Theme.quakeWarm) { model.startSeismicWaves(q) }
+                        PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .quake(q.id) }
+                    }
                 }
                 .padding(.top, 4)
             }

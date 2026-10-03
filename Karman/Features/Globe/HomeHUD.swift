@@ -28,6 +28,12 @@ struct HomeHUD: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
 
+            if model.settings.layers.plates {
+                PlatesLegend()
+                    .padding(.top, 10)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             Spacer(minLength: 0)
 
             VStack(spacing: 12) {
@@ -324,6 +330,10 @@ private struct ExperienceCarousel: View {
                                    title: "Replay the last 24 hours", subtitle: replayLine) { model.startReplay() }
                         .id(2)
                         .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
+                    ExperienceCard(icon: model.yearLoading ? "hourglass" : "globe.asia.australia.fill", tint: Theme.quakeWarm, eyebrow: "A YEAR IN A MINUTE",
+                                   title: "Watch a year of earthquakes", subtitle: yearLine) { model.startYearReplay() }
+                        .id(3)
+                        .containerRelativeFrame(.horizontal) { w, _ in w - 22 }
                 }
                 .scrollTargetLayout()
             }
@@ -333,7 +343,7 @@ private struct ExperienceCarousel: View {
             .scrollClipDisabled()
             .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 6) {
-                ForEach([0, 1, 2].filter { $0 != 1 || model.canRideAlong }, id: \.self) { i in
+                ForEach([0, 1, 2, 3].filter { $0 != 1 || model.canRideAlong }, id: \.self) { i in
                     Capsule()
                         .fill(Color.white.opacity((page ?? 0) == i ? 0.9 : 0.25))
                         .frame(width: (page ?? 0) == i ? 14 : 5, height: 5)
@@ -350,6 +360,12 @@ private struct ExperienceCarousel: View {
         let alt = Int(SatGeo.subpoint(ecef: ecef).altitudeKm)
         let speed = (simd_length(state.velocity) * 3600).formatted(.number.precision(.fractionLength(0)))
         return String(localized: "Live · \(alt) km up · \(speed) km/h")
+    }
+
+    private var yearLine: String {
+        if model.yearLoading { return String(localized: "Fetching 365 days from USGS…") }
+        if model.history.failed { return String(localized: "Couldn't load the year. Tap to try again.") }
+        return String(localized: "Thousands of quakes trace the plates")
     }
 
     private var replayLine: String {

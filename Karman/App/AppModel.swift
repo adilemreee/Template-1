@@ -19,6 +19,7 @@ final class AppModel {
     let satellites: SatelliteEngine
     let planet = PlanetStore()
     let weather = WeatherStore()
+    let history = QuakeHistoryStore()
     /// The Ask Kármán conversation (kept while the panel is closed).
     let askService = AskService()
     /// Height of the Ask sheet; it drops to half height while the globe flies to an answer.
@@ -148,6 +149,7 @@ final class AppModel {
         scene.launches = planet.snapshot.launches
         scene.aurora = planet.auroraGrid
         scene.user = settings.showUserLocation ? user : nil
+        scene.yearQuakes = globe.scene.yearQuakes
         globe.update(scene: scene)
     }
 
@@ -320,6 +322,8 @@ final class AppModel {
 
     func startReplay() {
         if briefingActive { BriefingDirector.shared.stop() }
+        if yearReplaying { stopYearReplay() }
+        stopSeismicWaves()
         resetForecast()
         if ridingISS { stopRideAlong() }
         panel = nil
@@ -338,6 +342,85 @@ final class AppModel {
         withAnimation(.easeInOut(duration: 0.5)) { replaying = false }
     }
 
+    // MARK: A year of earthquakes
+
+    private(set) var yearReplaying = false
+    private(set) var yearLoading = false
+
+    func startYearReplay() {
+        guard !yearReplaying, !yearLoading else { return }
+        if briefingActive { BriefingDirector.shared.stop() }
+        if ridingISS { stopRideAlong() }
+        if replaying { stopReplay() }
+        stopSeismicWaves()
+        resetForecast()
+        panel = nil
+        detailItem = nil
+        withAnimation(.easeInOut(duration: 0.4)) { selection = nil }
+        Haptics.shared.tap()
+        yearLoading = true
+        Task {
+            let year = await history.load()
+            yearLoading = false
+            guard let year, !year.quakes.isEmpty else { return }
+            var scene = globe.scene
+            scene.yearQuakes = year.quakes
+            globe.update(scene: scene)
+            // Open on the Pacific, where the Ring of Fire lights up first.
+            globe.fly(to: CameraPose(lat: 8, lon: -165, distance: 5.6), duration: 1.8)
+            globe.startYearReplay(from: year.from, to: year.to, duration: 52, delay: 1.8)
+            withAnimation(.easeInOut(duration: 0.5)) { yearReplaying = true }
+        }
+    }
+
+    func stopYearReplay() {
+        guard yearReplaying else { return }
+        globe.stopReplay()
+        var scene = globe.scene
+        scene.yearQuakes = []
+        globe.update(scene: scene)
+        withAnimation(.easeInOut(duration: 0.5)) { yearReplaying = false }
+    }
+
+    // MARK: Seismic waves
+
+    /// The earthquake whose waves are on screen.
+    private(set) var wavesQuake: Quake?
+
+    func startSeismicWaves(_ quake: Quake) {
+        if briefingActive { BriefingDirector.shared.stop() }
+        if ridingISS { stopRideAlong() }
+        if replaying { stopReplay() }
+        if yearReplaying { stopYearReplay() }
+        resetForecast()
+        panel = nil
+        detailItem = nil
+        Haptics.shared.thud()
+        withAnimation(.easeInOut(duration: 0.4)) { selection = .quake(quake.id) }
+        // Frame the epicentre and you together when you're on the same side of the planet.
+        var center = quake.coordinate
+        var distance = 3.6
+        if let user = location.point {
+            let angle = quake.coordinate.distanceKm(to: user) / Geo.earthRadiusKm
+            if angle < 1.6 {
+                let v = simd_normalize(quake.coordinate.unitVector * 0.6 + user.unitVector * 0.4)
+                center = GeoPoint(vector: v)
+                distance = max(3.0, min(5.2, 2.6 + angle * 1.8))
+            }
+        }
+        globe.fly(to: CameraPose(lat: center.lat, lon: center.lon, distance: distance), duration: 1.6)
+        globe.startSeismicWaves(for: quake, delay: 1.4)
+        globe.drift = (0, 0.016)   // ease out as the waves spread round the planet
+        withAnimation(.easeInOut(duration: 0.5)) { wavesQuake = quake }
+    }
+
+    func stopSeismicWaves() {
+        guard wavesQuake != nil else { return }
+        globe.stopSeismicWaves()
+        globe.drift = (0, 0)
+        withAnimation(.easeInOut(duration: 0.5)) { wavesQuake = nil }
+    }
+
     // MARK: Ride along with the ISS
 
     var canRideAlong: Bool {
@@ -349,6 +432,8 @@ final class AppModel {
         guard let iss = satellites.iss else { return }
         if briefingActive { BriefingDirector.shared.stop() }
         if replaying { stopReplay() }
+        if yearReplaying { stopYearReplay() }
+        stopSeismicWaves()
         panel = nil
         detailItem = nil
         withAnimation(.easeInOut(duration: 0.4)) { selection = nil }

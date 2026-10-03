@@ -17,6 +17,7 @@ struct LayersPanel: View {
         Item(title: "Storms", icon: "hurricane", tint: Theme.storm, keyPath: \.storms),
         Item(title: "Wildfires", icon: "flame.fill", tint: Theme.fire, keyPath: \.fires),
         Item(title: "Volcanoes & more", icon: "mountain.2.fill", tint: Theme.volcano, keyPath: \.otherEvents),
+        Item(title: "Tectonic plates", icon: "squareshape.split.2x2.dotted", tint: Color(red: 1.0, green: 0.6, blue: 0.48), keyPath: \.plates),
         Item(title: "Aurora", icon: "light.beacon.max.fill", tint: Theme.aurora, keyPath: \.aurora),
         Item(title: "Space Station", icon: "dot.circle.and.hand.point.up.left.fill", tint: Theme.ice, keyPath: \.satellites),
         Item(title: "Starlink swarm", icon: "circle.grid.3x3.fill", tint: Color(red: 0.55, green: 0.7, blue: 1), keyPath: \.starlink),

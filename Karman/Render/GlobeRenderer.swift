@@ -93,6 +93,9 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var issPathCount = 0
     private var issPathVersion = -1
     private var auroraVersion = -1
+    /// Plate boundaries, one path buffer per boundary type (built once).
+    private var plateBuffers: [(kind: PlateBoundaries.Kind, buffer: MTLBuffer, count: Int)] = []
+    private var platesFade: Float = 0
 
     // Frame state for picking/projection
     private(set) var viewProj = matrix_identity_float4x4
@@ -135,6 +138,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         }
         weatherLayer = WeatherLayer(device: device, stepPSO: windStepPSO, drawPSO: windPSO)
         weatherPlaceholder = makeWeatherPlaceholder()
+        buildPlateBuffers()
         earthMesh = MetalResources.sphere(device: device, segments: 256, rings: 128)
         shellMesh = MetalResources.sphere(device: device, segments: 128, rings: 64)
         blackTex = MetalResources.solidTexture(device: device, gray: 0)
@@ -145,6 +149,20 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         auroraDesc.storageMode = .shared
         auroraTex = device.makeTexture(descriptor: auroraDesc)
         loadTexturesAsync()
+    }
+
+    private func buildPlateBuffers() {
+        guard let plates = PlateBoundaries.bundled else { return }
+        for kind in PlateBoundaries.Kind.allCases {
+            var verts: [PathVertex] = []
+            for line in plates.lines where line.kind == kind {
+                if !verts.isEmpty { verts.append(PathVertex(position: .zero, alpha: -1)) }
+                for p in line.points { verts.append(PathVertex(position: p.unitVectorF * 1.0015, alpha: 1)) }
+            }
+            if verts.count > 1, let b = device.makeBuffer(bytes: verts, length: MemoryLayout<PathVertex>.stride * verts.count, options: .storageModeShared) {
+                plateBuffers.append((kind, b, verts.count))
+            }
+        }
     }
 
     /// One calm, dry 1×1 frame so the Earth shader always has a weather array bound.
@@ -359,8 +377,15 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
 
         var pose = controller.step(now: now)
         var starIntensity: Float = 1
-        let date = controller.lightingDate(at: now)
-        let sunDir = Astro.sunDirection(date)
+        var date = controller.lightingDate(at: now)
+        var sunDir = Astro.sunDirection(date)
+        if controller.isYearReplay {
+            // A year flies by: hold the Sun beside the camera and let it nod through the seasons
+            // instead of strobing round the planet 365 times.
+            let declination = Astro.subsolarPoint(date).lat
+            sunDir = GeoPoint(lat: declination, lon: Geo.normalizeLon(controller.pose.lon + 38)).unitVectorF
+            date = Date()
+        }
         if let introStart = controller.introStart {
             let t = now - introStart
             let intro = introPose(t: t, sun: sunDir)
@@ -391,6 +416,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         let projM = Self.perspective(fovY: Self.fovY, aspect: aspect, near: 0.01, far: 300)
         viewProj = projM * viewM
         eye = SIMD3<Float>(basis.eye)
+        controller.projection = GlobeProjection(viewProj: viewProj, eye: eye, viewSize: viewSizePoints)
 
         let elapsed = Float(now - startTime)
         let gmst = Astro.gmst(date)
@@ -418,14 +444,23 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         u.atmosphereIntensity = 1
         u.reliefStrength = 1.0
 
+        // Seismic wave fronts racing out from an earthquake.
+        if let waves = controller.seismic, let t = controller.seismicTime(at: now) {
+            let rad = Float.pi / 180
+            u.seismicCenter = SIMD4(waves.epicenter.unitVectorF, Float(controller.seismicStrength(at: now)))
+            u.seismicFronts = SIMD4(Float(Seismology.front(.p, at: t)) * rad, Float(Seismology.front(.s, at: t)) * rad,
+                                    Float(Seismology.front(.surface, at: t)) * rad, 0)
+        }
+
         // Live weather maps fade in and out with their layers.
         let layers = controller.layers
         weatherLayer?.sync(controller.weather, version: controller.weatherVersion)
         let hasWeather = weatherLayer?.hasData ?? false
         let fadeStep = Float(min(1, max(0, now - lastFadeStep) * 4))
         lastFadeStep = now
-        temperatureFade += ((layers.temperature && hasWeather ? 1 : 0) - temperatureFade) * fadeStep
-        rainFade += ((layers.rain && hasWeather ? 1 : 0) - rainFade) * fadeStep
+        let liveWeather = hasWeather && !controller.isYearReplay
+        temperatureFade += ((layers.temperature && liveWeather ? 1 : 0) - temperatureFade) * fadeStep
+        rainFade += ((layers.rain && liveWeather ? 1 : 0) - rainFade) * fadeStep
         if let weatherLayer, hasWeather {
             u.weatherSlice = weatherLayer.slice(at: date)
             u.weatherSlices = weatherLayer.sliceCount
@@ -450,7 +485,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         guard let drawable = view.currentDrawable, let cmd = queue.makeCommandBuffer() else { return }
 
         // ---- Wind particles step on the GPU before the scene that draws them
-        weatherLayer?.encodeWind(cmd, enabled: layers.wind && controller.introStart == nil, now: now, date: date,
+        weatherLayer?.encodeWind(cmd, enabled: layers.wind && controller.introStart == nil && !controller.isYearReplay, now: now, date: date,
                                  pose: pose, eye: eye, aspect: aspect)
 
         // ---- Scene pass
@@ -559,6 +594,23 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             for r in trackRanges where r.count > 1 {
                 enc.setVertexBuffer(trackBuffer, offset: r.start * MemoryLayout<PathVertex>.stride, index: 0)
                 enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: r.count - 1)
+            }
+        }
+
+        // Tectonic plate boundaries (always during the year replay: the quakes trace them).
+        let platesTarget: Float = layers.plates ? 1 : (controller.isYearReplay ? 0.55 : 0)
+        platesFade += (platesTarget - platesFade) * Float(min(1, fadeStep))
+        if platesFade > 0.01, !plateBuffers.isEmpty {
+            enc.setRenderPipelineState(pathPSO)
+            enc.setDepthStencilState(depthTest)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 1)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            for plate in plateBuffers {
+                var style = Self.plateStyle(plate.kind, alpha: platesFade)
+                enc.setVertexBuffer(plate.buffer, offset: 0, index: 0)
+                enc.setVertexBytes(&style, length: MemoryLayout<PathStyle>.stride, index: 2)
+                enc.setFragmentBytes(&style, length: MemoryLayout<PathStyle>.stride, index: 1)
+                enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: plate.count - 1)
             }
         }
 
@@ -687,6 +739,14 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         DispatchQueue.main.async { [weak self] in self?.updateAnchor() }
     }
 
+    static func plateStyle(_ kind: PlateBoundaries.Kind, alpha: Float) -> PathStyle {
+        switch kind {
+        case .divergent: PathStyle(color: SIMD4(0.30, 0.85, 1.0, 0.85 * alpha), widthPx: 1.5, glow: 0.9, dash: 0, pad: 0)
+        case .convergent: PathStyle(color: SIMD4(1.0, 0.36, 0.22, 0.95 * alpha), widthPx: 1.8, glow: 1.0, dash: 0, pad: 0)
+        case .transform: PathStyle(color: SIMD4(1.0, 0.86, 0.36, 0.85 * alpha), widthPx: 1.3, glow: 0.6, dash: 2.5, pad: 0)
+        }
+    }
+
     /// Copies the finished frame into a CPU buffer and hands it back as a CGImage.
     private func encodeCapture(_ cmd: MTLCommandBuffer, texture: MTLTexture, completion: @escaping (CGImage?) -> Void) {
         let w = texture.width, h = texture.height, bpr = w * 4
@@ -794,7 +854,34 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         var tracks: [PathVertex] = []
         var ranges: [(Int, Int)] = []
 
-        if layers.quakes {
+        if controller.isYearReplay {
+            // A year of M4.5+ quakes: each flares as its day comes round, then settles into a dim
+            // ember, so the year's seismicity builds up into a map of the plate boundaries.
+            let quakes = scene.yearQuakes
+            var hi = quakes.count
+            if let last = quakes.last, last.time > nowDate {
+                var lo = 0
+                hi = quakes.count
+                while lo < hi { let mid = (lo + hi) / 2; if quakes[mid].time <= nowDate { lo = mid + 1 } else { hi = mid } }
+            }
+            rings.reserveCapacity(hi + 4)
+            for q in quakes[0..<hi] {
+                let ageDays = nowDate.timeIntervalSince(q.time) / 86400
+                let m = q.mag
+                let base = Float(0.0055 + pow(max(m, 4.5) - 2.0, 1.55) * 0.0032)
+                let phase = Float(abs(q.id.hashValue % 1000)) / 1000
+                if ageDays < 4 {
+                    let f = Float(ageDays / 4)
+                    rings.append(RingInstance(position: q.coordinate.unitVectorF, size: base * (1.25 - 0.4 * f),
+                                              color: m >= 6.5 ? Palette.quakeFresh : Palette.quakeDay, phase: phase, speed: 0.9,
+                                              kind: 0, intensity: Float(min(1.3, 0.55 + (m - 4.5) * 0.28)) * (1 - 0.5 * f)))
+                } else {
+                    let color: SIMD4<Float> = m >= 6.5 ? Palette.quakeFresh : (m >= 5.5 ? Palette.quakeDay : Palette.quakeWeek)
+                    rings.append(RingInstance(position: q.coordinate.unitVectorF, size: base * 0.42, color: color, phase: phase, speed: 0,
+                                              kind: 0, intensity: Float(min(0.75, 0.28 + (m - 4.5) * 0.14))))
+                }
+            }
+        } else if layers.quakes {
             for q in scene.quakes {
                 let ageH = nowDate.timeIntervalSince(q.time) / 3600
                 guard ageH >= 0, ageH < 24 * 7.5 else { continue } // not yet happened while replaying
@@ -812,7 +899,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             }
         }
 
-        for e in scene.events {
+        for e in scene.events where !controller.isYearReplay {
             let pos = e.coordinate.unitVectorF
             switch e.kind {
             case .wildfire:
@@ -848,7 +935,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             }
         }
 
-        if layers.launches {
+        if layers.launches && !controller.isYearReplay {
             for l in scene.launches where l.net > nowDate.addingTimeInterval(-6 * 3600) && l.net < nowDate.addingTimeInterval(7 * 86400) {
                 let pos = l.coordinate.unitVectorF
                 let emphasis: Float = selected == .launch(l.id) ? 1 : 0

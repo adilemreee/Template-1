@@ -28,13 +28,30 @@ struct RootView: View {
                     .ignoresSafeArea()
             }
 
-            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying {
+            if model.settings.layers.plates || model.yearReplaying {
+                PlateLabels()
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+
+            if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil {
                 HomeHUD()
                     .transition(.opacity)
             }
 
             if model.replaying {
                 ReplayOverlay()
+                    .transition(.opacity)
+            }
+
+            if model.yearReplaying {
+                YearReplayOverlay()
+                    .transition(.opacity)
+            }
+
+            if let quake = model.wavesQuake {
+                SeismicWavesOverlay(quake: quake)
+                    .id(quake.id)
                     .transition(.opacity)
             }
 
@@ -84,6 +101,9 @@ struct RootView: View {
             case "replay":
                 model.skipIntro()
                 model.startReplay()
+            case "year":
+                model.skipIntro()
+                model.startYearReplay()
             case "ride":
                 model.skipIntro()
                 model.startRideAlong()

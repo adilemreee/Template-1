@@ -234,6 +234,22 @@ fragment float4 earth_fragment(SphereOut in [[stage_in]],
         }
     }
 
+    // Seismic waves racing out from an earthquake: the P front (blue-white), the slower S front
+    // (orange, stopped by the liquid outer core beyond ~104°) and the broad surface waves.
+    if (u.seismicCenter.w > 0.001) {
+        float d = acos(clamp(dot(N, normalize(u.seismicCenter.xyz)), -1.0, 1.0));
+        float strength = u.seismicCenter.w;
+        float shadowP = mix(1.0, 0.35, smoothstep(1.78, 1.86, u.seismicFronts.x));
+        float pRing = exp(-pow((d - u.seismicFronts.x) / 0.011, 2.0)) * shadowP * step(0.001, u.seismicFronts.x);
+        float sRing = exp(-pow((d - u.seismicFronts.y) / 0.014, 2.0)) * (1.0 - smoothstep(1.76, 1.90, d)) * step(0.001, u.seismicFronts.y);
+        float wake = smoothstep(u.seismicFronts.z + 0.002, u.seismicFronts.z - 0.10, d) * step(0.001, u.seismicFronts.z);
+        float ripples = (0.55 + 0.45 * sin((d - u.seismicFronts.z) * 160.0)) * exp(-max(u.seismicFronts.z - d, 0.0) * 9.0);
+        float rRing = exp(-pow((d - u.seismicFronts.z) / 0.035, 2.0)) * (0.5 + 0.5 * ripples) + wake * ripples * 0.25;
+        float glow = mix(0.55, 1.0, smoothstep(-0.2, 0.2, NdotL));
+        color += (float3(0.55, 0.85, 1.0) * pRing * 1.5 + float3(1.0, 0.48, 0.18) * sRing * 1.7
+                  + float3(1.0, 0.82, 0.42) * rRing * 0.55) * strength * glow;
+    }
+
     // Warm twilight band along the terminator.
     float twilight = exp(-pow((NdotL - 0.03) / 0.085, 2.0));
     color += float3(1.0, 0.40, 0.14) * twilight * 0.03;
@@ -687,7 +703,7 @@ vertex PathOut path_vertex(uint vid [[vertex_id]], uint iid [[instance_id]],
     float4 ca = u.viewProj * float4(a.position, 1.0);
     float4 cb = u.viewProj * float4(b.position, 1.0);
     PathOut o;
-    if (ca.w < 0.01 || cb.w < 0.01) {
+    if (ca.w < 0.01 || cb.w < 0.01 || a.alpha < 0.0 || b.alpha < 0.0) {
         o.position = float4(0, 0, -2, 1);
         o.across = 0; o.alpha = 0; o.along = 0;
         return o;

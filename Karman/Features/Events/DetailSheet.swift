@@ -62,11 +62,29 @@ struct QuakeDetail: View {
                 Text("WHAT THIS MEANS").eyebrow()
                 Text(meaning)
                     .font(.system(size: 14)).foregroundStyle(.white.opacity(0.88)).lineSpacing(3)
+                if let user = model.location.point {
+                    let km = quake.coordinate.distanceKm(to: user)
+                    let mmi = Seismology.intensity(magnitude: quake.mag, distanceKm: km, depthKm: quake.depthKm)
+                    Label(mmi < 1.5 ? String(localized: "Too far away to have been felt where you are.")
+                          : String(localized: "Estimated shaking where you are: \(Seismology.shakingWord(mmi)) (intensity \(Seismology.intensityRoman(mmi))). The first waves reached you about \(Seismology.clock(Seismology.travelTime(.p, degrees: km / Seismology.kmPerDegree, depthKm: quake.depthKm)).dropFirst()) after it struck."),
+                          systemImage: "house.fill")
+                        .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.ice)
+                }
                 if quake.isTsunamiFlagged {
                     Label("USGS tsunami flag set. This is informational — follow your local tsunami warning center for official guidance.", systemImage: "water.waves")
                         .font(.system(size: 12, weight: .medium)).foregroundStyle(.orange)
                 }
             }
+
+            TectonicSettingCard(quake: quake)
+
+            Button {
+                model.startSeismicWaves(quake)
+            } label: {
+                Label("Watch the waves cross the planet", systemImage: "dot.radiowaves.left.and.right").frame(maxWidth: .infinity)
+            }
+            .primaryAction(Theme.quakeWarm)
+            .controlSize(.large)
 
             HStack(spacing: 10) {
                 Button {
@@ -74,7 +92,15 @@ struct QuakeDetail: View {
                 } label: {
                     Label("Feel it", systemImage: "hand.tap.fill").frame(maxWidth: .infinity)
                 }
-                .primaryAction(Theme.quake)
+                .buttonStyle(.glass)
+                if let context = model.askContext(for: .quake(quake.id)) {
+                    Button {
+                        model.ask(about: context)
+                    } label: {
+                        Label("Ask", systemImage: "sparkle").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.glass)
+                }
                 if let url = quake.url.flatMap(URL.init(string:)) {
                     Link(destination: url) {
                         Label("USGS", systemImage: "arrow.up.right.square").frame(maxWidth: .infinity)

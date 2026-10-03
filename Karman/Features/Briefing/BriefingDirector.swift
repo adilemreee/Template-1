@@ -50,6 +50,10 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
     func start(model: AppModel) {
         guard phase == .idle else { return }
         self.model = model
+        model.stopSeismicWaves()
+        model.stopYearReplay()
+        model.stopReplay()
+        model.resetForecast()
         errorMessage = nil
         phase = .loading
         withAnimation(.easeInOut(duration: 0.6)) { model.briefingActive = true }

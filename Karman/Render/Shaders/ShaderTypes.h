@@ -36,6 +36,8 @@ typedef struct {
     float weatherSlices;          // number of GFS frames bound (0 = none yet)
     float temperatureOverlay;     // 0..1 opacity of the 2 m temperature map
     float rainOverlay;            // 0..1 opacity of the precipitation map
+    simd_float4 seismicCenter;    // xyz: epicentre (unit vector), w: strength of the wave display (0 = off)
+    simd_float4 seismicFronts;    // x: P front, y: S front, z: surface-wave front (radians from the epicentre)
 } FrameUniforms;
 
 typedef struct {
@@ -75,7 +77,7 @@ typedef struct {
 
 typedef struct {
     simd_float3 position;
-    float alpha;
+    float alpha;                  // negative: breaks the path (no segment to or from this vertex)
 } PathVertex;
 
 typedef struct {

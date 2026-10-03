@@ -57,11 +57,37 @@ enum GlobeItem: Hashable, Sendable {
 
 struct GlobeSceneData {
     var quakes: [Quake] = []
+    /// A year of M4.5+ earthquakes for the year replay.
+    var yearQuakes: [Quake] = []
     var events: [NaturalEvent] = []
     var launches: [Launch] = []
     var aurora: [UInt8]?
     var user: GeoPoint?
     var now = Date()
+}
+
+/// The renderer's latest camera, for projecting points to the screen outside the draw call.
+struct GlobeProjection {
+    var viewProj = matrix_identity_float4x4
+    var eye = SIMD3<Float>(0, 0, 5)
+    var viewSize: CGSize = .zero
+
+    /// View-space point for a render-frame position; nil when behind the globe or the camera.
+    func project(_ p: SIMD3<Float>) -> CGPoint? {
+        let clip = viewProj * SIMD4(p, 1)
+        guard clip.w > 0.001, viewSize.width > 0 else { return nil }
+        let toCam = simd_normalize(eye - p)
+        let n = simd_normalize(p)
+        if simd_length(p) < 1.2 && simd_dot(n, toCam) < 0.02 { return nil }
+        let ndc = SIMD2(clip.x, clip.y) / clip.w
+        return CGPoint(x: CGFloat(ndc.x * 0.5 + 0.5) * viewSize.width, y: CGFloat(0.5 - ndc.y * 0.5) * viewSize.height)
+    }
+
+    /// How squarely a surface point faces the camera (1 = straight on, ≤ 0 = hidden).
+    func facing(_ p: SIMD3<Float>) -> Float {
+        let n = simd_normalize(p)
+        return simd_dot(n, simd_normalize(eye - n))
+    }
 }
 
 /// Screen-space anchor for the selection callout, published at frame rate.
@@ -160,10 +186,12 @@ final class GlobeController {
     // MARK: Replay (time machine)
 
     struct Replay: Equatable {
+        enum Kind: Equatable { case day, year }
         var from: Date
         var to: Date
         var startedAt: CFTimeInterval
         var duration: CFTimeInterval
+        var kind: Kind = .day
     }
 
     private(set) var replay: Replay?
@@ -186,6 +214,61 @@ final class GlobeController {
         autoRotate = false
         sceneVersion &+= 1
     }
+
+    /// Plays a year of earthquakes; the globe turns slowly under a studio-lit Sun.
+    func startYearReplay(from: Date, to: Date, duration: CFTimeInterval, delay: CFTimeInterval = 0) {
+        replay = Replay(from: from, to: to, startedAt: CACurrentMediaTime() + delay, duration: duration, kind: .year)
+        autoRotate = false
+        sceneVersion &+= 1
+    }
+
+    var isYearReplay: Bool { replay?.kind == .year }
+
+    // MARK: Seismic waves
+
+    struct SeismicWaves: Equatable {
+        var quakeID: String
+        var epicenter: GeoPoint
+        var depthKm: Double
+        var magnitude: Double
+        var startedAt: CFTimeInterval
+        /// Seismic seconds shown per second on screen.
+        static let speed = 90.0
+        /// Seconds on screen before the display fades away.
+        static let duration = 38.0
+    }
+
+    private(set) var seismic: SeismicWaves?
+
+    func startSeismicWaves(for quake: Quake, delay: CFTimeInterval = 0) {
+        seismic = SeismicWaves(quakeID: quake.id, epicenter: quake.coordinate, depthKm: quake.depthKm, magnitude: quake.mag,
+                               startedAt: CACurrentMediaTime() + delay)
+    }
+
+    func stopSeismicWaves() { seismic = nil }
+
+    /// Seconds after the earthquake being shown (negative before the display starts).
+    func seismicTime(at now: CFTimeInterval = CACurrentMediaTime()) -> Double? {
+        seismic.map { (now - $0.startedAt) * SeismicWaves.speed }
+    }
+
+    /// 0…1 brightness of the wave display (fades in, then out at the end).
+    func seismicStrength(at now: CFTimeInterval = CACurrentMediaTime()) -> Double {
+        guard let s = seismic else { return 0 }
+        let t = now - s.startedAt
+        guard t > 0 else { return 0 }
+        return min(1, t / 0.6) * min(1, max(0, (SeismicWaves.duration - t) / 3))
+    }
+
+    var seismicFinished: Bool {
+        guard let s = seismic else { return true }
+        return CACurrentMediaTime() - s.startedAt > SeismicWaves.duration
+    }
+
+    // MARK: Projection
+
+    /// Updated by the renderer every frame.
+    var projection = GlobeProjection()
 
     #if DEBUG
     /// Screenshots only: render the scene's lighting at a fixed instant (the data stays live).
@@ -325,6 +408,10 @@ final class GlobeController {
             if drift.heading != 0 || drift.zoom != 0 {
                 pose.heading += drift.heading * dt
                 pose.distance = max(minDistance, pose.distance * (1 + drift.zoom * dt))
+            } else if isYearReplay && now - lastInteraction > 2.5 {
+                // The year replay turns the planet once in about a minute.
+                let ramp = min(1, (now - lastInteraction - 2.5) / 2)
+                pose.lon = Geo.normalizeLon(pose.lon - 6 * ramp * dt)
             } else if autoRotate && now - lastInteraction > 25 {
                 let ramp = min(1, (now - lastInteraction - 25) / 4)
                 pose.lon = Geo.normalizeLon(pose.lon - 1.4 * ramp * dt * min(1, pose.distance / 3))
