@@ -72,6 +72,13 @@ struct OrreryView: View {
                 .padding(.horizontal, 14)
                 .padding(.bottom, 8)
             }
+            .onChange(of: days >= Self.span.upperBound) { _, atEnd in
+                // Ten years on: stop at the end of the span rather than spin in place.
+                if atEnd && playing {
+                    dayOffset = Self.span.upperBound
+                    playAnchor = nil
+                }
+            }
         }
         .background(Color.black.ignoresSafeArea())
         .preferredColorScheme(.dark)
@@ -112,7 +119,7 @@ struct OrreryView: View {
             let d = hypot(pt.x - location.x, pt.y - location.y)
             if d < 30, d < (best?.distance ?? .infinity) { best = (p, d) }
         }
-        Haptics.shared.select()
+        if best != nil { Haptics.shared.select() }
         withAnimation(.snappy) { selected = best?.planet }
     }
 

@@ -165,6 +165,8 @@ static float4 shadeEarth(SphereOut in, constant FrameUniforms& u,
     float3 V = normalize(u.cameraPos - in.world);
     float3 L = normalize(u.sunDir);
     float2 uv = in.uv;
+    // Taken here, in uniform control flow, for the samples made inside branches below.
+    float2 uvDx = dfdx(uv), uvDy = dfdy(uv);
 
     // Regional 500 m imagery streamed for the area under the camera (NASA GIBS). It carries
     // its own shaded relief, so the coarse relief map and static clouds step back where it shows.
@@ -201,7 +203,7 @@ static float4 shadeEarth(SphereOut in, constant FrameUniforms& u,
         float reach = -NdotL + sqrt(max(NdotL * NdotL - 1.0 + kCloudShell * kCloudShell, 0.0));
         float2 suv = sphereUV(normalize(N + L * reach));
         // The ground's own derivatives pick the mip level (suv jumps at the antimeridian).
-        float cover = cloudTex.sample(s, float2(suv.x + u.cloudDrift, suv.y), gradient2d(dfdx(uv), dfdy(uv))).r;
+        float cover = cloudTex.sample(s, float2(suv.x + u.cloudDrift, suv.y), gradient2d(uvDx, uvDy)).r;
         shadow = smoothstep(0.2, 0.9, cover) * cloudAmount * smoothstep(-0.05, 0.1, NdotL);
     }
 
@@ -312,8 +314,9 @@ fragment float4 earth_cutaway_fragment(SphereOut in [[stage_in]],
                                        sampler s [[sampler(0)]],
                                        sampler cs [[sampler(1)]],
                                        sampler ws [[sampler(2)]]) {
+    float4 color = shadeEarth(in, u, dayTex, lightsTex, cloudTex, waterTex, normalTex, liveTex, detailTex, detailMask, weatherTex, s, cs, ws);
     if (inCutaway(in.world, u.cutaway)) discard_fragment();
-    return shadeEarth(in, u, dayTex, lightsTex, cloudTex, waterTex, normalTex, liveTex, detailTex, detailMask, weatherTex, s, cs, ws);
+    return color;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -477,6 +480,9 @@ fragment float4 cloud_fragment(SphereOut in [[stage_in]],
     // Step aside for the weather maps and seismic waves painted on the ground beneath.
     amount *= (1.0 - 0.6 * max(u.temperatureOverlay, u.rainOverlay)) * (1.0 - 0.5 * u.seismicCenter.w);
     float2 cuv = float2(in.uv.x + u.cloudDrift, in.uv.y);
+    // Derivatives before any discard (the relief samples below reuse them explicitly).
+    gradient2d grad = gradient2d(dfdx(cuv), dfdy(cuv));
+    float worldPerPixel = length(fwidth(in.world));
     float density = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv).r);
     float alpha = density * amount;
     if (alpha < 0.004 || inCutaway(in.world, u.cutaway)) discard_fragment();
@@ -490,10 +496,10 @@ fragment float4 cloud_fragment(SphereOut in [[stage_in]],
     // Relief: thick cloud bulges up, so the map's slopes tilt the normal. The step follows the
     // footprint of a pixel, keeping the relief alive when the texture is minified.
     float texel = 1.0 / float(cloudTex.get_width());
-    float footprint = clamp(length(fwidth(in.world)) / (2.0 * M_PI_F * texel), 1.0, 8.0);
+    float footprint = clamp(worldPerPixel / (2.0 * M_PI_F * texel), 1.0, 8.0);
     float2 o = float2(texel, 1.0 / float(cloudTex.get_height())) * 2.5 * footprint;
-    float gE = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(o.x, 0)).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(o.x, 0)).r);
-    float gN = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(0, o.y)).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(0, o.y)).r);
+    float gE = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(o.x, 0), grad).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(o.x, 0), grad).r);
+    float gN = smoothstep(0.16, 0.92, cloudTex.sample(s, cuv - float2(0, o.y), grad).r) - smoothstep(0.16, 0.92, cloudTex.sample(s, cuv + float2(0, o.y), grad).r);
     float3 east = tangentEast(N);
     float3 north = cross(N, east);
     float3 Nc = normalize(N - (east * gE + north * gN) * 1.2);
