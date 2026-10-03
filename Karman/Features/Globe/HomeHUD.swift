@@ -41,6 +41,18 @@ struct HomeHUD: View {
             .opacity(appeared ? 1 : 0)
             .animation(.spring(response: 0.75, dampingFraction: 0.82).delay(0.15), value: appeared)
         }
+        .background(alignment: .top) {
+            // Soft scrims keep the HUD legible over bright clouds and ice.
+            VStack(spacing: 0) {
+                LinearGradient(colors: [.black.opacity(0.62), .black.opacity(0.32), .clear], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 230)
+                Spacer()
+                LinearGradient(colors: [.clear, .black.opacity(0.35)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 240)
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+        }
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: model.selection)
         .animation(.spring(response: 0.45, dampingFraction: 0.86), value: showLayers)
         .onAppear {
@@ -63,6 +75,7 @@ private struct TopBar: View {
                     .foregroundStyle(.white)
                 LiveClock()
             }
+            .shadow(color: .black.opacity(0.65), radius: 8)
             Spacer()
             Button {
                 model.panel = .settings

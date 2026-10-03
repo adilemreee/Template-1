@@ -6,6 +6,7 @@
 "%@ megatons of TNT" = "%@ megaton TNT";
 "%@ tons of TNT" = "%@ ton TNT";
 "%@ · %@" = "%1$@ · %2$@";
+"%@ · %@ → %@ · %lld min" = "%1$@ · %2$@ → %3$@ · %4$lld dk";
 "%@ Å" = "%@ Å";
 "%@ × Moon distance · %lld–%lld m · %@ km/s" = "Ay uzaklığının %1$@ katı · %2$lld–%3$lld m · %4$@ km/sn";
 "%@ → %@ · %lld min" = "%1$@ → %2$@ · %3$lld dk";
@@ -129,6 +130,7 @@
 "Location" = "Konum";
 "Location needed" = "Konum gerekli";
 "Look %@ at %@. A bright, steady star moving fast with no blinking lights — that's seven people living in orbit." = "%2$@ sularında %1$@ yönüne bak. Yanıp sönmeden hızla ilerleyen parlak bir yıldız göreceksin — o, yörüngede yaşayan insanların evi.";
+"Look %@ at %@. China's Tiangong space station glides across your sky as a steady, bright point." = "%2$@ sularında %1$@ yönüne bak. Çin'in Tiangong uzay istasyonu gökyüzünde sabit ve parlak bir nokta olarak süzülecek.";
 "Look %@ in 10 minutes. It climbs to %lld° and sets in the %@." = "10 dakika sonra %1$@ yönüne bak. %2$lld° yüksekliğe çıkacak ve %3$@ yönünde batacak.";
 "M%@ · %@" = "M%1$@ · %2$@";
 "MAG" = "BÜY";

@@ -26,7 +26,10 @@ final class AppModel {
         }
     }
     var panel: Panel?
+    var detailItem: GlobeItem?
     var inspectorFrame: CGRect?
+    /// DEBUG-only: drives the UI into a named state for App Store screenshots.
+    var screenshotScene: String?
     var introPlaying = true
     var showTitle = false
     var hudVisible = false
@@ -52,7 +55,27 @@ final class AppModel {
         started = true
         planet.start()
         location.requestIfNeeded()
+        applyLayers(settings.layers)
         Task { await loadSatellites() }
+        #if DEBUG
+        screenshotScene = ProcessInfo.processInfo.environment["KARMAN_SCREEN"]
+        if screenshotScene == "preview" {
+            // App Preview recording: full intro, then the briefing starts by itself.
+            ScreenshotDirector.prepare(self)
+            Task {
+                try? await Task.sleep(for: .seconds(GlobeRenderer.introDuration + 3.2))
+                BriefingDirector.shared.start(model: self)
+            }
+        } else if screenshotScene != nil {
+            ScreenshotDirector.prepare(self)
+            introFinished()
+            globe.sceneFade = 1
+            globe.set(pose: globe.homePose)
+            syncScene()
+            Task { await ScreenshotDirector.run(self) }
+            return
+        }
+        #endif
         if settings.playIntro {
             globe.introStart = CACurrentMediaTime() + 0.25
             Task {

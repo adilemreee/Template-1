@@ -173,7 +173,7 @@ private struct MessageView: View {
                 if message.text.isEmpty && message.streaming {
                     TypingDots().padding(.top, 8)
                 } else {
-                    (Text(message.text) + Text(message.streaming ? " ▍" : "").foregroundStyle(Theme.aurora))
+                    Text("\(Text(verbatim: message.text))\(Text(verbatim: message.streaming ? " ▍" : "").foregroundStyle(Theme.aurora))")
                         .font(.system(size: 15))
                         .foregroundStyle(message.failed ? Color.orange : .white.opacity(0.92))
                         .lineSpacing(3)

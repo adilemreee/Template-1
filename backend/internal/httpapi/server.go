@@ -36,6 +36,7 @@ func (s *Server) Handler() http.Handler {
 	s.limiter = newIPLimiter(240, time.Minute)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.health)
+	mux.HandleFunc("GET /privacy", s.privacy)
 	mux.HandleFunc("GET /v1/snapshot", s.snapshot)
 	mux.HandleFunc("GET /v1/satellites/{group}", s.satellites)
 	mux.HandleFunc("GET /v1/imagery", s.imageryIndex)

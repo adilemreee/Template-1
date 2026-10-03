@@ -1,5 +1,6 @@
 import CoreLocation
 import Foundation
+import MapKit
 import Observation
 
 /// Approximate location for "near you" features. Stored coarsely and never leaves the device
@@ -12,7 +13,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     private(set) var authorization: CLAuthorizationStatus = .notDetermined
 
     @ObservationIgnored private let manager = CLLocationManager()
-    @ObservationIgnored private let geocoder = CLGeocoder()
     @ObservationIgnored private var lastGeocoded: CLLocation?
 
     private static let latKey = "karman.location.lat", lonKey = "karman.location.lon", nameKey = "karman.location.name", manualKey = "karman.location.manual"
@@ -94,9 +94,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     private func reverseGeocode(_ loc: CLLocation) async {
         if let last = lastGeocoded, last.distance(from: loc) < 20_000, placeName != nil { return }
         lastGeocoded = loc
-        if let mark = try? await geocoder.reverseGeocodeLocation(loc).first {
-            let name = mark.locality ?? mark.administrativeArea ?? mark.country
-            if let name, let p = point { store(p, name: name) }
-        }
+        guard let request = MKReverseGeocodingRequest(location: loc),
+              let item = try? await request.mapItems.first else { return }
+        let name = item.addressRepresentations?.cityName ?? item.name
+        if let name, let p = point { store(p, name: name) }
     }
 }

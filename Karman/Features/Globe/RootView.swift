@@ -30,6 +30,12 @@ struct RootView: View {
             }
 
             SelectionCallout()
+                .sheet(item: $model.detailItem) { item in
+                    DetailSheet(item: item)
+                        .presentationDetents([.large])
+                        .presentationCornerRadius(34)
+                        .presentationBackground(.clear)
+                }
 
             if model.briefingActive {
                 BriefingPlayerView()

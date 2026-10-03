@@ -39,7 +39,13 @@ struct SkyTonightView: View {
         }
         .scrollIndicators(.hidden)
         .background(PanelBackground())
-        .task { await model.recomputePasses() }
+        .task {
+            await model.recomputePasses()
+            if model.screenshotScene == "sky", let first = model.passes.filter({ $0.end > Date() }).max(by: { $0.maxElevation < $1.maxElevation }) {
+                try? await Task.sleep(for: .milliseconds(600))
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { expandedPass = first.id }
+            }
+        }
     }
 
     private var passes: some View {
@@ -216,7 +222,7 @@ struct PassRow: View {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(Fmt.dayTime(pass.start)).font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
-                        Text("\(GeoPoint.compassName(pass.startAzimuth)) → \(GeoPoint.compassName(pass.endAzimuth)) · \(Int(pass.end.timeIntervalSince(pass.start) / 60)) min")
+                        Text("\(stationName) · \(GeoPoint.compassName(pass.startAzimuth)) → \(GeoPoint.compassName(pass.endAzimuth)) · \(Int(pass.end.timeIntervalSince(pass.start) / 60)) min")
                             .font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
@@ -234,12 +240,16 @@ struct PassRow: View {
                 SkyDome(pass: pass)
                     .frame(height: 230)
                     .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-                Text(pass.satellite == "ISS (ZARYA)" ? String(localized: "Look \(GeoPoint.compassName(pass.startAzimuth)) at \(Fmt.time(pass.start)). A bright, steady star moving fast with no blinking lights — that's seven people living in orbit.") : pass.satellite)
+                Text(pass.noradID == 25544
+                     ? String(localized: "Look \(GeoPoint.compassName(pass.startAzimuth)) at \(Fmt.time(pass.start)). A bright, steady star moving fast with no blinking lights — that's seven people living in orbit.")
+                     : String(localized: "Look \(GeoPoint.compassName(pass.startAzimuth)) at \(Fmt.time(pass.start)). China's Tiangong space station glides across your sky as a steady, bright point."))
                     .font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
             }
         }
         .padding(.vertical, 6)
     }
+
+    private var stationName: String { pass.noradID == 25544 ? "ISS" : "Tiangong" }
 
     private var elevationColor: Color { pass.maxElevation > 60 ? Theme.aurora : (pass.maxElevation > 30 ? Theme.ice : Theme.textSecondary) }
 
@@ -255,9 +265,17 @@ struct PassRow: View {
 /// Sky chart: horizon at the edge, zenith in the middle, the pass drawn with its direction.
 struct SkyDome: View {
     let pass: PassPredictor.Pass
-    @State private var progress: CGFloat = 0
+    @State private var appeared = Date()
 
     var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 30)) { tl in
+            let t = min(1, tl.date.timeIntervalSince(appeared) / 2.2)
+            dome(progress: CGFloat(Easing.inOutSine(t)))
+        }
+        .onAppear { appeared = Date() }
+    }
+
+    private func dome(progress: CGFloat) -> some View {
         Canvas { ctx, size in
             let r = min(size.width, size.height) / 2 - 18
             let c = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -282,10 +300,6 @@ struct SkyDome: View {
             let head = pts[count - 1]
             ctx.fill(Path(ellipseIn: CGRect(x: head.x - 5, y: head.y - 5, width: 10, height: 10)), with: .color(.white))
             ctx.fill(Path(ellipseIn: CGRect(x: head.x - 11, y: head.y - 11, width: 22, height: 22)), with: .color(Theme.ice.opacity(0.25)))
-        }
-        .onAppear {
-            progress = 0
-            withAnimation(.easeInOut(duration: 2.2)) { progress = 1 }
         }
     }
 

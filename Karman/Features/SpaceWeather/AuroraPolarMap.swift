@@ -14,7 +14,7 @@ struct AuroraPolarMap: View {
     @State private var image: CGImage?
     @State private var shimmer = false
 
-    static let edgeLatitude = 40.0
+    nonisolated static let edgeLatitude = 40.0
 
     var body: some View {
         GeometryReader { geo in

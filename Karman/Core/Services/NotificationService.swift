@@ -23,7 +23,7 @@ final class NotificationService {
 
     @discardableResult
     func requestAuthorization() async -> Bool {
-        let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge, .timeSensitive])) ?? false
+        let granted = (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])) ?? false
         authorized = granted
         if granted { UIApplication.shared.registerForRemoteNotifications() }
         return granted

@@ -11,6 +11,7 @@
 		05E2401CB9F57E8D9729CECA /* stars.bin in Resources */ = {isa = PBXBuildFile; fileRef = 34DC9B586E7A631FD358E629 /* stars.bin */; };
 		069BE632C35C62C82B6B401C /* AstroMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3B04B76DF53BC90A9EBD06 /* AstroMath.swift */; };
 		12A3ADAFD336E674B48D9D28 /* Soundscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED461DF20500BA434F58C99 /* Soundscape.swift */; };
+		1924418A80A7AE9FF872DFDC /* ScreenshotDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8680D3FC92CEFA2BA844A696 /* ScreenshotDirector.swift */; };
 		1B01F1815E2A9B181B58C63C /* Globe.metal in Sources */ = {isa = PBXBuildFile; fileRef = D10B8D4B18C3158B2D2F7E34 /* Globe.metal */; };
 		2C946D0DC4069EE49E7D6821 /* KarmanApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6C4BE4C5DF3766AA76193A /* KarmanApp.swift */; };
 		30216CB9A7A778136D6861D2 /* moon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = FF6B47423238D4C7B83FF18F /* moon.jpg */; };
@@ -148,6 +149,7 @@
 		7D359214F18B022C04C45349 /* DetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailSheet.swift; sourceTree = "<group>"; };
 		80A8C6D7C2058CEE84FAEA4F /* LiveImagery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveImagery.swift; sourceTree = "<group>"; };
 		8475F9268862AEDC750CAB3E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8680D3FC92CEFA2BA844A696 /* ScreenshotDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotDirector.swift; sourceTree = "<group>"; };
 		87E7D0170506DF75EEE13B0B /* earth_day.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_day.jpg; sourceTree = "<group>"; };
 		892092C3A695F815B3B94900 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		8A09FE9EF57DEDB31320F999 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				4B70ED95826842647A5B8C6E /* Log.swift */,
+				8680D3FC92CEFA2BA844A696 /* ScreenshotDirector.swift */,
 				9D98059E112454A80B106DE2 /* WidgetBridge.swift */,
 			);
 			path = Support;
@@ -688,6 +691,7 @@
 				9907F01ABC07CD613F07101F /* RootView.swift in Sources */,
 				CDA4BCDB9834BD8737B530F6 /* SGP4.swift in Sources */,
 				8D865D8DF61E1BDCBDCD6CDC /* SatelliteEngine.swift in Sources */,
+				1924418A80A7AE9FF872DFDC /* ScreenshotDirector.swift in Sources */,
 				8397501463C833508102CA32 /* SelectionCallout.swift in Sources */,
 				984EDFCEF579BF3D022F2814 /* SettingsView.swift in Sources */,
 				54D49FF1F70E665B55967A64 /* SkyTonightView.swift in Sources */,
@@ -839,7 +843,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				KARMAN_API_BASE_URL = "https://92.5.38.182:8443";
-				KARMAN_API_PIN = "";
+				KARMAN_API_PIN = "5Nw6Cz7fhWbHzw/Z7+BR/2HQ8R97IW458jnXjOuI0ng=";
 				KARMAN_DEV_TOKEN = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
 				MARKETING_VERSION = 1.0;
@@ -977,7 +981,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				KARMAN_API_BASE_URL = "https://92.5.38.182:8443";
-				KARMAN_API_PIN = "";
+				KARMAN_API_PIN = "5Nw6Cz7fhWbHzw/Z7+BR/2HQ8R97IW458jnXjOuI0ng=";
 				KARMAN_DEV_TOKEN = "";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
 				MARKETING_VERSION = 1.0;

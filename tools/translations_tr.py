@@ -16,6 +16,8 @@ APP = {
     "%@ · %@": "%1$@ · %2$@",
     "%@ × Moon distance · %lld–%lld m · %@ km/s": "Ay uzaklığının %1$@ katı · %2$lld–%3$lld m · %4$@ km/sn",
     "%@ → %@ · %lld min": "%1$@ → %2$@ · %3$lld dk",
+    "%@ · %@ → %@ · %lld min": "%1$@ · %2$@ → %3$@ · %4$lld dk",
+    "Look %@ at %@. China's Tiangong space station glides across your sky as a steady, bright point.": "%2$@ sularında %1$@ yönüne bak. Çin'in Tiangong uzay istasyonu gökyüzünde sabit ve parlak bir nokta olarak süzülecek.",
     "%lld km": "%lld km",
     "%lld km deep": "%lld km derinlikte",
     "%lld km up · %@ km/h": "%1$lld km yükseklikte · %2$@ km/sa",

@@ -19,30 +19,33 @@ struct SelectionCallout: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
+        // Read observable state here (not inside the Canvas closure) so SwiftUI tracks it.
         let anchor = model.globe.anchor
-        Canvas { ctx, size in
-            guard model.selection != nil, anchor.visible, let p = anchor.point, let card = model.inspectorFrame,
-                  card.minY > p.y + 30 else { return }
+        let point = anchor.visible ? anchor.point : nil
+        let card = model.inspectorFrame
+        let active = model.selection != nil && model.hudVisible && !model.briefingActive
+        Canvas { ctx, _ in
+            guard active, let p = point, let card, card.minY > p.y + 30 else { return }
             let end = CGPoint(x: min(max(p.x, card.minX + 40), card.maxX - 40), y: card.minY - 2)
             var path = Path()
             path.move(to: p)
             let mid = CGPoint(x: p.x, y: p.y + (end.y - p.y) * 0.55)
             path.addQuadCurve(to: end, control: mid)
-            ctx.stroke(path, with: .linearGradient(Gradient(colors: [.white.opacity(0.9), .white.opacity(0.15)]), startPoint: p, endPoint: end),
-                       style: StrokeStyle(lineWidth: 1.2, lineCap: .round, dash: [3, 4]))
+            ctx.stroke(path, with: .color(.black.opacity(0.45)), style: StrokeStyle(lineWidth: 3.2, lineCap: .round, dash: [3, 4]))
+            ctx.stroke(path, with: .linearGradient(Gradient(colors: [.white, .white.opacity(0.35)]), startPoint: p, endPoint: end),
+                       style: StrokeStyle(lineWidth: 1.4, lineCap: .round, dash: [3, 4]))
+            ctx.fill(Path(ellipseIn: CGRect(x: p.x - 5, y: p.y - 5, width: 10, height: 10)), with: .color(.black.opacity(0.4)))
             ctx.fill(Path(ellipseIn: CGRect(x: p.x - 3, y: p.y - 3, width: 6, height: 6)), with: .color(.white))
             ctx.fill(Path(ellipseIn: CGRect(x: end.x - 2.5, y: end.y - 2.5, width: 5, height: 5)), with: .color(.white.opacity(0.6)))
         }
         .allowsHitTesting(false)
         .ignoresSafeArea()
-        .opacity(model.hudVisible && !model.briefingActive ? 1 : 0)
     }
 }
 
 /// Bottom card summarising the selected item.
 struct InspectorCard: View {
     @Environment(AppModel.self) private var model
-    @State private var detail: GlobeItem?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -69,12 +72,6 @@ struct InspectorCard: View {
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { model.inspectorFrame = $0 }
         .onDisappear { model.inspectorFrame = nil }
-        .sheet(item: $detail) { item in
-            DetailSheet(item: item)
-                .presentationDetents([.large])
-                .presentationCornerRadius(34)
-                .presentationBackground(.clear)
-        }
     }
 
     @ViewBuilder
@@ -116,7 +113,7 @@ struct InspectorCard: View {
                 .minimumScaleFactor(0.8)
                 HStack(spacing: 8) {
                     PillButton(title: "Feel it", icon: "hand.tap.fill", tint: Theme.quake) { Haptics.shared.seismic(magnitude: q.mag) }
-                    PillButton(title: "Details", icon: "chevron.up", tint: .white) { detail = .quake(q.id) }
+                    PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .quake(q.id) }
                 }
                 .padding(.top, 4)
             }
@@ -135,7 +132,7 @@ struct InspectorCard: View {
                     Text(Fmt.relative(e.time))
                 }
                 .font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
-                PillButton(title: "Details", icon: "chevron.up", tint: .white) { detail = .event(e.id) }
+                PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .event(e.id) }
                     .padding(.top, 4)
             }
             Spacer(minLength: 0)
@@ -155,7 +152,7 @@ struct InspectorCard: View {
                         .foregroundStyle(l.isDone ? Theme.textSecondary : Theme.launch)
                         .contentTransition(.numericText(countsDown: true))
                 }
-                PillButton(title: "Details", icon: "chevron.up", tint: .white) { detail = .launch(l.id) }
+                PillButton(title: "Details", icon: "chevron.up", tint: .white) { model.detailItem = .launch(l.id) }
                     .padding(.top, 2)
             }
             Spacer(minLength: 0)

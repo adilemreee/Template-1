@@ -84,6 +84,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
         soundscape.stop()
         configureAudio(active: false)
         guard let model else { phase = .idle; return }
+        model.selection = nil
         model.globe.drift = (0, 0)
         model.globe.autoRotate = true
         model.globe.fly(to: model.globe.homePose, duration: 2.2)
