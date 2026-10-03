@@ -73,6 +73,8 @@ struct GlobeProjection {
     var viewProj = matrix_identity_float4x4
     var eye = SIMD3<Float>(0, 0, 5)
     var viewSize: CGSize = .zero
+    /// The Moon's centre in the render frame (Earth radii).
+    var moon = SIMD3<Float>(0, 0, 60)
 
     /// View-space point for a render-frame position; nil when behind the globe or the camera.
     func project(_ p: SIMD3<Float>) -> CGPoint? {
@@ -122,7 +124,8 @@ final class GlobeController {
     var homePose: CameraPose = .home
     var drift: (heading: Double, zoom: Double) = (0, 0)
     var minDistance = 1.22
-    var maxDistance = 16.0
+    /// Far enough out to see the whole of the Moon's orbit.
+    var maxDistance = 200.0
 
     // Content
     var layers = GlobeLayers() { didSet { if layers != oldValue { sceneVersion &+= 1 } } }

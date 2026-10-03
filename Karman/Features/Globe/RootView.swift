@@ -34,6 +34,12 @@ struct RootView: View {
                     .transition(.opacity)
             }
 
+            if !model.introPlaying && !model.insideEarth && !model.ridingISS && !model.ambientActive && !model.briefingActive {
+                CosmicLabels()
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+
             if model.hudVisible && !model.briefingActive && !model.ridingISS && !model.replaying && !model.yearReplaying && model.wavesQuake == nil
                 && !model.ambientActive && !model.insideEarth {
                 HomeHUD()

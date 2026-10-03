@@ -42,6 +42,15 @@ typedef struct {
     simd_float4 cutaway;          // xyz: centre of the wedge cut out of the planet (unit vector on the equator), w: its half-angle in radians (0 = whole)
 } FrameUniforms;
 
+// The Moon at its real place: a unit sphere turned so its near side faces Earth, scaled and moved.
+typedef struct {
+    simd_float4x4 model;          // unit sphere -> render frame (Earth radii)
+    float earthshine;             // brightness of the Earth-lit night side (Earth's phase seen from the Moon)
+    float pad0;
+    float pad1;
+    float pad2;
+} MoonUniforms;
+
 typedef struct {
     simd_float3 position;         // unit vector on the globe (render frame)
     float size;                   // radius in globe units

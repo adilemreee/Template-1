@@ -568,8 +568,9 @@ struct SunOut {
 
 vertex SunOut sun_vertex(uint vid [[vertex_id]], constant FrameUniforms& u [[buffer(0)]]) {
     float2 c = kQuad[vid];
-    float3 center = normalize(u.sunDir) * 80.0;
-    float size = 22.0;
+    // Far from the camera in the Sun's direction, so it stays at infinity however far out you zoom.
+    float3 center = u.cameraPos + normalize(u.sunDir) * 250.0;
+    float size = 68.75;
     float3 world = center + (u.cameraRight * c.x + u.cameraUp * c.y) * size;
     SunOut o;
     o.position = u.viewProj * float4(world, 1.0);
@@ -609,8 +610,8 @@ vertex SkyOut milkyway_vertex(uint vid [[vertex_id]], constant FrameUniforms& u 
     float2 ndc = float2((vid << 1) & 2, vid & 2) * 2.0 - 1.0;
     float3 forward = cross(u.cameraUp, u.cameraRight);
     SkyOut o;
-    // Just in front of the far plane like the stars: the depth test keeps it behind everything.
-    o.position = float4(ndc, 0.99999, 1.0);
+    // At the far plane: the depth test keeps it behind everything, even the Moon's far orbit.
+    o.position = float4(ndc, 0.9999999, 1.0);
     o.ray = forward + u.cameraRight * (ndc.x / u.proj[0][0]) + u.cameraUp * (ndc.y / u.proj[1][1]);
     return o;
 }
@@ -628,6 +629,65 @@ fragment float4 milkyway_fragment(SkyOut in [[stage_in]],
     float2 uv = float2(0.5 - lon * (0.5 / M_PI_F), 0.5 - lat * (2.0 / M_PI_F));
     float3 c = sky.sample(s, uv, level(0.0)).rgb;
     return float4(c * u.milkyWay * u.sceneFade, 0.0);
+}
+
+// ---------------------------------------------------------------------------------------
+// The Moon, to scale and at its real distance (about 60 Earth radii), tidally locked so the near
+// side faces Earth, lit by the Sun with its true phase.
+// ---------------------------------------------------------------------------------------
+
+struct MoonOut {
+    float4 position [[position]];
+    float3 world;
+    float3 normal;
+    float2 uv;
+};
+
+vertex MoonOut moon_vertex(uint vid [[vertex_id]],
+                           const device SphereVertex* verts [[buffer(0)]],
+                           constant FrameUniforms& u [[buffer(1)]],
+                           constant MoonUniforms& m [[buffer(2)]]) {
+    SphereVertex v = verts[vid];
+    float4 world = m.model * float4(float3(v.position), 1.0);
+    MoonOut o;
+    o.position = u.viewProj * world;
+    o.world = world.xyz;
+    o.normal = (m.model * float4(float3(v.position), 0.0)).xyz;
+    o.uv = float2(v.uv);
+    return o;
+}
+
+fragment float4 moon_fragment(MoonOut in [[stage_in]],
+                              constant FrameUniforms& u [[buffer(0)]],
+                              constant MoonUniforms& m [[buffer(1)]],
+                              texture2d<float> tex [[texture(0)]],
+                              sampler s [[sampler(0)]]) {
+    float3 N = normalize(in.normal);
+    float3 V = normalize(u.cameraPos - in.world);
+    float3 L = normalize(u.sunDir);
+    float3 albedo = tex.sample(s, in.uv).rgb;
+    float mu0 = dot(N, L);
+    float mu = saturate(dot(N, V));
+    // Lommel-Seeliger scattering: the regolith keeps a full Moon evenly bright out to its limb.
+    float sunlit = mu0 > 0.0 ? 2.0 * mu0 / (mu0 + mu + 0.05) : 0.0;
+    sunlit *= smoothstep(-0.02, 0.06, mu0);
+
+    // Earth's shadow, cylindrical at this distance: the penumbra dims, the umbra turns copper
+    // (sunlight bent through Earth's atmosphere) during a lunar eclipse.
+    float along = dot(in.world, L);
+    float axis = length(in.world - L * along);
+    float behind = step(along, 0.0);
+    float penumbra = mix(1.0, smoothstep(0.70, 1.27, axis), behind);
+    float umbra = behind * (1.0 - smoothstep(0.69, 0.76, axis));
+    float3 direct = albedo * sunlit * 1.1 * penumbra * (1.0 - umbra);
+    float3 copper = albedo * float3(0.55, 0.17, 0.07) * 0.16 * umbra * smoothstep(0.0, 0.1, mu0 + 0.1);
+
+    // Earthshine on the night side, strongest around new Moon when Earth is nearly full from here.
+    float3 toEarth = normalize(-in.world);
+    float3 earthlit = albedo * float3(0.45, 0.60, 1.0) * m.earthshine * saturate(dot(N, toEarth)) * (1.0 - smoothstep(0.0, 0.2, mu0));
+
+    float3 color = direct + copper + earthlit;
+    return float4(color * u.sceneFade, 1.0);
 }
 
 // ---------------------------------------------------------------------------------------

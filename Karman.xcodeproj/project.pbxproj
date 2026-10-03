@@ -49,6 +49,7 @@
 		637B7CD628AD1356F5058347 /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892092C3A695F815B3B94900 /* AskView.swift */; };
 		661E7C517A0E88601CD9F2E2 /* OrthoSphere.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8031AEB6FFF41E38B75C4 /* OrthoSphere.swift */; };
 		6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F669B24228503A0F50BEFB5C /* BriefingDirector.swift */; };
+		6A3314C8B62C4D57251E8082 /* CosmicLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13003994F604B60142E48C8 /* CosmicLabels.swift */; };
 		6A74DF09EAC19CB089BBFE90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1B37297F3AA3EFD93526695C /* Assets.xcassets */; };
 		6C0F912FB67E87DB6576FA38 /* milkyway.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 82B6CFD3E8CDC06CF6579558 /* milkyway.jpg */; };
 		6CD00BB22DE3B9AD3A3B5C1E /* earth_clouds.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 15550FFB007FB9B1657980D0 /* earth_clouds.jpg */; };
@@ -225,6 +226,7 @@
 		A7BDB84E2E5A919FC223104B /* widget_lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = widget_lights.jpg; sourceTree = "<group>"; };
 		A865C1CFB079917C7509C0A1 /* SkyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyTests.swift; sourceTree = "<group>"; };
 		ACCB9F6D96404AAD71977A33 /* SpaceWeatherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceWeatherView.swift; sourceTree = "<group>"; };
+		B13003994F604B60142E48C8 /* CosmicLabels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CosmicLabels.swift; sourceTree = "<group>"; };
 		B2523F799F11C706FBFEBFC7 /* earth_lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = earth_lights.jpg; sourceTree = "<group>"; };
 		B511BF49E8529E984826CD0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B572A77300946719B1479AAF /* SkyCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyCards.swift; sourceTree = "<group>"; };
@@ -292,6 +294,14 @@
 			path = Support;
 			sourceTree = "<group>";
 		};
+		18588AE5126925C490560F33 /* Cosmos */ = {
+			isa = PBXGroup;
+			children = (
+				B13003994F604B60142E48C8 /* CosmicLabels.swift */,
+			);
+			path = Cosmos;
+			sourceTree = "<group>";
+		};
 		19B7A37DDD0F6F321F019D15 /* KarmanTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -347,6 +357,7 @@
 				FE72912D8982FEFA3EE619A2 /* Ambient */,
 				518F49B96793BE4BBAB8C6C9 /* Ask */,
 				CE87C9ADD41336B6739A4705 /* Briefing */,
+				18588AE5126925C490560F33 /* Cosmos */,
 				5B58E8F6A13A79A2CB1E8ECC /* Events */,
 				8C2D05172361B73461F172E0 /* Globe */,
 				D911F8C7613173C1C90B85C4 /* Inside */,
@@ -854,6 +865,7 @@
 				6739272C25F781090A3D02BF /* BriefingDirector.swift in Sources */,
 				41A3CCAF19F3C46459F8B4EE /* BriefingPlayerView.swift in Sources */,
 				0FDD6FBA8C3A815E1C03E9D6 /* ControlIntents.swift in Sources */,
+				6A3314C8B62C4D57251E8082 /* CosmicLabels.swift in Sources */,
 				82F8A2053B3E5CB4A7346AEA /* DetailImagery.swift in Sources */,
 				E13533BCF9C81AFFF23CB8CE /* DetailSheet.swift in Sources */,
 				6ECAAD250AD053865048E2BC /* DirectFeeds.swift in Sources */,

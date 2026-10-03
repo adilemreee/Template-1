@@ -27,6 +27,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     /// The Inside the Earth variants: the surface with the wedge discarded, and the cut's faces.
     private var earthCutPSO: MTLRenderPipelineState!
     private var cutFacePSO: MTLRenderPipelineState!
+    private var moonPSO: MTLRenderPipelineState!
     private var atmospherePSO: MTLRenderPipelineState!
     private var auroraPSO: MTLRenderPipelineState!
     private var cloudPSO: MTLRenderPipelineState!
@@ -80,6 +81,11 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
     private var iconAtlas: MTLTexture?
     private var auroraTex: MTLTexture?
     private var milkyWayTex: MTLTexture?
+    private var moonTex: MTLTexture?
+    /// The Moon's orbit as a path among the stars (rebuilt as the frame turns with the Earth).
+    private var moonOrbitBuffer: MTLBuffer?
+    private var moonOrbitCount = 0
+    private var moonOrbitBuilt: (gmst: Double, date: Date) = (-1, .distantPast)
     private(set) var texturesReady = false
 
     // Render targets
@@ -241,6 +247,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         earthPSO = try pipeline("sphere_vertex", "earth_fragment", blend: .opaque)
         earthCutPSO = try pipeline("sphere_vertex", "earth_cutaway_fragment", blend: .opaque)
         cutFacePSO = try pipeline("cutface_vertex", "cutface_fragment", blend: .opaque)
+        moonPSO = try pipeline("moon_vertex", "moon_fragment", blend: .opaque)
         atmospherePSO = try pipeline("sphere_vertex", "atmosphere_fragment", blend: .additive)
         auroraPSO = try pipeline("sphere_vertex", "aurora_fragment", blend: .additive)
         cloudPSO = try pipeline("sphere_vertex", "cloud_fragment", blend: .premultiplied)
@@ -327,9 +334,11 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             let milkyWay = url("milkyway.jpg").flatMap {
                 MetalResources.loadTexture(url: $0, kind: .colorSRGB, device: device, queue: queue, maxWidth: maxDay / 2, mipmapped: false)
             }
+            let moon = url("moon.jpg").flatMap { MetalResources.loadTexture(url: $0, kind: .colorSRGB, device: device, queue: queue) }
             let atlas = await MainActor.run { MetalResources.iconAtlas(device: device, queue: queue).map(SendableTexture.init) }
             let pack = (day.map(SendableTexture.init), small.map(SendableTexture.init), clouds.map(SendableTexture.init),
-                        water.map(SendableTexture.init), normal.map(SendableTexture.init), atlas, milkyWay.map(SendableTexture.init))
+                        water.map(SendableTexture.init), normal.map(SendableTexture.init), atlas, milkyWay.map(SendableTexture.init),
+                        moon.map(SendableTexture.init))
             await MainActor.run { [weak self] in
                 guard let self else { return }
                 self.dayTex = pack.0?.texture
@@ -339,6 +348,7 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
                 self.normalTex = pack.4?.texture
                 self.iconAtlas = pack.5?.texture
                 self.milkyWayTex = pack.6?.texture
+                self.moonTex = pack.7?.texture
                 self.texturesReady = self.dayTex != nil
             }
         }
@@ -437,10 +447,20 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         let projM = Self.perspective(fovY: Self.fovY, aspect: aspect, near: 0.01, far: 300)
         viewProj = projM * viewM
         eye = SIMD3<Float>(basis.eye)
-        controller.projection = GlobeProjection(viewProj: viewProj, eye: eye, viewSize: viewSizePoints)
 
         let elapsed = Float(now - startTime)
         let gmst = Astro.gmst(date)
+
+        // The Moon at its real place (render frame, Earth radii), turned so its near side faces us.
+        let moonEq = Astro.moon(date).eq
+        let moonDir = GeoPoint(lat: moonEq.dec / Astro.deg, lon: Geo.normalizeLon((moonEq.ra - gmst) / Astro.deg)).unitVector
+        let moonCenter = moonDir * moonEq.distance
+        var moon = MoonUniforms()
+        moon.model = Self.moonModel(center: moonCenter)
+        // Earth's phase seen from the Moon: nearly full around new Moon, when earthshine is brightest.
+        moon.earthshine = Float(0.035 * (1 + simd_dot(moonDir, SIMD3<Double>(sunDir))) / 2)
+        controller.projection = GlobeProjection(viewProj: viewProj, eye: eye, viewSize: viewSizePoints, moon: SIMD3<Float>(moonCenter))
+        updateMoonOrbit(date: date, gmst: gmst)
         var u = FrameUniforms()
         u.viewProj = viewProj
         u.view = viewM
@@ -571,6 +591,22 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             enc.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 96 * 3, instanceCount: 2)
         }
 
+        // The Moon, to scale at its real distance.
+        if let mesh = shellMesh, let moonTex {
+            enc.setRenderPipelineState(moonPSO)
+            enc.setDepthStencilState(depthWrite)
+            enc.setCullMode(.back)
+            enc.setVertexBuffer(mesh.vertices, offset: 0, index: 0)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 1)
+            enc.setVertexBytes(&moon, length: MemoryLayout<MoonUniforms>.stride, index: 2)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentBytes(&moon, length: MemoryLayout<MoonUniforms>.stride, index: 1)
+            enc.setFragmentTexture(moonTex, index: 0)
+            enc.setFragmentSamplerState(surfaceSampler, index: 0)
+            enc.drawIndexedPrimitives(type: .triangle, indexCount: mesh.indexCount, indexType: .uint32, indexBuffer: mesh.indices, indexBufferOffset: 0)
+            enc.setCullMode(.none)
+        }
+
         // The Milky Way fills the sky the Earth leaves uncovered (drawn after it so hidden pixels are skipped).
         if let milkyWayPSO, let milkyWayTex, u.milkyWay > 0 {
             enc.setRenderPipelineState(milkyWayPSO)
@@ -690,6 +726,20 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
             enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
             enc.setFragmentBytes(&style, length: MemoryLayout<PathStyle>.stride, index: 1)
             enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: issPathCount - 1)
+        }
+
+        // The Moon's orbit appears as you pull back past a few dozen Earth radii.
+        let orbitFade = smoothstep(10, 30, Float(pose.distance))
+        if orbitFade > 0.01, let moonOrbitBuffer, moonOrbitCount > 1 {
+            var style = PathStyle(color: SIMD4(0.72, 0.80, 0.96, 0.55 * orbitFade), widthPx: 1.0, glow: 0.6, dash: 0, pad: 0)
+            enc.setRenderPipelineState(pathPSO)
+            enc.setDepthStencilState(depthTest)
+            enc.setVertexBuffer(moonOrbitBuffer, offset: 0, index: 0)
+            enc.setVertexBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 1)
+            enc.setVertexBytes(&style, length: MemoryLayout<PathStyle>.stride, index: 2)
+            enc.setFragmentBytes(&u, length: MemoryLayout<FrameUniforms>.stride, index: 0)
+            enc.setFragmentBytes(&style, length: MemoryLayout<PathStyle>.stride, index: 1)
+            enc.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: moonOrbitCount - 1)
         }
 
         if let ringBuffer, ringCount > 0 {
@@ -1141,8 +1191,44 @@ final class GlobeRenderer: NSObject, MTKViewDelegate {
         controller.anchor.visible = true
     }
 
+    /// Mean lunar radius in Earth radii (1,737.4 km / 6,371 km).
+    static let moonRadius = 0.2727
+
+    /// The unit sphere turned so the Moon's near side (selenographic 0°, 0°) faces Earth with its
+    /// north up, scaled to size and moved to its place.
+    static func moonModel(center: SIMD3<Double>) -> simd_float4x4 {
+        let toEarth = simd_normalize(-center)
+        let up = SIMD3<Double>(0, 1, 0)
+        let north = simd_normalize(up - simd_dot(up, toEarth) * toEarth)
+        let east = simd_cross(north, toEarth)
+        func column(_ v: SIMD3<Double>) -> SIMD4<Float> { SIMD4(Float(v.x * moonRadius), Float(v.y * moonRadius), Float(v.z * moonRadius), 0) }
+        return simd_float4x4(columns: (column(east), column(north), column(toEarth), SIMD4(Float(center.x), Float(center.y), Float(center.z), 1)))
+    }
+
+    /// The Moon's path over one orbit around now, hung among the stars (ECI) and turned into the
+    /// render frame; brightest at the Moon itself, fading along the trail both ways.
+    private func updateMoonOrbit(date: Date, gmst: Double) {
+        if moonOrbitBuffer != nil, abs(gmst - moonOrbitBuilt.gmst) < 0.002, abs(date.timeIntervalSince(moonOrbitBuilt.date)) < 1800 { return }
+        moonOrbitBuilt = (gmst, date)
+        let rotation = Self.starRotation(gmst: gmst)
+        let steps = 326   // 27.2 days in 2-hour steps: one sidereal month
+        var verts: [PathVertex] = []
+        verts.reserveCapacity(steps + 1)
+        for k in 0...steps {
+            let offset = Double(k - steps / 2)
+            let eq = Astro.moon(date.addingTimeInterval(offset * 7200)).eq
+            let eci = SIMD4<Float>(Float(cos(eq.dec) * cos(eq.ra) * eq.distance), Float(cos(eq.dec) * sin(eq.ra) * eq.distance),
+                                   Float(sin(eq.dec) * eq.distance), 0)
+            let p = rotation * eci
+            let fade = 1 - abs(offset) / Double(steps / 2)
+            verts.append(PathVertex(position: SIMD3(p.x, p.y, p.z), alpha: Float(0.25 + 0.75 * fade * fade)))
+        }
+        moonOrbitBuffer = device.makeBuffer(bytes: verts, length: MemoryLayout<PathVertex>.stride * verts.count, options: .storageModeShared)
+        moonOrbitCount = verts.count
+    }
+
     private func sunScreenInfo(sunDir: SIMD3<Float>, aspect: Double) -> (ndc: SIMD2<Float>, visible: Float) {
-        let p = sunDir * 80
+        let p = eye + simd_normalize(sunDir) * 250
         let clip = viewProj * SIMD4(p, 1)
         guard clip.w > 0 else { return (.zero, 0) }
         let ndc = SIMD2(clip.x, clip.y) / clip.w
