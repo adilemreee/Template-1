@@ -67,3 +67,8 @@ nonisolated enum Geo {
         return l
     }
 }
+
+/// Locale-aware whole percentage ("12%" in English, "%12" in Turkish).
+nonisolated func percentString(_ value: Int) -> String {
+    (Double(value) / 100).formatted(.percent.precision(.fractionLength(0)))
+}

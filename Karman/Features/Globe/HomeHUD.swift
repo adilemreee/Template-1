@@ -159,7 +159,7 @@ private struct StatusChips: View {
                         }
                     }
                     if let chance = model.planet.auroraChance(at: model.location.point), chance > 0 {
-                        Chip(icon: "light.beacon.max.fill", tint: Theme.aurora, title: "\(chance)%", subtitle: String(localized: "aurora here")) {
+                        Chip(icon: "light.beacon.max.fill", tint: Theme.aurora, title: percentString(chance), subtitle: String(localized: "aurora here")) {
                             model.panel = .space
                         }
                     }

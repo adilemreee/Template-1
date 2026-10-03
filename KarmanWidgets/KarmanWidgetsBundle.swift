@@ -107,7 +107,7 @@ struct EarthNowView: View {
                 HStack(spacing: 12) {
                     stat("\(entry.state.quakes24h)", "quakes 24h", WTheme.quake)
                     stat(entry.state.kp.formatted(.number.precision(.fractionLength(1))), "Kp", WTheme.kp(entry.state.kp))
-                    if let a = entry.state.auroraChance { stat("\(a)%", "aurora", WTheme.aurora) }
+                    if let a = entry.state.auroraChance { stat(percentString(a), "aurora", WTheme.aurora) }
                 }
             }
             .padding(.vertical, 12)
@@ -131,7 +131,7 @@ struct EarthNowView: View {
                 stat("\(entry.state.quakes24h)", "quakes 24h", WTheme.quake)
                 if let q = entry.state.topQuake { stat("M\(q.mag.formatted(.number.precision(.fractionLength(1))))", "strongest", WTheme.quake) }
                 stat(entry.state.kp.formatted(.number.precision(.fractionLength(1))), "Kp index", WTheme.kp(entry.state.kp))
-                if let a = entry.state.auroraChance { stat("\(a)%", "aurora", WTheme.aurora) }
+                if let a = entry.state.auroraChance { stat(percentString(a), "aurora", WTheme.aurora) }
             }
             if let pass = entry.state.nextPass {
                 HStack(spacing: 6) {
@@ -188,12 +188,12 @@ struct AuroraView: View {
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 2) {
                 Text("AURORA").font(.system(size: 11, weight: .bold).width(.expanded))
-                Text("Kp \(kp.formatted(.number.precision(.fractionLength(1)))) · \(entry.state.auroraChance.map { "\($0)%" } ?? "—") here")
+                Text("Kp \(kp.formatted(.number.precision(.fractionLength(1)))) · \(entry.state.auroraChance.map { percentString($0) } ?? "—") here")
                     .font(.system(size: 13, weight: .semibold))
                 Gauge(value: min(kp, 9), in: 0...9) { EmptyView() }.gaugeStyle(.accessoryLinearCapacity)
             }
         case .accessoryInline:
-            Text("Kp \(kp.formatted(.number.precision(.fractionLength(1)))) · aurora \(entry.state.auroraChance.map { "\($0)%" } ?? "—")")
+            Text("Kp \(kp.formatted(.number.precision(.fractionLength(1)))) · aurora \(entry.state.auroraChance.map { percentString($0) } ?? "—")")
         default:
             VStack(alignment: .leading, spacing: 6) {
                 Text("AURORA").eyebrowStyle(WTheme.aurora)

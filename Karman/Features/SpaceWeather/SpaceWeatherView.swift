@@ -219,7 +219,7 @@ struct AuroraChanceCard: View {
         Card {
             Text("AURORA HERE").eyebrow(Theme.aurora)
             Spacer(minLength: 4)
-            Text(chance.map { "\($0)%" } ?? "—")
+            Text(chance.map { percentString($0) } ?? "—")
                 .font(.display(40, weight: .bold))
                 .foregroundStyle(LinearGradient(colors: [Theme.aurora, Theme.ice], startPoint: .top, endPoint: .bottom))
                 .shadow(color: Theme.aurora.opacity(glow ? 0.7 : 0.2), radius: glow ? 16 : 6)
