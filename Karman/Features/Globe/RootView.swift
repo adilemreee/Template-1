@@ -89,6 +89,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
+                ReviewPrompter.noteActiveDay()
                 model.planet.start()
                 model.satellites.start()
                 Task { await NotificationService.shared.refreshStatus() }

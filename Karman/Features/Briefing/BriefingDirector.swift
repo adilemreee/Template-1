@@ -78,6 +78,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
     }
 
     func stop() {
+        let finished = phase == .outro
         advanceTask?.cancel()
         progressTask?.cancel()
         synth.stopSpeaking(at: .immediate)
@@ -95,6 +96,12 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
         stages = []
         index = 0
         spokenRange = nil
+        if finished, model.screenshotScene == nil {
+            Task {
+                try? await Task.sleep(for: .seconds(1.8))
+                ReviewPrompter.askIfAppropriate()
+            }
+        }
     }
 
     func togglePause() {
@@ -202,6 +209,7 @@ final class BriefingDirector: NSObject, AVSpeechSynthesizerDelegate {
 
     private func outro() {
         guard let model else { return }
+        ReviewPrompter.briefingCompleted()
         withAnimation(.easeInOut(duration: 0.8)) { phase = .outro }
         model.selection = nil
         model.globe.drift = (0, 0)
