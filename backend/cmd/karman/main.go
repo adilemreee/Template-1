@@ -105,7 +105,7 @@ func main() {
 
 	askLimit, _ := strconv.Atoi(env("KARMAN_ASK_DAILY_LIMIT", "25"))
 	api := &httpapi.Server{Log: log, Hub: hub, AI: aiSvc, Auth: verifier, Store: st, AskLimit: askLimit, PushActive: apns != nil, Version: version,
-		SupportEmail: env("KARMAN_SUPPORT_EMAIL", "")}
+		SupportEmail: env("KARMAN_SUPPORT_EMAIL", ""), SiteDir: env("KARMAN_SITE_DIR", "")}
 
 	srv := &http.Server{
 		Addr:              env("KARMAN_ADDR", ":8443"),

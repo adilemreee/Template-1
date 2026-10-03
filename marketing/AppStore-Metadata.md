@@ -13,6 +13,9 @@ All fields are within App Store Connect limits (checked). Screenshots: `marketin
 | Bundle ID | `com.adilemre.karman` (widgets: `com.adilemre.karman.widgets`) |
 | SKU | `karman-ios-1` |
 | Copyright | © 2026 Adil Emre |
+| Privacy Policy URL | `https://<your-domain>/karman/privacy` (see README → nginx snippet) |
+| Support URL | `https://<your-domain>/karman/support` |
+| Marketing URL (optional) | `https://<your-domain>/karman/` — the landing site in `marketing/site/` |
 
 Why paid up front: the Top Paid chart only ranks paid downloads, and "one purchase, no subscription" is itself a selling point in 2026. AI cost is bounded: briefings are generated once per language per 3 hours and shared by everyone; Ask Kármán has a daily per-buyer quota (default 25, `KARMAN_ASK_DAILY_LIMIT`).
 

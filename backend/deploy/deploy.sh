@@ -36,6 +36,11 @@ mkdir -p "$BACKEND/dist"
 echo "==> Uploading"
 "${SSH[@]}" 'mkdir -p /opt/karman/bin /opt/karman/data /opt/karman/tls'
 "${SCP[@]}" "$BACKEND/dist/karman" "$TARGET:/opt/karman/bin/karman.new"
+# The product website (landing page, privacy and support pages) served at / by the API.
+SITE="$(cd "$BACKEND/../marketing/site" 2>/dev/null && pwd || true)"
+if [ -n "$SITE" ] && [ -f "$SITE/index.html" ]; then
+  COPYFILE_DISABLE=1 tar --no-xattrs -C "$SITE" -czf - . | "${SSH[@]}" 'rm -rf /opt/karman/site.new && mkdir -p /opt/karman/site.new && tar --warning=no-unknown-keyword -xzf - -C /opt/karman/site.new'
+fi
 # Use the certificate whose pin is compiled into the app, if it was generated locally.
 if [ -f "$HERE/certs/tls.crt" ] && [ -f "$HERE/certs/tls.key" ]; then
   "${SSH[@]}" 'test -f /opt/karman/tls/tls.crt' || "${SCP[@]}" "$HERE/certs/tls.crt" "$HERE/certs/tls.key" "$HERE/certs/pin.txt" "$TARGET:/opt/karman/tls/"
@@ -47,6 +52,7 @@ set -euo pipefail
 id karman >/dev/null 2>&1 || useradd --system --home /opt/karman --shell /usr/sbin/nologin karman
 mv /opt/karman/bin/karman.new /opt/karman/bin/karman
 chmod 755 /opt/karman/bin/karman
+if [ -d /opt/karman/site.new ]; then rm -rf /opt/karman/site && mv /opt/karman/site.new /opt/karman/site; fi
 if [ ! -f /opt/karman/tls/tls.crt ]; then
   /opt/karman/bin/karman gencert -host "$HOST" -out /opt/karman/tls | tee /opt/karman/tls/pin.txt
 fi
@@ -70,8 +76,10 @@ APNS_TEAM_ID=
 KARMAN_APPLE_APP_ID=
 # Optional: shown on /support
 KARMAN_SUPPORT_EMAIL=
+KARMAN_SITE_DIR=/opt/karman/site
 ENV
 fi
+grep -q '^KARMAN_SITE_DIR=' /opt/karman/karman.env || echo 'KARMAN_SITE_DIR=/opt/karman/site' >> /opt/karman/karman.env
 chown -R karman:karman /opt/karman
 chmod 600 /opt/karman/karman.env /opt/karman/tls/tls.key
 cat > /etc/systemd/system/karman.service <<UNIT

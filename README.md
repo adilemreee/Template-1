@@ -128,6 +128,7 @@ Yapılandırma: `/opt/karman/karman.env` (değiştirdikten sonra `systemctl rest
 | `KARMAN_APPLE_APP_ID` | App Store'daki sayısal uygulama kimliği (AppTransaction doğrulamasını sıkılaştırır). |
 | `KARMAN_ALLOW_SANDBOX` | TestFlight/inceleme satın almalarını kabul et (varsayılan `true`). |
 | `KARMAN_SUPPORT_EMAIL` | İsteğe bağlı; `/support` sayfasında iletişim adresi olarak gösterilir. |
+| `KARMAN_SITE_DIR` | Tanıtım sitesinin klasörü (betik `/opt/karman/site` olarak ayarlar); `/` adresinde sunulur. |
 
 Uç noktalar: `/healthz`, `/privacy`, `/support`, `/v1/snapshot`, `/v1/satellites/{stations|visual|starlink}`, `/v1/imagery/latest`, `/v1/sun/{304|171|195}`, `/v1/briefing?lang=tr`, `/v1/ask` (SSE), `/v1/auth/app-transaction`, `/v1/devices`.
 
@@ -144,14 +145,16 @@ cd backend && go run ./cmd/karman
 
 App Store Connect, **Privacy Policy URL** ve **Support URL** için güvenilir sertifikalı herkese açık HTTPS adresleri ister. Sayfalar hazır (EN + TR): sunucuda `/privacy` ve `/support`, statik kopyaları `marketing/site/` içinde. İki kolay yol:
 
-1. **Kendi alan adın (önerilen):** Sunucundaki nginx'e (bunu sen eklersin; kurulum betiği nginx'e dokunmaz) mevcut HTTPS `server` bloğuna şunu ekle ve `nginx -s reload` yap:
+1. **Kendi alan adın (önerilen):** Kurulum betiği tanıtım sitesini de sunucuya yükler (`/opt/karman/site`, `KARMAN_SITE_DIR`). Sunucundaki nginx'e (bunu sen eklersin; betik nginx'e dokunmaz) mevcut HTTPS `server` bloğuna şunu ekle ve `nginx -s reload` yap:
    ```nginx
    location /karman/ {
        proxy_pass https://127.0.0.1:8443/;
        proxy_ssl_verify off;
+       proxy_set_header X-Real-IP $remote_addr;
+       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
    }
    ```
-   Adresler: `https://<alan-adın>/karman/privacy` ve `https://<alan-adın>/karman/support`.
+   Adresler: tanıtım `https://<alan-adın>/karman/`, gizlilik `https://<alan-adın>/karman/privacy`, destek `https://<alan-adın>/karman/support`. (API, yalnızca yerel vekilden gelen `X-Real-IP` başlığına güvenir; hız sınırı ziyaretçi başına işler.)
 2. **Statik barındırma (GitHub Pages vb.):** `marketing/site/` klasörünü yayınla. İletişim adresiyle yeniden üretmek için:
    ```bash
    cd backend && go run ./cmd/karman site -out ../marketing/site -support-email destek@ornek.com

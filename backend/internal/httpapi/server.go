@@ -30,6 +30,8 @@ type Server struct {
 	Version    string
 	// SupportEmail is shown on /support when set (KARMAN_SUPPORT_EMAIL).
 	SupportEmail string
+	// SiteDir, when set, serves the static product website at / (KARMAN_SITE_DIR).
+	SiteDir string
 
 	limiter     *ipLimiter
 	supportOnce sync.Once
@@ -53,6 +55,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/ask", s.ask)
 	mux.HandleFunc("POST /v1/devices", s.registerDevice)
 	mux.HandleFunc("DELETE /v1/devices/{token}", s.deleteDevice)
+	if s.SiteDir != "" {
+		mux.Handle("GET /", siteHandler(s.SiteDir))
+	}
 	return s.middleware(mux)
 }
 
@@ -93,7 +98,20 @@ func (r *statusRecorder) Flush() {
 func clientIP(r *http.Request) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		return r.RemoteAddr
+		host = r.RemoteAddr
+	}
+	// Behind a reverse proxy on the same machine (nginx serving the website), use the address
+	// it forwards; the header is never trusted from anyone else.
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		if real := strings.TrimSpace(r.Header.Get("X-Real-IP")); net.ParseIP(real) != nil {
+			return real
+		}
+		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			parts := strings.Split(xff, ",")
+			if last := strings.TrimSpace(parts[len(parts)-1]); net.ParseIP(last) != nil {
+				return last
+			}
+		}
 	}
 	return host
 }
