@@ -33,11 +33,11 @@ Live winds sweep the globe, seismic waves race from every quake and the Sky Lens
 **Keywords (93/100):**
 `earthquake,hurricane,wind,weather,iss,satellite,space weather,stars,planets,aurora,nasa,globe`
 
-**Description (2596/4000):**
+**Description (3113/4000):**
 
 See the whole planet, live — the way astronauts do.
 
-Kármán renders a cinematic, real-time Earth: city lights on the night side, a glowing atmosphere, real relief and clouds, the Sun rising over the limb. On top of it, everything happening right now: earthquakes pulsing as they strike, hurricanes with their tracks, wildfires, volcanoes, the aurora from NOAA's live model, launches, and 11,000 satellites on their real orbits.
+Kármán renders a cinematic, real-time Earth: city lights on the night side, a glowing atmosphere, real relief, 3D clouds that blush pink at sunset, the Moon at its true place and phase, and the Milky Way behind it all. On top of it, everything happening right now: earthquakes pulsing as they strike, hurricanes with their tracks, wildfires, volcanoes, the aurora from NOAA's live model, launches, and 11,000 satellites on their real orbits.
 
 LIVE WEATHER, ALIVE
 Thousands of glowing particles ride the real winds of NOAA's global forecast model. Paint the planet with temperature or rain, then press play to watch the next 24 hours unfold, daylight and all. Tap anywhere on Earth for its weather, local time and a one-day outlook.
@@ -54,8 +54,14 @@ Point your iPhone at the sky to name every bright star, planet, constellation an
 TONIGHT'S SKY
 An hour-by-hour stargazing score from cloud cover, darkness and moonlight; which planets are up and when; upcoming meteor showers with real rates for your location; space station passes on a sky dome; moonrise and twilight.
 
+INSIDE THE EARTH
+Slice the planet open like an orange: crust, a slowly churning mantle, the liquid outer core and a core as hot as the Sun's surface, each named with its depth and temperature.
+
+THE SOLAR SYSTEM
+All eight planets on their real orbits right now, with a time machine ten years either way. Tap one to see how far away it is, how long its light takes to reach you, and whether you can see it tonight.
+
 RIDE WITH THE ISS
-Fly with the International Space Station 400 km up as city lights, aurora and airglow slide by.
+Fly with the International Space Station 400 km up as city lights, aurora and airglow slide by. Or pull back past the Moon's orbit.
 
 PLANET BRIEFING
 Press play and an AI narrator flies you around the globe through today's biggest stories.
@@ -79,7 +85,7 @@ No subscriptions. No ads. No accounts. No tracking. Your precise location never 
 
 Data: USGS, NOAA, NASA, MET Norway, CelesTrak, The Space Devs, PB2002 plate model.
 
-**What's New (1.1, 724/4000):**
+**What's New (1.1, 927/4000):**
 The biggest update yet.
 
 • Live weather: wind particles, temperature and rain maps, and a 24-hour forecast player
@@ -91,6 +97,9 @@ The biggest update yet.
 • Ask Kármán flies the globe to its answers; ask about anything from its card
 • Watched places for family and second homes
 • Ambient nightstand globe
+• Inside the Earth: slice the planet open to its core
+• The Solar System: every planet on its real orbit, with a time machine
+• The Milky Way, 3D clouds lit by the sunset, and the Moon in its true phase
 • New Siri shortcuts
 
 ---

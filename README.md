@@ -29,7 +29,12 @@
 
 | | |
 |---|---|
-| **Canlı 3D Dünya (Metal)** | Gece şehir ışıkları (NASA Black Marble), 8K gündüz dokusu (Blue Marble), GEBCO rölyef gölgelemesi, sürüklenen bulutlar ve bulut gölgeleri, okyanus güneş parlaması, analitik atmosfer saçılması, terminatörde alacakaranlık bandı, gerçek yıldız haritası (Yale Bright Star Catalogue, GMST ile doğru konumda), güneş + lens flare, iki katmanlı bloom ve ACES ton eşleme. |
+| **Canlı 3D Dünya (Metal)** | Gece şehir ışıkları (NASA Black Marble), 8K gündüz dokusu (Blue Marble), GEBCO rölyef gölgelemesi, okyanus güneş parlaması, analitik atmosfer saçılması, terminatörde alacakaranlık bandı, gerçek yıldız haritası (Yale Bright Star Catalogue, GMST ile doğru konumda), güneş + lens flare, iki katmanlı bloom ve ACES ton eşleme. |
+| **Samanyolu** | Yıldızların arkasında, galaktik koordinatlarda gerçek yerinde duran ve gökyüzüyle birlikte dönen Samanyolu: galaksi merkezi, toz şeritleri ve Büyük Yarık, Kömür Çuvalı, yıldız bulutları, salma bulutsuları, Macellan Bulutları ve Andromeda. Üçüncü taraf görsel kullanılmadan prosedürel olarak boyandı (`tools/build_milkyway.py`). |
+| **3B bulutlar** | Bulutlar zeminden ayrı bir kabukta: eğimlerinden kabartma ışığı alır, Güneş batarken altın sonra pembe renge döner ve zemin karardıktan sonra da bir süre parlar (yörüngeden gün batımı); gölgeleri Güneş ışınının doğrultusunda zemine düşer, kenara doğru kalınlaşır. |
+| **Dünya'nın İçi** | Gezegen portakal dilimi gibi kesilir: kabuk, yavaşça konveksiyon yapan manto, çalkalanan sıvı dış çekirdek ve beyaz-sıcak iç çekirdek gerçek (PREM) yarıçaplarında, animasyonlu ve parıltılı. Katman adları, derinlik ve sıcaklıklar çizgilerle kesite bağlı; "senin tam altındaki karşı nokta" dahil dönen bilgi kartları. |
+| **Ay ve kozmik zoom** | Ay gerçek boyutu, uzaklığı ve evresiyle sahnede: yakın yüzü Dünya'ya dönük, dolunayda kenarına kadar eşit parlak (Lommel-Seeliger), gece tarafında Dünya ışığı, ay tutulmasında bakır-kırmızı. 200 Dünya yarıçapına kadar uzaklaşıp Ay'ın yörüngesini görebilirsin. |
+| **Güneş Sistemi** | Sekiz gezegen gerçek yörüngelerinde (JPL elemanları; uzaklıklar sığması için sıkıştırılmış): yörünge izleri, Satürn'ün gerçek eğimdeki halkaları, kendi Kepler saatinde dönen asteroit kuşağı. ±10 yıl zaman makinesi (günden yıla hız), döndür/yakınlaştır; gezegene dokununca Güneş'e ve bize uzaklığı, ışığının kaç dakikada geldiği ve bu gece görünüp görünmediği. |
 | **Açılış sinematiği** | Gece tarafından başlayan, Güneş'in Dünya'nın kenarından doğduğu "yörüngeden gün doğumu" sahnesi; harf harf beliren başlık. |
 | **Canlı olaylar** | USGS depremleri (nabız gibi atan dalga halkaları), NASA EONET kasırga/tayfun rotaları (dönen ikonlar), orman yangınları (közler), volkanlar, buzdağları, roket fırlatmaları, NOAA OVATION modeliyle canlı aurora perdeleri. |
 | **Uydular** | ISS, Tiangong ve parlak uydular + isteğe bağlı **11.000+ Starlink sürüsü**; tamamı cihazda SGP4 ile (Python referans uygulamasıyla birebir doğrulanmış) gerçek zamanlı hesaplanır, Dünya'nın gölgesindekiler sönükleşir. |
@@ -56,7 +61,7 @@
 | **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu (ISS + Tiangong); kilit ekranı widget'ları. |
 | **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım; fırlatma ertelenirse hatırlatıcı ve geri sayım kendini günceller. |
 | **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
-| **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü", "Sky Lens'i aç", "Bir yılın depremleri", "Rüzgâr tahminini oynat", "Ambient küre" — Eylem Düğmesi'ne de atanabilir. |
+| **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü", "Sky Lens'i aç", "Bir yılın depremleri", "Rüzgâr tahminini oynat", "Ambient küre", "Dünya'nın içini göster"; Kestirmeler uygulamasında "Güneş Sistemini göster" — Eylem Düğmesi'ne de atanabilir. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
 | **Gizlilik** | Hesap yok, reklam yok, takip yok. Hassas konum cihazdan çıkmaz (sunucuya ~50 km yuvarlanmış gider). |
 | **Dil** | Yalnızca İngilizce (arayüz, Siri, widget'lar, brifing ve yanıtlar). Bölge biçimi farklı cihazlarda sayı ve tarih biçimi de İngilizceye sabitlenir. |
@@ -88,8 +93,8 @@ iOS (SwiftUI + Metal, iOS 26+)          Kármán API (Go, tek binary)           
 Karman/                 iOS uygulaması
   App/                  giriş noktası, AppModel
   Render/               Metal renderer, kamera, shader'lar (Shaders/Globe.metal)
-  Features/             Globe HUD, Briefing, SpaceWeather, Sky, SkyLens, Weather, Seismic, Replay, Ambient, Ask, Events, Settings
-  Core/                 servisler (veri, hava, konum, uydu motoru, bildirim, haptik, AI), Astro (gezegenler, meteorlar), Seismic
+  Features/             Globe HUD, Briefing, SpaceWeather, Sky, SkyLens, Weather, Seismic, Replay, Ambient, Ask, Events, Settings, Inside (Dünya'nın içi), Orrery (Güneş Sistemi), Cosmos
+  Core/                 servisler (veri, hava, konum, uydu motoru, bildirim, haptik, AI), Astro (gezegenler, Güneş Sistemi, meteorlar), Seismic
   Resources/            NASA dokuları, yıldız kataloğu, Data/ (levha sınırları, takımyıldızlar), ikon
 KarmanWidgets/          WidgetKit eklentisi
 Shared/                 uygulama + widget ortak kod (modeller, API istemcisi, SGP4, astronomi)
@@ -226,10 +231,10 @@ cd backend && go test ./...
 xcodebuild test -project Karman.xcodeproj -scheme Karman -destination 'platform=iOS Simulator,name=iPhone 18 Pro Max'
 ```
 - Go: Claude istek şekli (model, effort, structured output, fallback başlığı), Ask araç döngüsü (show_on_globe), sahne doğrulama, SSE akışı, şablon brifingler, GFS ayrıştırma/kodlama, izlenen yer uyarıları.
-- iOS: SGP4'ün Python referans uygulamasıyla birebir eşleşmesi, güneş/ay konumları, gün batımı, aurora görünürlük modeli, GFS ızgara çözme ve zaman enterpolasyonu, IASP91 seyahat süreleri ve MMI, levha sınırı sorguları, gezegen konumları (JPL Horizons'a karşı), meteor yağmuru tarihleri, yıldız gözlem skoru, Sky Lens geometrisi.
+- iOS: SGP4'ün Python referans uygulamasıyla birebir eşleşmesi, güneş/ay konumları, gün batımı, aurora görünürlük modeli, GFS ızgara çözme ve zaman enterpolasyonu, IASP91 seyahat süreleri ve MMI, levha sınırı sorguları, gezegen konumları (JPL Horizons'a karşı), Güneş Sistemi (Dünya'nın Güneş'e karşıt boylamı, Uranüs/Neptün, kapalı yörüngeler, ışık süreleri), meteor yağmuru tarihleri, yıldız gözlem skoru, Sky Lens geometrisi.
 
 ## Veri kaynakları ve atıflar
 
-USGS Earthquake Hazards Program (+ FDSN Event Service) · NOAA Space Weather Prediction Center (Kp, OVATION, RTSW, GOES X-ray, SUVI) · NOAA GFS (PacIOOS ERDDAP üzerinden) · MET Norway Locationforecast (CC BY 4.0) · NASA EONET · NASA GIBS/EOSDIS (VIIRS) · NASA Visible Earth (Blue Marble NG, Black Marble 2016) · GEBCO · NASA SVS CGI Moon Kit · Yale Bright Star Catalogue (NASA ADC) · d3-celestial takımyıldız çizgileri ve yıldız adları (© Olaf Frohn, BSD-3-Clause; `tools/build_sky.py`) · PB2002 levha sınırları (P. Bird 2003, ODC-By 1.0; `tools/build_plates.py`) · JPL yaklaşık gezegen elemanları (E. M. Standish) · IASP91 · IMO meteor yağmuru takvimi · CelesTrak · The Space Devs (Launch Library 2) · NASA JPL/CNEOS NeoWs · Anthropic Claude.
+USGS Earthquake Hazards Program (+ FDSN Event Service) · NOAA Space Weather Prediction Center (Kp, OVATION, RTSW, GOES X-ray, SUVI) · NOAA GFS (PacIOOS ERDDAP üzerinden) · MET Norway Locationforecast (CC BY 4.0) · NASA EONET · NASA GIBS/EOSDIS (VIIRS) · NASA Visible Earth (Blue Marble NG, Black Marble 2016) · GEBCO · NASA SVS CGI Moon Kit · Yale Bright Star Catalogue (NASA ADC) · d3-celestial takımyıldız çizgileri ve yıldız adları (© Olaf Frohn, BSD-3-Clause; `tools/build_sky.py`) · PB2002 levha sınırları (P. Bird 2003, ODC-By 1.0; `tools/build_plates.py`) · JPL yaklaşık gezegen elemanları (E. M. Standish) · Samanyolu dokusu prosedürel, Kármán (`tools/build_milkyway.py`) · Dünya'nın iç yapısı: PREM (Dziewonski & Anderson 1981) · IASP91 · IMO meteor yağmuru takvimi · CelesTrak · The Space Devs (Launch Library 2) · NASA JPL/CNEOS NeoWs · Anthropic Claude.
 
 Görseller ve veriler kamu malıdır (NASA/NOAA/USGS) ya da kaynaklarının kullanım koşullarına uygundur; uygulama içinde Ayarlar → Veri kaynakları ekranında atıflar yer alır.

@@ -264,6 +264,8 @@ struct CreditsView: View {
         ("P. Bird (2003), PB2002", "Tectonic plate boundaries (ODC-By 1.0, via H. Ahlenius / Nordpil)"),
         ("JPL Solar System Dynamics", "Approximate planetary orbital elements (E. M. Standish)"),
         ("IASP91 Earth model", "Seismic wave travel times"),
+        ("PREM, Dziewonski & Anderson (1981)", "The layers of the Inside the Earth view"),
+        ("Kármán", "The Milky Way panorama, painted procedurally"),
         ("International Meteor Organization", "Meteor shower calendar"),
         ("d3-celestial, Olaf Frohn", "Constellation figures and star names (BSD-3-Clause)"),
         ("CelesTrak", "Satellite orbital elements"),
