@@ -7,6 +7,7 @@ struct KarmanWidgetsBundle: WidgetBundle {
         EarthNowWidget()
         AuroraWidget()
         StationWidget()
+        LaunchLiveActivity()
     }
 }
 
@@ -17,6 +18,7 @@ enum WTheme {
     static let aurora = Color(red: 0.24, green: 1.0, blue: 0.63)
     static let violet = Color(red: 0.72, green: 0.45, blue: 1.0)
     static let quake = Color(red: 1.0, green: 0.42, blue: 0.22)
+    static let launchTint = Color(red: 1.0, green: 0.86, blue: 0.62)
     static let secondary = Color.white.opacity(0.62)
     static let background = LinearGradient(colors: [Color(red: 0.02, green: 0.03, blue: 0.07), Color(red: 0.0, green: 0.0, blue: 0.02)], startPoint: .top, endPoint: .bottom)
 

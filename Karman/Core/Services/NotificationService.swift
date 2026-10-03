@@ -1,3 +1,4 @@
+import ActivityKit
 import Foundation
 import Observation
 import UIKit
@@ -78,6 +79,17 @@ final class NotificationService {
         }
     }
 
+    /// Starts a Lock Screen / Dynamic Island countdown for launches within the next 8 hours.
+    func startLaunchActivity(_ launch: Launch) {
+        guard ActivityAuthorizationInfo().areActivitiesEnabled,
+              launch.net > Date(), launch.net.timeIntervalSinceNow < 8 * 3600,
+              !Activity<LaunchActivityAttributes>.activities.contains(where: { $0.attributes.mission == launch.missionName }) else { return }
+        let attributes = LaunchActivityAttributes(mission: launch.missionName, rocket: launch.rocket, provider: launch.provider, location: launch.location)
+        let state = LaunchActivityAttributes.ContentState(net: launch.net, status: launch.status)
+        _ = try? Activity.request(attributes: attributes,
+                                  content: ActivityContent(state: state, staleDate: launch.net.addingTimeInterval(1800)))
+    }
+
     func scheduleLaunchReminder(_ launch: Launch) async -> Bool {
         if !authorized { _ = await requestAuthorization() }
         guard authorized else { return false }
@@ -93,6 +105,7 @@ final class NotificationService {
         let req = UNNotificationRequest(identifier: "launch-\(launch.id)", content: content,
                                         trigger: UNCalendarNotificationTrigger(dateMatching: comps, repeats: false))
         try? await UNUserNotificationCenter.current().add(req)
+        startLaunchActivity(launch)
         return true
     }
 

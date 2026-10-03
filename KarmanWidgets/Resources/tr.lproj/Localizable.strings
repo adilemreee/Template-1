@@ -1,6 +1,7 @@
 "%@ %@ · %lld°" = "%1$@ %2$@ · %3$lld°";
 "%@ PASS" = "%@ GEÇİŞİ";
 "%@ visible %@ · %lld°" = "%1$@ görünür %2$@ · %3$lld°";
+"%@ · %@" = "%1$@ · %2$@";
 "%@ → %@ · %lld°" = "%1$@ → %2$@ · %3$lld°";
 "%@ → %@ · %lld° high" = "%1$@ → %2$@ · %3$lld° yükseklik";
 "%lld quakes · Kp %@" = "%1$lld deprem · Kp %2$@";
@@ -21,6 +22,7 @@
 "Kp %@ · aurora %@" = "Kp %1$@ · aurora %2$@";
 "Kp index" = "Kp endeksi";
 "KÁRMÁN · LIVE" = "KÁRMÁN · CANLI";
+"LIFTOFF" = "KALKIŞ";
 "LIVE" = "CANLI";
 "Last Quarter" = "Son Dördün";
 "M%@" = "M%@";

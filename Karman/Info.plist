@@ -44,6 +44,8 @@
 	<string>$(KARMAN_API_PIN)</string>
 	<key>KarmanDevToken</key>
 	<string>$(KARMAN_DEV_TOKEN)</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

@@ -51,6 +51,11 @@ enum ScreenshotDirector {
             model.globe.fly(to: CameraPose(lat: max(-30, min(40, sun.lat + 12)), lon: Geo.normalizeLon(sun.lon - 35), distance: 4.6, tilt: 0, heading: 0), duration: 2.5)
         case "iss":
             model.select(.satellite(25544))
+        case "liveactivity":
+            if var next = model.planet.upcomingLaunches.first {
+                next.net = Date().addingTimeInterval(2 * 3600 + 17 * 60)
+                NotificationService.shared.startLaunchActivity(next)
+            }
         default: break
         }
     }
