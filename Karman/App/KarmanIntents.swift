@@ -62,6 +62,42 @@ struct OpenTonightsSkyIntent: AppIntent {
     }
 }
 
+struct OpenSkyLensIntent: AppIntent {
+    static let title: LocalizedStringResource = "Open Sky Lens"
+    static let description = IntentDescription("Point your phone at the sky to name the stars, planets, constellations and space stations.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://lens")!)
+        return .result()
+    }
+}
+
+struct YearOfQuakesIntent: AppIntent {
+    static let title: LocalizedStringResource = "Watch a Year of Earthquakes"
+    static let description = IntentDescription("Plays the last 365 days of strong earthquakes in under a minute.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://year")!)
+        return .result()
+    }
+}
+
+struct WeatherForecastIntent: AppIntent {
+    static let title: LocalizedStringResource = "Play the Wind Forecast"
+    static let description = IntentDescription("Shows live winds on the globe and plays the next 24 hours.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://weather")!)
+        return .result()
+    }
+}
+
 struct KarmanShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: PlayBriefingIntent(),
@@ -79,5 +115,14 @@ struct KarmanShortcuts: AppShortcutsProvider {
         AppShortcut(intent: OpenTonightsSkyIntent(),
                     phrases: ["Show tonight's sky in \(.applicationName)", "When is the space station visible in \(.applicationName)"],
                     shortTitle: "Tonight's Sky", systemImageName: "moon.stars.fill")
+        AppShortcut(intent: OpenSkyLensIntent(),
+                    phrases: ["Open the Sky Lens in \(.applicationName)", "What's that star with \(.applicationName)", "Find the planets with \(.applicationName)"],
+                    shortTitle: "Sky Lens", systemImageName: "scope")
+        AppShortcut(intent: YearOfQuakesIntent(),
+                    phrases: ["Show a year of earthquakes in \(.applicationName)"],
+                    shortTitle: "A Year of Quakes", systemImageName: "globe.asia.australia.fill")
+        AppShortcut(intent: WeatherForecastIntent(),
+                    phrases: ["Play the wind forecast in \(.applicationName)", "Show the weather on the globe in \(.applicationName)"],
+                    shortTitle: "Wind Forecast", systemImageName: "wind")
     }
 }

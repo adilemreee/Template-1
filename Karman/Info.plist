@@ -60,6 +60,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>The Sky Lens shows the live camera view behind the stars, planets and satellites it labels. Nothing is recorded or sent anywhere.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Kármán uses your approximate location to show what is happening near you: nearby earthquakes, your aurora chances and when the Space Station passes overhead.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

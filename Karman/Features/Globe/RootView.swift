@@ -86,6 +86,9 @@ struct RootView: View {
             PanelHost(panel: panel)
                 .presentationBackground(.clear)
         }
+        .fullScreenCover(isPresented: $model.skyLensPresented) {
+            SkyLensView()
+        }
         .onAppear {
             NotificationService.shared.model = model
             Haptics.shared.enabled = model.settings.haptics
@@ -104,6 +107,19 @@ struct RootView: View {
             case "year":
                 model.skipIntro()
                 model.startYearReplay()
+            case "lens":
+                model.skipIntro()
+                model.openSkyLens(target: nil)
+            case "weather":
+                model.skipIntro()
+                var l = model.settings.layers
+                l.wind = true
+                model.applyLayers(l)
+                Task {
+                    // Give the frames a moment to arrive on a cold start.
+                    for _ in 0..<20 where !model.weather.hasData { try? await Task.sleep(for: .milliseconds(500)) }
+                    if !model.forecastPlaying { model.toggleForecastPlayback() }
+                }
             case "ride":
                 model.skipIntro()
                 model.startRideAlong()

@@ -12,16 +12,20 @@ struct SkyTonightView: View {
                     Text(model.location.placeName ?? String(localized: "Above you")).font(.display(26, weight: .bold)).foregroundStyle(.white)
                 }
 
-                if model.canRideAlong { RideAlongCard() }
+                SkyLensCard()
 
                 if let observer = model.location.point {
+                    StargazingCard(observer: observer)
+                    PlanetsCard(observer: observer)
                     MoonCard(observer: observer)
-                    SunTimelineCard(observer: observer)
+                    MeteorShowersCard(observer: observer)
                     passes
+                    SunTimelineCard(observer: observer)
+                    if model.canRideAlong { RideAlongCard() }
                 } else {
                     Card {
                         Label("Location needed", systemImage: "location.slash").font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
-                        Text("Tonight's Sky predicts Space Station passes, moonrise and twilight for where you are. Your location stays on this device.")
+                        Text("Tonight's Sky predicts the stargazing conditions, planets, meteor showers, Space Station passes and twilight for where you are. Your location stays on this device, except a rounded area (about 50 km) for the cloud forecast.")
                             .font(.system(size: 13)).foregroundStyle(Theme.textSecondary)
                         HStack {
                             Button("Use my location") { model.location.useDeviceLocation() }

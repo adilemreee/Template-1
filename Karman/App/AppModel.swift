@@ -20,6 +20,10 @@ final class AppModel {
     let planet = PlanetStore()
     let weather = WeatherStore()
     let history = QuakeHistoryStore()
+    let sky = SkyConditionsStore()
+    /// The Sky Lens is open (full screen), optionally pointing the user at something.
+    var skyLensPresented = false
+    var skyLensTarget: SkyTarget?
     /// The Ask Kármán conversation (kept while the panel is closed).
     let askService = AskService()
     /// Height of the Ask sheet; it drops to half height while the globe flies to an answer.
@@ -340,6 +344,22 @@ final class AppModel {
         guard replaying else { return }
         globe.stopReplay()
         withAnimation(.easeInOut(duration: 0.5)) { replaying = false }
+    }
+
+    // MARK: Sky Lens
+
+    func openSkyLens(target: SkyTarget?) {
+        Haptics.shared.tap()
+        skyLensTarget = target
+        if panel != nil {
+            panel = nil
+            Task {
+                try? await Task.sleep(for: .milliseconds(450))
+                skyLensPresented = true
+            }
+        } else {
+            skyLensPresented = true
+        }
     }
 
     // MARK: A year of earthquakes
