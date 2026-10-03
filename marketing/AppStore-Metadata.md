@@ -55,7 +55,10 @@ ASK THE PLANET
 Ask anything — "Why was there an earthquake near Japan?", "Could I see the aurora tonight?" — and get a clear answer grounded in live data from USGS, NOAA and NASA.
 
 ON YOUR HOME SCREEN
-Earth Now, Aurora & Kp and Space Station widgets, including Lock Screen widgets. Optional alerts for nearby earthquakes, aurora, geomagnetic storms and launches.
+Earth Now, Aurora & Kp and Space Station widgets, including Lock Screen widgets. Rocket launch countdowns live on your Lock Screen and in the Dynamic Island. Optional alerts for nearby earthquakes, aurora, geomagnetic storms and launches. Siri and Shortcuts can play your briefing.
+
+SHARE THE MOMENT
+Turn the planet right now into a beautiful postcard — the live globe, the date and the day's numbers — and share it anywhere.
 
 ONE PURCHASE. EVERYTHING, FOREVER.
 No subscriptions. No ads. No accounts. No tracking. Your precise location never leaves your iPhone.
@@ -104,7 +107,10 @@ GEZEGENE SOR
 Her şeyi sor — "Japonya yakınında neden deprem oldu?", "Bu gece aurorayı görebilir miyim?" — ve USGS, NOAA ve NASA'nın canlı verilerine dayanan net yanıtlar al.
 
 ANA EKRANINDA
-Şu An Dünya, Aurora ve Kp, Uzay İstasyonu widget'ları; kilit ekranı widget'ları dahil. Yakın depremler, aurora, jeomanyetik fırtınalar ve fırlatmalar için isteğe bağlı uyarılar.
+Şu An Dünya, Aurora ve Kp, Uzay İstasyonu widget'ları; kilit ekranı widget'ları dahil. Roket fırlatma geri sayımları kilit ekranında ve Dynamic Island'da canlı. Yakın depremler, aurora, jeomanyetik fırtınalar ve fırlatmalar için isteğe bağlı uyarılar. Brifingini Siri ve Kestirmeler ile başlat.
+
+ANI PAYLAŞ
+Gezegenin şu anını güzel bir kartpostala dönüştür — canlı küre, tarih ve günün sayıları — ve dilediğin yerde paylaş.
 
 TEK SATIN ALMA. HER ŞEY, SONSUZA DEK.
 Abonelik yok. Reklam yok. Hesap yok. Takip yok. Hassas konumun iPhone'undan asla çıkmaz.

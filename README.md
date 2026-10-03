@@ -37,7 +37,10 @@
 | **Bu Gece Gökyüzü** | Ay evresi (NASA LRO dokusuyla render), ay doğuşu/batışı, 24 saatlik ışık zaman çizelgesi (altın/mavi saat), görünür ISS/Tiangong geçişleri + gök kubbesi çizimi ve hatırlatıcı, fırlatma geri sayımları, asteroit geçişleri. |
 | **Dünkü gerçek Dünya** | NASA GIBS VIIRS günlük mozaiği ile küre dünün gerçek bulut/tayfun/duman görüntüsüyle kaplanır. |
 | **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci sohbet asistanı. |
-| **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu; kilit ekranı widget'ları. |
+| **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu (ISS + Tiangong); kilit ekranı widget'ları. |
+| **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım. |
+| **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
+| **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü" — Eylem Düğmesi'ne de atanabilir. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
 | **Gizlilik** | Hesap yok, reklam yok, takip yok. Hassas konum cihazdan çıkmaz (sunucuya ~50 km yuvarlanmış gider). |
 | **Dil** | İngilizce + tam Türkçe yerelleştirme. |
