@@ -56,14 +56,14 @@ final class NotificationService {
 
     // MARK: Local reminders
 
-    func scheduleISSPasses(_ passes: [WidgetState.Pass], enabled: Bool) async {
+    func scheduleStationPasses(_ passes: [WidgetState.Pass], enabled: Bool) async {
         let center = UNUserNotificationCenter.current()
         let pending = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix("iss-") }
         center.removePendingNotificationRequests(withIdentifiers: pending)
         guard enabled, authorized else { return }
         for pass in passes.prefix(6) where pass.start.timeIntervalSinceNow > 15 * 60 && pass.maxElevation >= 25 {
             let content = UNMutableNotificationContent()
-            content.title = String(localized: "The Space Station is about to pass over")
+            content.title = String(localized: "\(pass.stationName) is about to pass over")
             let from = GeoPoint.compassName(pass.startAzimuth), to = GeoPoint.compassName(pass.endAzimuth)
             content.body = String(localized: "Look \(from) in 10 minutes. It climbs to \(Int(pass.maxElevation))° and sets in the \(to).")
             content.sound = .default

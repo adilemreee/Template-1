@@ -17,6 +17,7 @@ struct PlanetProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (PlanetEntry) -> Void) {
+        // The gallery preview may use sample data; real timelines never do.
         let state = WidgetState.load() ?? .placeholder
         let size = globeSize(for: context)
         let image = renderGlobe ? WidgetEarth.render(state: state, date: Date(), size: size) : nil
@@ -28,7 +29,7 @@ struct PlanetProvider: TimelineProvider {
         let render = renderGlobe
         let done = UncheckedBox(value: completion)
         Task {
-            var state = WidgetState.load() ?? .placeholder
+            var state = WidgetState.load() ?? .empty
             if Date().timeIntervalSince(state.updatedAt) > 40 * 60, let fresh = await WidgetRefresher.refresh(state) {
                 state = fresh
                 fresh.save()

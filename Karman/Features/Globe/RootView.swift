@@ -73,7 +73,11 @@ struct RootView: View {
             }
         }
         .onChange(of: model.planet.version) { model.syncScene(); model.refreshDerived() }
-        .onChange(of: model.location.point) { model.syncScene(); model.refreshDerived() }
+        .onChange(of: model.location.point) {
+            model.syncScene()
+            model.refreshDerived()
+            Task { await NotificationService.shared.syncRegistration() }
+        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:

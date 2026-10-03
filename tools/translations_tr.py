@@ -211,6 +211,7 @@ APP = {
     "The International Space Station will pass over %@ at %@, climbing %lld degrees above the %@ horizon.": "Uluslararası Uzay İstasyonu %2$@ sularında %1$@ üzerinden geçecek ve %4$@ ufkunun %3$lld derece üzerine yükselecek.",
     "The Planet, Right Now": "Gezegen, Şu An",
     "The Space Station is about to pass over": "Uzay İstasyonu birazdan tependen geçecek",
+    "%@ is about to pass over": "%@ birazdan tependen geçecek",
     "The Sun–Earth connection": "Güneş–Dünya bağlantısı",
     "The living planet · v%@": "Yaşayan gezegen · v%@",
     "The living planet, live. Kármán": "Yaşayan gezegen, canlı. Kármán",
@@ -333,6 +334,9 @@ APP = {
 
 WIDGETS = {
     "%@ → %@ · %lld°": "%1$@ → %2$@ · %3$lld°",
+    "%@ PASS": "%@ GEÇİŞİ",
+    "%@ %@ · %lld°": "%1$@ %2$@ · %3$lld°",
+    "%@ visible %@ · %lld°": "%1$@ görünür %2$@ · %3$lld°",
     "%@ → %@ · %lld° high": "%1$@ → %2$@ · %3$lld° yükseklik",
     "%lld quakes · Kp %@": "%1$lld deprem · Kp %2$@",
     "%lld%% chance here": "Burada %%%lld ihtimal",

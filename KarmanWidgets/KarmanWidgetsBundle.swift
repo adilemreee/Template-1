@@ -136,7 +136,7 @@ struct EarthNowView: View {
             if let pass = entry.state.nextPass {
                 HStack(spacing: 6) {
                     Image(systemName: "person.2.fill").font(.system(size: 10)).foregroundStyle(WTheme.ice)
-                    Text("ISS visible \(pass.start, style: .relative) · \(Int(pass.maxElevation))°").font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.85))
+                    Text("\(pass.stationName) visible \(pass.start, style: .relative) · \(Int(pass.maxElevation))°").font(.system(size: 11, weight: .medium)).foregroundStyle(.white.opacity(0.85))
                 }
             }
         }
@@ -240,7 +240,7 @@ struct StationView: View {
         switch family {
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 2) {
-                Text("ISS PASS").font(.system(size: 11, weight: .bold).width(.expanded))
+                Text(pass.map { String(localized: "\($0.stationName.uppercased()) PASS") } ?? String(localized: "ISS PASS")).font(.system(size: 11, weight: .bold).width(.expanded))
                 if let pass {
                     Text(pass.start, style: .relative).font(.system(size: 14, weight: .semibold))
                     Text("\(compass(pass.startAzimuth)) → \(compass(pass.endAzimuth)) · \(Int(pass.maxElevation))°").font(.system(size: 12))
@@ -249,11 +249,11 @@ struct StationView: View {
                 }
             }
         case .accessoryInline:
-            if let pass { Text("ISS \(pass.start, style: .time) · \(Int(pass.maxElevation))°") } else { Text("ISS — no pass soon") }
+            if let pass { Text("\(pass.stationName) \(pass.start, style: .time) · \(Int(pass.maxElevation))°") } else { Text("ISS — no pass soon") }
         default:
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("SPACE STATION").eyebrowStyle(WTheme.ice)
+                    Text(pass?.stationName.uppercased() ?? String(localized: "SPACE STATION")).eyebrowStyle(WTheme.ice)
                     Spacer()
                     Image(systemName: "person.2.fill").font(.system(size: 10)).foregroundStyle(WTheme.ice)
                 }

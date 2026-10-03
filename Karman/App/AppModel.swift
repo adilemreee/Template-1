@@ -214,7 +214,7 @@ final class AppModel {
         }.value
         passes = result
         writeWidgetState()
-        await NotificationService.shared.scheduleISSPasses(result.filter { $0.noradID == 25544 }.map(\.widget), enabled: settings.alerts.issPasses)
+        await NotificationService.shared.scheduleStationPasses(result.map(\.widget), enabled: settings.alerts.issPasses)
     }
 
     func writeWidgetState() {
@@ -232,7 +232,7 @@ final class AppModel {
             quakes24h: snap.quakes.filter { $0.time > day }.count,
             topQuake: top.map { q in WidgetState.TopQuake(id: q.id, mag: q.mag, place: q.place, time: q.time, distanceKm: user.map { q.coordinate.distanceKm(to: $0) }) },
             recentQuakes: recent.map { WidgetState.QuakeDot(lat: $0.lat, lon: $0.lon, mag: $0.mag, time: $0.time) },
-            passes: passes.filter { $0.noradID == 25544 }.prefix(8).map(\.widget),
+            passes: passes.prefix(8).map(\.widget),
             nextLaunch: launch.map { WidgetState.NextLaunch(name: $0.missionName, rocket: $0.rocket, provider: $0.provider, net: $0.net, location: $0.location) })
         state.save()
         WidgetBridge.reload()

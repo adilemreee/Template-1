@@ -1,3 +1,6 @@
+"%@ %@ · %lld°" = "%1$@ %2$@ · %3$lld°";
+"%@ PASS" = "%@ GEÇİŞİ";
+"%@ visible %@ · %lld°" = "%1$@ görünür %2$@ · %3$lld°";
 "%@ → %@ · %lld°" = "%1$@ → %2$@ · %3$lld°";
 "%@ → %@ · %lld° high" = "%1$@ → %2$@ · %3$lld° yükseklik";
 "%lld quakes · Kp %@" = "%1$lld deprem · Kp %2$@";

@@ -1,5 +1,6 @@
 " ▍" = " ▍";
 "%@ acres" = "%@ akre";
+"%@ is about to pass over" = "%@ birazdan tependen geçecek";
 "%@ is being tracked over open water. %@." = "%1$@ açık denizde izleniyor. %2$@.";
 "%@ kilotons of TNT" = "%@ kiloton TNT";
 "%@ lifts off in 15 minutes" = "%@ 15 dakika içinde fırlatılıyor";

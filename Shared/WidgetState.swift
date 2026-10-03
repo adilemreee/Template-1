@@ -26,6 +26,14 @@ nonisolated struct WidgetState: Codable, Sendable {
         var startAzimuth: Double
         var endAzimuth: Double
         var magnitude: Double?
+
+        /// Friendly station name for display ("ISS", "Tiangong").
+        var stationName: String {
+            let upper = satellite.uppercased()
+            if upper.contains("CSS") || upper.contains("TIANHE") || upper.contains("TIANGONG") { return "Tiangong" }
+            if upper.contains("ISS") || upper.contains("ZARYA") { return "ISS" }
+            return satellite.capitalized
+        }
     }
 
     struct NextLaunch: Codable, Sendable, Hashable {
@@ -67,6 +75,10 @@ nonisolated struct WidgetState: Codable, Sendable {
     }
 
     var nextPass: Pass? { passes.first { $0.end > Date() } }
+
+    /// Starting point when the app has never shared anything: real data only, no samples.
+    static let empty = WidgetState(updatedAt: .distantPast, kp: 0, gScale: 0, windSpeed: 0, bz: 0, auroraChance: nil, location: nil,
+                                   locationName: nil, quakes24h: 0, topQuake: nil, recentQuakes: [], passes: [], nextLaunch: nil)
 
     static let placeholder = WidgetState(
         updatedAt: Date(), kp: 3.3, gScale: 0, windSpeed: 412, bz: -2.1, auroraChance: 12,
