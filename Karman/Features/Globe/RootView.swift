@@ -20,6 +20,9 @@ struct RootView: View {
 
             IntroTitleView(visible: model.showTitle)
                 .allowsHitTesting(false)
+                .fullScreenCover(isPresented: $model.orreryPresented) {
+                    OrreryView()
+                }
 
             if model.introPlaying {
                 Color.clear
@@ -133,6 +136,9 @@ struct RootView: View {
             case "inside":
                 model.skipIntro()
                 model.startInsideEarth()
+            case "orrery":
+                model.skipIntro()
+                model.openOrrery()
             case "weather":
                 model.skipIntro()
                 var l = model.settings.layers

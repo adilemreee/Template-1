@@ -184,6 +184,10 @@ struct PlanetsCard: View {
                 .disabled(!v.isVisible)
                 if v.id != tonight.last?.id { Divider().overlay(Theme.hairline) }
             }
+            PillButton(title: "See them around the Sun", icon: "sun.max.fill", tint: Theme.sun) {
+                model.openOrrery()
+            }
+            .padding(.top, 4)
         }
     }
 

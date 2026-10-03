@@ -31,6 +31,31 @@ enum Fmt {
         return m.formatted(.measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0))))
     }
 
+    /// Interplanetary distances: "628 million km", "1.2 billion mi".
+    static func bigDistance(_ km: Double, units: UnitSystem) -> String {
+        let v = units == .metric ? km : km * 0.621371
+        let unit = units == .metric ? "km" : "mi"
+        if v >= 1e9 { return String(localized: "\((v / 1e9).formatted(.number.precision(.fractionLength(1)))) billion \(unit)") }
+        if v >= 1e6 { return String(localized: "\((v / 1e6).formatted(.number.precision(.fractionLength(0)))) million \(unit)") }
+        return distance(km, units: units)
+    }
+
+    /// How long light takes: "8 min 19 s", "43 min", "4 h 10 min".
+    static func lightTime(_ seconds: Double) -> String {
+        let s = Int(seconds.rounded())
+        if s < 60 { return "\(s) s" }
+        if s < 600 { return "\(s / 60) min \(s % 60) s" }
+        if s < 3600 { return "\(s / 60) min" }
+        return "\(s / 3600) h \(s % 3600 / 60) min"
+    }
+
+    /// "in 3 months", "2 years ago".
+    static func relativeDays(_ days: Double, now: Date = Date()) -> String {
+        let f = RelativeDateTimeFormatter()
+        f.unitsStyle = .full
+        return f.localizedString(for: now.addingTimeInterval(days * 86_400), relativeTo: now)
+    }
+
     static func speed(kmPerSecond v: Double) -> String {
         v.formatted(.number.precision(.fractionLength(0))) + " km/s"
     }

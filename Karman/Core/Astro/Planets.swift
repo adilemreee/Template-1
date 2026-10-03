@@ -31,12 +31,13 @@ nonisolated enum Planets {
     }
 
     /// J2000 elements and rates per Julian century: a (au), e, I, L, ϖ (long. of perihelion), Ω (deg).
-    private struct Elements { var a, e, i, l, peri, node: Double; var da, de, di, dl, dperi, dnode: Double }
+    struct Elements: Sendable { var a, e, i, l, peri, node: Double; var da, de, di, dl, dperi, dnode: Double }
 
-    private static let earth = Elements(a: 1.00000261, e: 0.01671123, i: -0.00001531, l: 100.46457166, peri: 102.93768193, node: 0,
+    /// The Earth-Moon barycentre.
+    static let earth = Elements(a: 1.00000261, e: 0.01671123, i: -0.00001531, l: 100.46457166, peri: 102.93768193, node: 0,
                                         da: 0.00000562, de: -0.00004392, di: -0.01294668, dl: 35999.37244981, dperi: 0.32327364, dnode: 0)
 
-    private static func elements(_ b: Body) -> Elements {
+    static func elements(_ b: Body) -> Elements {
         switch b {
         case .mercury: Elements(a: 0.38709927, e: 0.20563593, i: 7.00497902, l: 252.25032350, peri: 77.45779628, node: 48.33076593,
                                 da: 0.00000037, de: 0.00001906, di: -0.00594749, dl: 149472.67411175, dperi: 0.16047689, dnode: -0.12534081)
@@ -51,15 +52,16 @@ nonisolated enum Planets {
         }
     }
 
-    /// Heliocentric ecliptic (J2000) position in au.
-    private static func heliocentric(_ el: Elements, t: Double) -> (x: Double, y: Double, z: Double) {
+    /// Heliocentric ecliptic (J2000) position in au, t in Julian centuries from J2000. Pass a mean
+    /// anomaly (radians) to place the body elsewhere on the orbit those elements describe.
+    static func heliocentric(_ el: Elements, t: Double, meanAnomaly: Double? = nil) -> (x: Double, y: Double, z: Double) {
         let d = Astro.deg
         let a = el.a + el.da * t, e = el.e + el.de * t, i = (el.i + el.di * t) * d
         let l = el.l + el.dl * t, peri = el.peri + el.dperi * t, node = (el.node + el.dnode * t) * d
         let w = peri * d - node
         var m = (l - peri).truncatingRemainder(dividingBy: 360)
         if m > 180 { m -= 360 } else if m < -180 { m += 360 }
-        let mr = m * d
+        let mr = meanAnomaly ?? m * d
         var E = mr + e * sin(mr)
         for _ in 0..<8 { E -= (E - e * sin(E) - mr) / (1 - e * cos(E)) }
         let xp = a * (cos(E) - e), yp = a * (1 - e * e).squareRoot() * sin(E)

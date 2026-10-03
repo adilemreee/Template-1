@@ -122,6 +122,18 @@ struct InsideEarthIntent: AppIntent {
     }
 }
 
+struct SolarSystemIntent: AppIntent {
+    static let title: LocalizedStringResource = "Show the Solar System"
+    static let description = IntentDescription("Shows where the eight planets are around the Sun right now.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        await UIApplication.shared.open(URL(string: "karman://orrery")!)
+        return .result()
+    }
+}
+
 struct KarmanShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: PlayBriefingIntent(),

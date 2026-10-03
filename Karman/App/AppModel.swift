@@ -407,6 +407,22 @@ final class AppModel {
         }
     }
 
+    // MARK: Solar System
+
+    var orreryPresented = false
+
+    func openOrrery() {
+        if panel != nil {
+            panel = nil
+            Task {
+                try? await Task.sleep(for: .milliseconds(450))
+                orreryPresented = true
+            }
+        } else {
+            orreryPresented = true
+        }
+    }
+
     // MARK: A year of earthquakes
 
     private(set) var yearReplaying = false
