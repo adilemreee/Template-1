@@ -27,58 +27,71 @@ Why paid up front: the Top Paid chart only ranks paid downloads, and "one purcha
 
 **Subtitle (28/30):** Quakes, storms, aurora & ISS
 
-**Promotional text (151/170):**
-Ride with the ISS, rewind the last 24 hours and dive into any city at 500 m. The whole planet, live on a cinematic 3D Earth — narrated by AI every day.
+**Promotional text (155/170):**
+Live winds sweep the globe, seismic waves race from every quake and the Sky Lens names any star you point at. The whole planet, live, narrated by AI daily.
 
 **Keywords (93/100):**
-`earthquake,hurricane,iss,satellite,space weather,typhoon,starlink,nasa,kp index,globe,volcano`
+`earthquake,hurricane,wind,weather,iss,satellite,space weather,stars,planets,aurora,nasa,globe`
 
-**Description:**
+**Description (2596/4000):**
 
 See the whole planet, live — the way astronauts do.
 
-Kármán renders a cinematic, real-time Earth: city lights on the night side, a glowing atmosphere, real relief and clouds, the Sun rising over the limb. On top of it, everything that is happening right now: earthquakes pulsing as they strike, hurricanes and typhoons with their full tracks, wildfires, volcanoes, the aurora driven by NOAA's live model, rocket launches, and more than 11,000 satellites on their real orbits.
+Kármán renders a cinematic, real-time Earth: city lights on the night side, a glowing atmosphere, real relief and clouds, the Sun rising over the limb. On top of it, everything happening right now: earthquakes pulsing as they strike, hurricanes with their tracks, wildfires, volcanoes, the aurora from NOAA's live model, launches, and 11,000 satellites on their real orbits.
 
-RIDE WITH THE ISS
-Fly along with the International Space Station, 400 km up at 28,000 km/h. The camera chases the station over the curve of the Earth as city lights, aurora and the thin green airglow slide by — with a countdown to the next orbital sunrise.
+LIVE WEATHER, ALIVE
+Thousands of glowing particles ride the real winds of NOAA's global forecast model. Paint the planet with temperature or rain, then press play to watch the next 24 hours unfold, daylight and all. Tap anywhere on Earth for its weather, local time and a one-day outlook.
 
-REWIND THE PLANET
-Replay the last 24 hours in half a minute: daylight sweeps round the globe, the stars wheel overhead and every earthquake ripples in where and when it happened.
+WATCH THE WAVES
+Pick any earthquake and watch its P, S and surface waves race across the planet. See when each reaches you, feel them arrive as haptics, and get the shaking you'd feel where you are.
 
-DIVE INTO ANY CITY
-Zoom in and NASA imagery streams in at 500 m: mountain ranges in shaded relief by day, and at night the street grids of light of New York, Istanbul or Tokyo.
+A YEAR IN A MINUTE
+Thousands of strong earthquakes from the past year flare up day by day until they draw the edges of the tectonic plates: the Ring of Fire, the Himalaya, the mid-ocean ridges.
 
-PLANET BRIEFING — YOUR DAILY DOCUMENTARY
-Press play and Kármán flies you around the globe. An AI narrator writes a short documentary from the latest data — the strongest earthquake, the storm to watch, tonight's aurora, the next launch — and reads it to you while the camera swoops in. Captions light up word by word over a generative ambient score.
-
-FEEL EVERY EARTHQUAKE
-Tap a quake to see its depth in a living cross-section of the crust, the energy it released, nearby aftershocks — and press "Feel it" to hold a haptic seismogram in your hand. Hurricanes and typhoons turn as living cloud spirals with their full tracks.
-
-THE SUN, ALIVE
-The last six hours of the Sun from the GOES-19 satellite as a time-lapse, solar wind speed and magnetic field, X-ray flares, the Kp index and a 3-day forecast. A polar map of the auroral oval shows where the northern and southern lights are glowing right now — and your own odds of seeing them.
+SKY LENS
+Point your iPhone at the sky to name every bright star, planet, constellation and the space stations. A finder arrow guides you to Jupiter, the ISS or a meteor shower's radiant. Red night-vision mode included.
 
 TONIGHT'S SKY
-Space station passes for exactly where you are, drawn on a sky dome, plus moonrise, the Moon's phase, golden hour and blue hour. Get a reminder before the station flies over.
+An hour-by-hour stargazing score from cloud cover, darkness and moonlight; which planets are up and when; upcoming meteor showers with real rates for your location; space station passes on a sky dome; moonrise and twilight.
 
-YESTERDAY'S EARTH FROM ORBIT
-Switch on NASA's daily satellite mosaic and wrap the globe in yesterday's real clouds, typhoons and smoke.
+RIDE WITH THE ISS
+Fly with the International Space Station 400 km up as city lights, aurora and airglow slide by.
+
+PLANET BRIEFING
+Press play and an AI narrator flies you around the globe through today's biggest stories.
 
 ASK THE PLANET
-Ask anything — "Why was there an earthquake near Japan?", "Could I see the aurora tonight?" — and get a clear answer grounded in live data from USGS, NOAA and NASA.
+"Why was there an earthquake near Japan?" The answer streams in while the globe flies there. Ask about any quake, storm or place straight from its card.
 
-ON YOUR HOME SCREEN
-Earth Now, Aurora & Kp and Space Station widgets, including Lock Screen widgets. Rocket launch countdowns live on your Lock Screen and in the Dynamic Island. Optional alerts for nearby earthquakes, aurora, geomagnetic storms and launches. Add a Planet Briefing control to Control Center or the Action button, or ask Siri to "Ride with the ISS".
+THE SUN, ALIVE
+A six-hour time-lapse of the Sun, solar wind, flares, Kp and your aurora odds.
 
-SHARE THE MOMENT
-Turn the planet right now into a beautiful postcard — the live globe, the date and the day's numbers — and share it anywhere.
+PEOPLE YOU CARE ABOUT
+Watch up to five places, like family or a second home, for nearby earthquakes.
+
+NIGHTSTAND GLOBE
+A dimmed, slowly touring planet behind a big clock while your iPhone charges.
+
+Plus widgets, Lock Screen launch countdowns, Siri shortcuts, a 24-hour replay, 500 m close-ups and shareable postcards.
 
 ONE PURCHASE. EVERYTHING, FOREVER.
 No subscriptions. No ads. No accounts. No tracking. Your precise location never leaves your iPhone.
 
-Data: USGS, NOAA Space Weather Prediction Center, NASA (EONET, GIBS, Visible Earth, NeoWs), CelesTrak, The Space Devs.
+Data: USGS, NOAA, NASA, MET Norway, CelesTrak, The Space Devs, PB2002 plate model.
 
-**What's New (1.0):**
-The living planet, live. Welcome to Kármán.
+**What's New (1.1, 724/4000):**
+The biggest update yet.
+
+• Live weather: wind particles, temperature and rain maps, and a 24-hour forecast player
+• Tap anywhere on Earth for its weather, local time and outlook
+• Watch seismic waves cross the planet from any earthquake, with arrival times and shaking where you are
+• A year of earthquakes in under a minute, tracing the tectonic plates (new plate boundaries layer)
+• Sky Lens: point your iPhone at the sky to name stars, planets, constellations and the ISS
+• Tonight's Sky: stargazing score with cloud forecast, planets, meteor showers
+• Ask Kármán flies the globe to its answers; ask about anything from its card
+• Watched places for family and second homes
+• Ambient nightstand globe
+• New Siri shortcuts
 
 ---
 
@@ -92,7 +105,7 @@ Removed: the app ships in English only. App Store Connect will show the English 
 
 - **Tracking:** No.
 - **Data Not Linked to You:**
-  - Location → *Coarse Location* — App Functionality (alerts, only if the user enables them; rounded to ~50 km).
+  - Location → *Coarse Location* — App Functionality (alerts and watched places, only if the user enables them; the stargazing cloud forecast; all rounded to ~50 km).
   - User Content → *Other User Content* — App Functionality (questions sent to Ask Kármán).
 - Everything else: not collected. Push tokens are used only to deliver chosen alerts.
 
@@ -109,3 +122,5 @@ AI data sharing (Guideline 5.1.2(i)): before the first question, Ask Kármán sh
 > • App Transport Security: a single exception (NSExceptionAllowsInsecureHTTPLoads) is scoped to our own API domain, karman.adilemree.xyz. The API uses a self-signed certificate that the app verifies by public-key pinning in code, which is stricter than CA validation. All other connections use default ATS.
 > • Location is optional (Settings → Location → Choose a place). It is only used for "near you" features and alerts.
 > • "Feel it" on an earthquake plays a haptic pattern; it requires a device with haptics.
+> • Sky Lens (Tonight's Sky → Sky Lens) uses the motion sensors to label the sky. The camera is optional (camera button in the Sky Lens) and only shows the live view on screen; nothing is recorded or uploaded.
+> • Weather layers (Layers → Live Weather) and the year of earthquakes (home carousel) load public NOAA/USGS data from our server.

@@ -36,7 +36,7 @@
 | **Gezegen Brifingi** | Yapay zekânın canlı verilerden yazdığı 5–7 sahnelik senaryo; kamera her olaya eğik sinematik açıyla uçar, ses sentezi anlatır, altyazılar kelime kelime yanar, arka planda gerçek zamanlı sentezlenen ambiyans müziği çalar. API'ye ulaşılamazsa cihaz üzerinde yerel brifing üretilir. |
 | **Deprem detayı** | Hiposantırdan yayılan animasyonlu sismik dalgalarla kabuk/manto kesiti, TNT eşdeğeri enerji, artçı grafiği ve **"Hisset"**: büyüklüğe göre şekillenen dokunsal (CoreHaptics) sismogram. |
 | **Uzay Havası** | GOES-19 SUVI'den birkaç dakika önceki canlı Güneş görüntüsü (3 dalga boyu), Kp göstergesi, konumuna göre aurora görme ihtimali, gerçek kıtalar üzerinde kutup aurora haritası, güneş rüzgârı/Bz, X-ışını grafiği ve patlamalar, 3 günlük Kp tahmini, NOAA uyarıları. |
-| **Bu Gece Gökyüzü** | Ay evresi (NASA LRO dokusuyla render), ay doğuşu/batışı, 24 saatlik ışık zaman çizelgesi (altın/mavi saat), görünür ISS/Tiangong geçişleri + gök kubbesi çizimi ve hatırlatıcı, fırlatma geri sayımları, asteroit geçişleri. |
+| **Bu Gece Gökyüzü** | Saat saat **yıldız gözlem skoru** (MET Norway bulut tahmini + karanlık + Ay ışığı + nem), en iyi zaman aralığı ve tepedeki takımyıldızlar; **gezegenler** (JPL Kepler elemanları; Horizons'a göre <0,1°, parlaklık ±0,15 kadir) ne zaman, nerede, hangi takımyıldızda; **meteor yağmurları** (IMO) bulunduğun yerden beklenen saatlik sayı ve Ay uyarısıyla; Ay evresi, ay doğuşu/batışı, 24 saatlik ışık zaman çizelgesi, ISS/Tiangong geçişleri + gök kubbesi ve hatırlatıcı, fırlatmalar, asteroitler. |
 | **Dünkü gerçek Dünya** | NASA GIBS VIIRS günlük mozaiği ile küre dünün gerçek bulut/tayfun/duman görüntüsüyle kaplanır. |
 | **ISS ile uç** | Kamera Uluslararası Uzay İstasyonu'nu arkasından takip eder: 400 km yükseklikte, 28.000 km/sa; altında şehir ışıkları, aurora ve ince yeşil hava ışıması (airglow) kayar. Hız, irtifa, altındaki bölge ve bir sonraki yörünge gün doğumu/batımı geri sayımı. Siri: "Ride with the ISS in Kármán". |
 | **Son 24 saati oynat** | Son günü 36 saniyede yeniden oynatır: gündüz küre üzerinde döner, yıldızlar yıldız zamanıyla döner, her deprem olduğu yerde ve anda dalgalanır; M5+ depremler dokunsal titreşim ve bildirimle. |
@@ -44,11 +44,19 @@
 | **Canlı Güneş** | GOES-19 SUVI'den son 6 saatin 24 karelik time-lapse'i, parıltılı (bloom) ve kenarı yumuşak kompozisyonla. |
 | **Fırtına sarmalları** | Kasırga ve tayfunlar rüzgâr hızına göre boyutlanan, kuzeyde saat yönünün tersine, güneyde saat yönünde dönen prosedürel bulut sarmalları olarak çizilir. |
 | **Denetim Merkezi kontrolü** | "Planet Briefing" kontrolü Denetim Merkezi'ne, Kilit Ekranı'na veya Eylem Düğmesi'ne eklenebilir. |
-| **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci sohbet asistanı. İlk sorudan önce Anthropic'i adıyla anan açık izin ekranı (App Store Kural 5.1.2(i)); izin Ayarlar'dan geri alınabilir. |
+| **Canlı hava (NOAA GFS)** | GPU'da (Metal compute) gerçek 10 m rüzgârında akan binlerce parçacık, hıza göre renklenen kuyruklu şeritler; 2 m sıcaklık haritası (10 °C eş-sıcaklık çizgileri, donma çizgisi vurgulu) ve radar renklerinde yağış. Kareler arası zaman enterpolasyonu; **24 saatlik tahmin oynatıcı** (gündüz/gece de birlikte ilerler). Katman panelinde dünyanın şu anki en sıcak, en soğuk, en rüzgârlı ve en yağışlı noktaları (dokununca oraya uçar). |
+| **Dokunduğun nokta** | Kürede herhangi bir yere dokun: yer adı, canlı sıcaklık/rüzgâr/yağış, 24 saatlik görünüm, yerel saat, Güneş yüksekliği, sana uzaklığı ve "Bunu sor". |
+| **Sismik dalgalar** | Herhangi bir depremden P, S ve yüzey dalgalarının küre üzerinde yayılması (IASP91 seyahat süreleri, çekirdeğin gölge bölgesi, 90× hız). Dalgaların sana ve izlediğin yerlere varış süreleri, geçerken dokunsal titreşim, Atkinson & Wald (DYFI) bağıntısıyla tahmini sarsıntı şiddeti (MMI). |
+| **Bir yılın depremleri** | Son 365 günün M4.5+ depremleri (USGS FDSN, ~8.000 olay) bir dakikada: her deprem gününde parlayıp köze dönüşür, sonunda levha sınırlarını çizer; Güneş mevsimlere göre salınır. Sayaçlar, M7+ çağrıları, yıl sonu özeti. |
+| **Tektonik levhalar** | PB2002 modeli (uygulamaya gömülü): açılan sırtlar, yitim/çarpışma zonları ve transform faylar renkleriyle; levha adları; deprem detayında "tektonik ortam" açıklaması. |
+| **Sky Lens (AR)** | Telefonu gökyüzüne tut: CoreMotion ile yıldızlar, takımyıldız çizgileri ve adları, gezegenler, Ay, Güneş, ISS/Tiangong ve aktif meteor yağmuru radyantları gerçek yerlerinde. İsteğe bağlı canlı kamera, kırmızı gece görüşü modu, yakınlaştırma, hedefe yönlendiren ok + titreşim. |
+| **Kármán'a Sor** | Canlı veriyle beslenen, akış (streaming) yanıtlı gezegen bilimci. Yanıt akarken küre ilgili depreme/fırtınaya uçar (Claude tool use), mesajlarda tıklanabilir konum çipleri; her kartta "Bunu sor" bağlamı. İlk sorudan önce Anthropic'i adıyla anan açık izin ekranı (App Store Kural 5.1.2(i)); izin Ayarlar'dan geri alınabilir. |
+| **İzlenen yerler** | Aile, ikinci ev gibi 5 yere kadar yer: yakınlarındaki depremler için uyarı (sunucuya ~50 km yuvarlanmış gider), kürede işaret, deprem/dalga ekranlarında uzaklık, varış süresi ve tahmini sarsıntı. |
+| **Ambient küre** | Şarjdayken başucu için: büyük saat, yavaşça gezen ve geceleri kısılan küre (şafak çizgisi, gece şehir ışıkları, günün en güçlü depremi, fırtınalar, aurora), OLED yanığına karşı kayma, ekran açık kalır. |
 | **Widget'lar** | Şu An Dünya (gerçek gece/gündüz render), Aurora & Kp, Uzay İstasyonu (ISS + Tiangong); kilit ekranı widget'ları. |
 | **Canlı Etkinlik** | Bir fırlatma için hatırlatıcı kurunca kilit ekranında ve Dynamic Island'da canlı geri sayım; fırlatma ertelenirse hatırlatıcı ve geri sayım kendini günceller. |
 | **Bu anı paylaş** | Kürenin o anki render'ı + tarih, günün sayıları ve konumla 4:5 markalı kartpostal (sosyal medya için). |
-| **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü" — Eylem Düğmesi'ne de atanabilir. |
+| **Siri & Kestirmeler** | "Gezegen brifingini oynat", "Uzay havasını göster", "Bu gece gökyüzü", "Sky Lens'i aç", "Bir yılın depremleri", "Rüzgâr tahminini oynat", "Ambient küre" — Eylem Düğmesi'ne de atanabilir. |
 | **Uyarılar** | Yakındaki depremler, M7+ büyük depremler, konumundan görülebilir aurora, G3+ jeomanyetik fırtınalar, fırlatmalar (sunucudan APNs) ve ISS geçişleri (cihazda yerel). |
 | **Gizlilik** | Hesap yok, reklam yok, takip yok. Hassas konum cihazdan çıkmaz (sunucuya ~50 km yuvarlanmış gider). |
 | **Dil** | Yalnızca İngilizce (arayüz, Siri, widget'lar, brifing ve yanıtlar). Bölge biçimi farklı cihazlarda sayı ve tarih biçimi de İngilizceye sabitlenir. |
@@ -59,11 +67,13 @@
 iOS (SwiftUI + Metal, iOS 26+)          Kármán API (Go, tek binary)              Kaynaklar
 ┌──────────────────────────┐   HTTPS    ┌─────────────────────────────┐   ┌────────────────────┐
 │ Metal globe renderer     │  (pinned)  │ feeds: pollers + cache      │◄──│ USGS, NOAA SWPC,   │
-│ SGP4 / Astro (on device) │◄──────────►│ /v1/snapshot (36 KB gzip)   │   │ NASA EONET/GIBS/   │
-│ Briefing director + TTS  │            │ /v1/satellites, /v1/sun     │   │ NeoWs, CelesTrak,  │
-│ Widgets (App Group)      │            │ /v1/briefing  (Claude)      │──►│ Launch Library 2   │
-│ StoreKit AppTransaction  │            │ /v1/ask (SSE, Claude)       │   │ Anthropic Claude   │
-└──────────────────────────┘            │ AppTransaction JWS verify   │   │ APNs               │
+│ + GPU wind particles     │◄──────────►│ /v1/snapshot (36 KB gzip)   │   │ NOAA GFS (ERDDAP), │
+│ SGP4 / Astro / planets   │            │ /v1/weather (GFS frames)    │   │ USGS FDSN, NASA    │
+│ Sky Lens (CoreMotion)    │            │ /v1/quakes/year, /v1/plates │   │ EONET/GIBS/NeoWs,  │
+│ Briefing director + TTS  │            │ /v1/sky/clouds (MET Norway) │   │ MET Norway,        │
+│ Widgets (App Group)      │            │ /v1/satellites, /v1/sun     │──►│ CelesTrak, LL2     │
+│ StoreKit AppTransaction  │            │ /v1/briefing, /v1/ask (SSE, │   │ Anthropic Claude   │
+└──────────────────────────┘            │   Claude tool use)          │   │ APNs               │
                                         │ APNs alert engine, SQLite   │   └────────────────────┘
                                         └─────────────────────────────┘
 ```
@@ -78,9 +88,9 @@ iOS (SwiftUI + Metal, iOS 26+)          Kármán API (Go, tek binary)           
 Karman/                 iOS uygulaması
   App/                  giriş noktası, AppModel
   Render/               Metal renderer, kamera, shader'lar (Shaders/Globe.metal)
-  Features/             Globe HUD, Briefing, SpaceWeather, Sky, Ask, Events, Settings
-  Core/                 servisler (veri, konum, uydu motoru, bildirim, haptik, AI)
-  Resources/            NASA dokuları, yıldız kataloğu, ikon
+  Features/             Globe HUD, Briefing, SpaceWeather, Sky, SkyLens, Weather, Seismic, Replay, Ambient, Ask, Events, Settings
+  Core/                 servisler (veri, hava, konum, uydu motoru, bildirim, haptik, AI), Astro (gezegenler, meteorlar), Seismic
+  Resources/            NASA dokuları, yıldız kataloğu, Data/ (levha sınırları, takımyıldızlar), ikon
 KarmanWidgets/          WidgetKit eklentisi
 Shared/                 uygulama + widget ortak kod (modeller, API istemcisi, SGP4, astronomi)
 KarmanTests/            birim testleri
@@ -143,10 +153,11 @@ Yapılandırma: `/opt/karman/karman.env` (değiştirdikten sonra `systemctl rest
 | `APNS_KEY_PATH`, `APNS_KEY_ID`, `APNS_TEAM_ID` | Push için `.p8` anahtarı. |
 | `KARMAN_APPLE_APP_ID` | App Store'daki sayısal uygulama kimliği (AppTransaction doğrulamasını sıkılaştırır). |
 | `KARMAN_ALLOW_SANDBOX` | TestFlight/inceleme satın almalarını kabul et (varsayılan `true`). |
-| `KARMAN_SUPPORT_EMAIL` | İsteğe bağlı; `/support` sayfasında iletişim adresi olarak gösterilir. |
+| `KARMAN_SUPPORT_EMAIL` | İsteğe bağlı; `/support` sayfasında iletişim adresi olarak gösterilir. MET Norway'in istediği iletişim bilgisi olarak da kullanılır. |
+| `KARMAN_CONTACT` | İsteğe bağlı; `KARMAN_SUPPORT_EMAIL` yoksa MET Norway isteklerinin User-Agent'ındaki iletişim adresi. |
 | `KARMAN_SITE_DIR` | Tanıtım sitesinin klasörü (betik `/opt/karman/site` olarak ayarlar); `/` adresinde sunulur. |
 
-Uç noktalar: `/healthz`, `/privacy`, `/support`, `/v1/snapshot`, `/v1/satellites/{stations|visual|starlink}`, `/v1/imagery/latest`, `/v1/sun/{304|171|195}`, `/v1/briefing?lang=tr`, `/v1/ask` (SSE), `/v1/auth/app-transaction`, `/v1/devices`.
+Uç noktalar: `/healthz`, `/privacy`, `/support`, `/v1/snapshot`, `/v1/satellites/{stations|visual|starlink}`, `/v1/imagery/latest`, `/v1/sun/{304|171|195}`, `/v1/briefing?lang=tr`, `/v1/ask` (SSE; `focus` olaylarıyla küre yönlendirme), `/v1/auth/app-transaction`, `/v1/devices` (izlenen yerler dahil), `/v1/weather` + `/v1/weather/{id}` (GFS kareleri, 360×181 RGBA8), `/v1/quakes/year`, `/v1/plates`, `/v1/sky/clouds?lat=&lon=`.
 
 Yerelde çalıştırma:
 ```bash
@@ -200,7 +211,8 @@ ISS geçiş hatırlatmaları sunucu gerektirmez; cihazda hesaplanıp yerel bildi
 - [ ] Uygulama önizlemesi (886×1920): `marketing/app-preview/karman-preview-en-886x1920.mp4`.
 - [ ] Gizlilik politikası ve Destek URL'leri: `/privacy` ve `/support` sayfalarını güvenilir sertifikalı bir adreste yayınla (ör. kendi alan adın veya GitHub Pages). İstersen `KARMAN_SUPPORT_EMAIL` ile destek sayfasına iletişim adresi ekle.
 - [ ] Yapay zekâ veri paylaşımı (Kural 5.1.2(i)): "Kármán'a Sor" ilk sorudan önce Anthropic'i adıyla anan tek seferlik bir izin ekranı gösterir; izin Ayarlar → Kármán'a Sor'dan geri alınabilir. İnceleme notu `marketing/AppStore-Metadata.md` içinde hazır.
-- [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu).
+- [ ] App Privacy etiketi: "Data Not Linked to You → Coarse Location, Other User Content", takip yok (`Karman/Resources/PrivacyInfo.xcprivacy` ile uyumlu). Kaba konum artık bulut tahmini ve izlenen yerler için de kullanılıyor (yine ~50 km, uygulama işlevi).
+- [ ] Kamera izni metni (`NSCameraUsageDescription`) eklendi: Sky Lens'te kamera isteğe bağlı, görüntü kaydedilmez/gönderilmez.
 - [ ] Sunucuda `ANTHROPIC_API_KEY` ve APNs anahtarı ayarlı, `https://karman.adilemree.xyz:9443/healthz` → `"ai": true, "push": true`.
 - [ ] Ayarlar → "Kármán'ı paylaş" bağlantısındaki `id0000000000` değerini App Store kimliğinle değiştir (`Karman/Features/Settings/SettingsView.swift`) ve aynısını tanıtım sayfasındaki `APP_STORE_URL` sabitinde yap (`marketing/site/index.html`).
 - [ ] Xcode → Product → Archive → Distribute (App Store Connect).
@@ -213,11 +225,11 @@ cd backend && go test ./...
 ```bash
 xcodebuild test -project Karman.xcodeproj -scheme Karman -destination 'platform=iOS Simulator,name=iPhone 18 Pro Max'
 ```
-- Go: Claude istek şekli (model, effort, structured output, fallback başlığı), sahne doğrulama, SSE akışı, şablon brifingler.
-- iOS: SGP4'ün Python referans uygulamasıyla birebir eşleşmesi, güneş/ay konumları, gün batımı, aurora görünürlük modeli.
+- Go: Claude istek şekli (model, effort, structured output, fallback başlığı), Ask araç döngüsü (show_on_globe), sahne doğrulama, SSE akışı, şablon brifingler, GFS ayrıştırma/kodlama, izlenen yer uyarıları.
+- iOS: SGP4'ün Python referans uygulamasıyla birebir eşleşmesi, güneş/ay konumları, gün batımı, aurora görünürlük modeli, GFS ızgara çözme ve zaman enterpolasyonu, IASP91 seyahat süreleri ve MMI, levha sınırı sorguları, gezegen konumları (JPL Horizons'a karşı), meteor yağmuru tarihleri, yıldız gözlem skoru, Sky Lens geometrisi.
 
 ## Veri kaynakları ve atıflar
 
-USGS Earthquake Hazards Program · NOAA Space Weather Prediction Center (Kp, OVATION, RTSW, GOES X-ray, SUVI) · NASA EONET · NASA GIBS/EOSDIS (VIIRS) · NASA Visible Earth (Blue Marble NG, Black Marble 2016) · GEBCO · NASA SVS CGI Moon Kit · Yale Bright Star Catalogue (NASA ADC) · CelesTrak · The Space Devs (Launch Library 2) · NASA JPL/CNEOS NeoWs · Anthropic Claude.
+USGS Earthquake Hazards Program (+ FDSN Event Service) · NOAA Space Weather Prediction Center (Kp, OVATION, RTSW, GOES X-ray, SUVI) · NOAA GFS (PacIOOS ERDDAP üzerinden) · MET Norway Locationforecast (CC BY 4.0) · NASA EONET · NASA GIBS/EOSDIS (VIIRS) · NASA Visible Earth (Blue Marble NG, Black Marble 2016) · GEBCO · NASA SVS CGI Moon Kit · Yale Bright Star Catalogue (NASA ADC) · d3-celestial takımyıldız çizgileri ve yıldız adları (© Olaf Frohn, BSD-3-Clause; `tools/build_sky.py`) · PB2002 levha sınırları (P. Bird 2003, ODC-By 1.0; `tools/build_plates.py`) · JPL yaklaşık gezegen elemanları (E. M. Standish) · IASP91 · IMO meteor yağmuru takvimi · CelesTrak · The Space Devs (Launch Library 2) · NASA JPL/CNEOS NeoWs · Anthropic Claude.
 
 Görseller ve veriler kamu malıdır (NASA/NOAA/USGS) ya da kaynaklarının kullanım koşullarına uygundur; uygulama içinde Ayarlar → Veri kaynakları ekranında atıflar yer alır.
