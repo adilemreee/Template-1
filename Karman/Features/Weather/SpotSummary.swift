@@ -20,7 +20,8 @@ enum SpotNamer {
             request.preferredLocale = Locale(identifier: "en_US") // place names in English, like the rest of the app
             if let item = try? await request.mapItems.first {
                 let reps = item.addressRepresentations
-                if let name = reps?.cityWithContext ?? reps?.regionName ?? item.name { info.name = name }
+                let parts = [reps?.cityName, reps?.regionName].compactMap { $0 }.filter { !$0.isEmpty }
+                if let name = parts.isEmpty ? item.name : parts.joined(separator: ", ") { info.name = name }
                 info.timeZone = item.timeZone
             }
         }
