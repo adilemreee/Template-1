@@ -36,13 +36,19 @@ const (
 	ChangeLaunches Change = "launches"
 	ChangeNEOs     Change = "neos"
 	ChangeSats     Change = "satellites"
+	ChangeWeather  Change = "weather"
+	ChangeHistory  Change = "history"
 )
 
 type Hub struct {
-	log      *slog.Logger
-	client   *http.Client
-	cacheDir string
-	nasaKey  string
+	log    *slog.Logger
+	client *http.Client
+	// slowClient serves the few large downloads (model grids, a year of earthquakes).
+	slowClient *http.Client
+	cacheDir   string
+	nasaKey    string
+	// contact identifies the operator to upstreams that ask for it (MET Norway).
+	contact string
 
 	mu       sync.RWMutex
 	quakes   []planet.Quake
@@ -54,6 +60,8 @@ type Hub struct {
 	sats     map[string][]planet.Satellite
 	satGen   map[string]uint64
 	sources  map[string]planet.SourceState
+	weather  []weatherFrame
+	history  quakeHistory
 
 	snapMu   sync.Mutex
 	snapGen  uint64
@@ -77,14 +85,15 @@ type encoded struct {
 func NewHub(log *slog.Logger, cacheDir, nasaKey string) *Hub {
 	_ = os.MkdirAll(cacheDir, 0o755)
 	h := &Hub{
-		log:      log,
-		client:   &http.Client{Timeout: 45 * time.Second},
-		cacheDir: cacheDir,
-		nasaKey:  nasaKey,
-		sats:     map[string][]planet.Satellite{},
-		satGen:   map[string]uint64{},
-		sources:  map[string]planet.SourceState{},
-		satCache: map[string]encoded{},
+		log:        log,
+		client:     &http.Client{Timeout: 45 * time.Second},
+		slowClient: &http.Client{Timeout: 3 * time.Minute},
+		cacheDir:   cacheDir,
+		nasaKey:    nasaKey,
+		sats:       map[string][]planet.Satellite{},
+		satGen:     map[string]uint64{},
+		sources:    map[string]planet.SourceState{},
+		satCache:   map[string]encoded{},
 	}
 	h.loadCaches()
 	return h
@@ -135,6 +144,11 @@ func (h *Hub) every(ctx context.Context, name string, interval time.Duration, fn
 				delay = wait
 			}
 		}
+		// Slow feeds move big files (model grids, global mosaics) and get longer to finish.
+		timeout := time.Minute
+		if interval >= time.Hour {
+			timeout = 4 * time.Minute
+		}
 		failures := 0
 		for {
 			select {
@@ -142,7 +156,7 @@ func (h *Hub) every(ctx context.Context, name string, interval time.Duration, fn
 				return
 			case <-time.After(delay):
 			}
-			cctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+			cctx, cancel := context.WithTimeout(ctx, timeout)
 			err := fn(cctx)
 			cancel()
 			if err != nil {

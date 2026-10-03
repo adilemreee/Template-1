@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"net"
 	"net/http"
 	"strconv"
@@ -52,6 +53,11 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/sun/{band}", s.sun)
 	mux.HandleFunc("GET /v1/sun/{band}/frames", s.sunFrames)
 	mux.HandleFunc("GET /v1/sun/{band}/frames/{id}", s.sunFrame)
+	mux.HandleFunc("GET /v1/weather", s.weatherIndex)
+	mux.HandleFunc("GET /v1/weather/{id}", s.weatherFrame)
+	mux.HandleFunc("GET /v1/quakes/year", s.quakeYear)
+	mux.HandleFunc("GET /v1/plates", s.plates)
+	mux.HandleFunc("GET /v1/sky/clouds", s.skyClouds)
 	mux.HandleFunc("POST /v1/auth/app-transaction", s.authAppTransaction)
 	mux.HandleFunc("GET /v1/ask/quota", s.askQuota)
 	mux.HandleFunc("POST /v1/ask", s.ask)
@@ -151,9 +157,11 @@ func serveCached(w http.ResponseWriter, r *http.Request, gz []byte, plain func()
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	snap := s.Hub.Current()
+	year, _ := s.Hub.YearStats()
 	writeJSON(w, http.StatusOK, map[string]any{
 		"ok": true, "version": s.Version, "ai": s.AI.Enabled(), "push": s.PushActive,
 		"quakes": len(snap.Quakes), "events": len(snap.Events), "sources": snap.Sources, "stats": s.Store.Stats(),
+		"weatherFrames": len(s.Hub.WeatherFrames()), "quakesYear": year.M45Plus,
 	})
 }
 
@@ -241,6 +249,72 @@ func (s *Server) sunFrame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/jpeg")
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	_, _ = w.Write(jpg)
+}
+
+// weatherIndex lists the GFS frames (oldest first); each frame's bytes never change.
+func (s *Server) weatherIndex(w http.ResponseWriter, r *http.Request) {
+	frames := s.Hub.WeatherFrames()
+	if len(frames) == 0 {
+		writeError(w, http.StatusServiceUnavailable, "weather not ready")
+		return
+	}
+	w.Header().Set("Cache-Control", "public, max-age=600")
+	writeJSON(w, http.StatusOK, map[string]any{
+		"frames": frames, "width": feeds.WeatherWidth, "height": feeds.WeatherHeight, "encoding": "rgba8-uvtp",
+		"attribution": "NOAA GFS via PacIOOS ERDDAP",
+	})
+}
+
+func (s *Server) weatherFrame(w http.ResponseWriter, r *http.Request) {
+	raw, gz, ok := s.Hub.WeatherFrameData(r.PathValue("id"))
+	if !ok {
+		writeError(w, http.StatusNotFound, "frame not found")
+		return
+	}
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	w.Header().Set("Vary", "Accept-Encoding")
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Set("Content-Length", strconv.Itoa(len(gz)))
+		_, _ = w.Write(gz)
+		return
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(raw)))
+	_, _ = w.Write(raw)
+}
+
+// quakeYear serves the last year of M4.5+ earthquakes for the year replay.
+func (s *Server) quakeYear(w http.ResponseWriter, r *http.Request) {
+	gz, etag, ok := s.Hub.QuakeHistory()
+	if !ok {
+		writeError(w, http.StatusServiceUnavailable, "history not ready")
+		return
+	}
+	serveCached(w, r, gz, func() []byte { return gunzip(gz) }, etag, 3600)
+}
+
+func (s *Server) plates(w http.ResponseWriter, r *http.Request) {
+	plain, gz, etag := feeds.Plates()
+	serveCached(w, r, gz, func() []byte { return plain }, etag, 86400)
+}
+
+// skyClouds is the stargazing cloud forecast near a location already rounded by the app.
+func (s *Server) skyClouds(w http.ResponseWriter, r *http.Request) {
+	lat, err1 := strconv.ParseFloat(r.URL.Query().Get("lat"), 64)
+	lon, err2 := strconv.ParseFloat(r.URL.Query().Get("lon"), 64)
+	if err1 != nil || err2 != nil || math.IsNaN(lat) || math.IsNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180 {
+		writeError(w, http.StatusBadRequest, "lat and lon required")
+		return
+	}
+	fc, err := s.Hub.Clouds(r.Context(), lat, lon)
+	if err != nil {
+		s.Log.Warn("clouds", "err", err)
+		writeError(w, http.StatusServiceUnavailable, "cloud forecast unavailable")
+		return
+	}
+	w.Header().Set("Cache-Control", "public, max-age=900")
+	writeJSON(w, http.StatusOK, fc)
 }
 
 func (s *Server) briefing(w http.ResponseWriter, r *http.Request) {

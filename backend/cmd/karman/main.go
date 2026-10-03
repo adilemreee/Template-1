@@ -36,7 +36,7 @@ import (
 	"karman/internal/store"
 )
 
-var version = "1.0.0"
+var version = "1.1.0"
 
 func env(key, def string) string {
 	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
@@ -66,9 +66,12 @@ func main() {
 	defer stop()
 
 	hub := feeds.NewHub(log, filepath.Join(dataDir, "cache"), env("NASA_API_KEY", "DEMO_KEY"))
+	hub.SetContact(env("KARMAN_SUPPORT_EMAIL", env("KARMAN_CONTACT", "")))
 	hub.Start(ctx)
 	hub.StartImagery(ctx)
 	hub.StartSunFrames(ctx)
+	hub.StartWeather(ctx)
+	hub.StartHistory(ctx)
 	go hub.PersistLoop(ctx)
 
 	st, err := store.Open(dataDir)
